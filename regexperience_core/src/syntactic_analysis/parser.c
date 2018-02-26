@@ -11,7 +11,6 @@ typedef struct
 {
     GPtrArray  *analysis_queues;
     GPtrArray  *prediction_queues;
-    GHashTable *expansion_steps;
     Grammar    *grammar;
 } ParserPrivate;
 
@@ -46,8 +45,7 @@ static void parser_remove_queues (GPtrArray *analysis_queues,
                                   GArray    *predictions_for_removal);
 
 static void parser_predict (GPtrArray  *analysis_queues,
-                            GPtrArray  *prediction_queues,
-                            GHashTable *expansion_steps);
+                            GPtrArray  *prediction_queues);
 
 static gboolean parser_can_make_prediction (GPtrArray  *prediction_queues,
                                             GArray    **indexes_for_expansion);
@@ -97,15 +95,10 @@ parser_init (Parser *self)
 
   GPtrArray *analysis_queues = g_ptr_array_new_with_free_func ((GDestroyNotify) g_queue_free_g_objects);
   GPtrArray *prediction_queues = g_ptr_array_new_with_free_func ((GDestroyNotify) g_queue_free);
-  GHashTable *expansion_steps = g_hash_table_new_full (g_direct_hash,
-                                                       g_direct_equal,
-                                                       NULL,
-                                                       g_object_unref);
   Grammar *grammar = grammar_new ();
 
   priv->analysis_queues = analysis_queues;
   priv->prediction_queues = prediction_queues;
-  priv->expansion_steps = expansion_steps;
   priv->grammar = grammar;
 }
 
@@ -124,7 +117,6 @@ parser_build_concrete_syntax_tree (Parser     *self,
 
   GPtrArray *analysis_queues = priv->analysis_queues;
   GPtrArray *prediction_queues = priv->prediction_queues;
-  GHashTable *expansion_steps = priv->expansion_steps;
   GNode *concrete_syntax_tree = NULL;
   guint token_position = 0;
 
@@ -137,7 +129,7 @@ parser_build_concrete_syntax_tree (Parser     *self,
        * each of their heads. Analysis queues keep track of the productions and
        * rules used during the expansion itself.
        */
-      parser_predict (analysis_queues, prediction_queues, expansion_steps);
+      parser_predict (analysis_queues, prediction_queues);
 
       /* Discarding predictions and their corresponding analyses
        * that cannot possibly lead to a correct parse.
@@ -189,7 +181,6 @@ parser_prepare_for_parsing (Parser *self)
 
   GPtrArray *analysis_queues = priv->analysis_queues;
   GPtrArray *prediction_queues = priv->prediction_queues;
-  GHashTable *expansion_steps = priv->expansion_steps;
   Grammar *grammar = priv->grammar;
 
   g_ptr_array_set_size (analysis_queues, 0);
@@ -299,8 +290,7 @@ parser_remove_queues (GPtrArray *analysis_queues,
 
 static void
 parser_predict (GPtrArray  *analysis_queues,
-                GPtrArray  *prediction_queues,
-                GHashTable *expansion_steps)
+                GPtrArray  *prediction_queues)
 {
   g_assert (analysis_queues->len == prediction_queues->len);
 
@@ -358,7 +348,7 @@ parser_predict (GPtrArray  *analysis_queues,
                          expansion_prediction_queues,
                          NULL);
 
-  parser_predict (analysis_queues, prediction_queues, expansion_steps);
+  parser_predict (analysis_queues, prediction_queues);
 }
 
 static gboolean
@@ -795,9 +785,6 @@ parser_dispose (GObject *object)
 
   if (priv->prediction_queues != NULL)
     g_clear_pointer (&priv->prediction_queues, g_ptr_array_unref);
-
-  if (priv->expansion_steps != NULL)
-    g_clear_pointer (&priv->expansion_steps, g_hash_table_unref);
 
   if (priv->grammar != NULL)
     g_clear_object (&priv->grammar);
