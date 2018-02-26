@@ -1,5 +1,6 @@
 # regexperience
 A simple DFA-based regular expression engine written in C with help from GLib and GObject.
+The regexperience_core subdirectory contains the library itself whereas the regexperience_cli subdirectory contains a bare bones CLI that depends on it.
 
 ### Supported features:
 
@@ -10,8 +11,6 @@ A simple DFA-based regular expression engine written in C with help from GLib an
     * value ranges: -
 
 Metacharacters are escaped the usual way - using the backslash character.
-
-The regexperience_core subdirectory is the actual library whereas the regexperience_cli subdirectory is a bare bones CLI that depends on it.
 
 ### Usage:
 
