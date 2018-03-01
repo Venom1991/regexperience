@@ -10,7 +10,7 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (Grammar, grammar, SYNTACTIC_ANALYSIS, GRAMMAR, GObject)
 
-#define PROP_GRAMMAR_PRODUCTIONS "productions"
+#define PROP_GRAMMAR_PRODUCTIONS         "productions"
 
 #define START                            "start"
 #define EXPRESSION                       "expression"
@@ -23,6 +23,7 @@ G_DECLARE_FINAL_TYPE (Grammar, grammar, SYNTACTIC_ANALYSIS, GRAMMAR, GObject)
 #define QUESTION_MARK_QUANTIFICATION     "question-mark-quantification"
 #define ELEMENTARY_EXPRESSION            "elementary-expression"
 #define GROUP                            "group"
+#define BRACKET_EXPRESSION               "bracket-expression"
 #define UPPER_CASE_LETTER                "upper-case-letter"
 #define LOWER_CASE_LETTER                "lower-case-letter"
 #define DIGIT                            "digit"
@@ -30,7 +31,6 @@ G_DECLARE_FINAL_TYPE (Grammar, grammar, SYNTACTIC_ANALYSIS, GRAMMAR, GObject)
 #define REGULAR_METACHARACTER            "regular-metacharacter"
 #define BRACKET_EXPRESSION_METACHARACTER "bracket-expression-metacharacter"
 #define METACHARACTER_ESCAPE             "metacharacter-escape"
-#define BRACKET_EXPRESSION               "bracket-expression"
 #define BRACKET_EXPRESSION_ITEMS         "bracket-expression-items"
 #define BRACKET_EXPRESSION_ITEM          "bracket-expression-item"
 #define RANGE                            "range"

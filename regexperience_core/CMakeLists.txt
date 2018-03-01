@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
-project(regexperience_core VERSION 0.1 LANGUAGES C)
+project(regexperience_core VERSION 1.0 LANGUAGES C)
 
 set(SOURCE_FILES
         include/core/errors.h
@@ -17,31 +17,34 @@ set(SOURCE_FILES
         include/internal/semantic_analysis/ast_nodes/quantification.h
         include/internal/semantic_analysis/ast_nodes/range.h
         include/internal/semantic_analysis/ast_nodes/unary_operator.h
-        include/internal/state_machines/acceptors/acceptor.h
+        include/internal/state_machines/acceptors/acceptor_runnable.h
         include/internal/state_machines/acceptors/dfa.h
         include/internal/state_machines/acceptors/epsilon_nfa.h
         include/internal/state_machines/acceptors/nfa.h
         include/internal/state_machines/composite_state.h
+        include/internal/state_machines/fsm.h
+        include/internal/state_machines/fsm_convertible.h
+        include/internal/state_machines/fsm_initializable.h
+        include/internal/state_machines/fsm_modifiable.h
         include/internal/state_machines/state.h
         include/internal/state_machines/state_factory.h
-        include/internal/state_machines/state_machine_convertible.h
-        include/internal/state_machines/state_machine_initializable.h
-        include/internal/state_machines/state_machine_modifiable.h
-        include/internal/state_machines/state_machine_runnable.h
+        include/internal/state_machines/transducers/mealy.h
+        include/internal/state_machines/transducers/transducer_runnable.h
         include/internal/state_machines/transitions/deterministic_transition.h
+        include/internal/state_machines/transitions/mealy_transition.h
         include/internal/state_machines/transitions/nondeterministic_transition.h
         include/internal/state_machines/transitions/transition.h
         include/internal/state_machines/transitions/transition_factory.h
         include/internal/syntactic_analysis/derivation_item.h
-        include/internal/syntactic_analysis/grammar/grammar.h
-        include/internal/syntactic_analysis/grammar/production.h
-        include/internal/syntactic_analysis/grammar/rule.h
-        include/internal/syntactic_analysis/grammar/symbols/non_terminal.h
-        include/internal/syntactic_analysis/grammar/symbols/symbol.h
-        include/internal/syntactic_analysis/grammar/symbols/terminal.h
+        include/internal/syntactic_analysis/grammar.h
         include/internal/syntactic_analysis/lexeme.h
         include/internal/syntactic_analysis/lexer.h
         include/internal/syntactic_analysis/parser.h
+        include/internal/syntactic_analysis/production.h
+        include/internal/syntactic_analysis/rule.h
+        include/internal/syntactic_analysis/symbols/non_terminal.h
+        include/internal/syntactic_analysis/symbols/symbol.h
+        include/internal/syntactic_analysis/symbols/terminal.h
         include/internal/syntactic_analysis/token.h
         src/common/helpers.c
         src/regexperience.c
@@ -56,31 +59,34 @@ set(SOURCE_FILES
         src/semantic_analysis/ast_nodes/quantification.c
         src/semantic_analysis/ast_nodes/range.c
         src/semantic_analysis/ast_nodes/unary_operator.c
-        src/state_machines/acceptors/acceptor.c
+        src/state_machines/acceptors/acceptor_runnable.c
         src/state_machines/acceptors/dfa.c
         src/state_machines/acceptors/epsilon_nfa.c
         src/state_machines/acceptors/nfa.c
         src/state_machines/composite_state.c
+        src/state_machines/fsm.c
+        src/state_machines/fsm_convertible.c
+        src/state_machines/fsm_initializable.c
+        src/state_machines/fsm_modifiable.c
         src/state_machines/state.c
         src/state_machines/state_factory.c
-        src/state_machines/state_machine_convertible.c
-        src/state_machines/state_machine_initializable.c
-        src/state_machines/state_machine_modifiable.c
-        src/state_machines/state_machine_runnable.c
+        src/state_machines/transducers/mealy.c
+        src/state_machines/transducers/transducer_runnable.c
         src/state_machines/transitions/deterministic_transition.c
+        src/state_machines/transitions/mealy_transition.c
         src/state_machines/transitions/nondeterministic_transition.c
         src/state_machines/transitions/transition.c
         src/state_machines/transitions/transition_factory.c
         src/syntactic_analysis/derivation_item.c
-        src/syntactic_analysis/grammar/grammar.c
-        src/syntactic_analysis/grammar/production.c
-        src/syntactic_analysis/grammar/rule.c
-        src/syntactic_analysis/grammar/symbols/non_terminal.c
-        src/syntactic_analysis/grammar/symbols/symbol.c
-        src/syntactic_analysis/grammar/symbols/terminal.c
+        src/syntactic_analysis/grammar.c
         src/syntactic_analysis/lexeme.c
         src/syntactic_analysis/lexer.c
         src/syntactic_analysis/parser.c
+        src/syntactic_analysis/production.c
+        src/syntactic_analysis/rule.c
+        src/syntactic_analysis/symbols/non_terminal.c
+        src/syntactic_analysis/symbols/symbol.c
+        src/syntactic_analysis/symbols/terminal.c
         src/syntactic_analysis/token.c)
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 

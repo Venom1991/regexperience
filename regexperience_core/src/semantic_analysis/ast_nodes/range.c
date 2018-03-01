@@ -1,7 +1,7 @@
 #include "internal/semantic_analysis/ast_nodes/range.h"
 #include "internal/semantic_analysis/ast_nodes/constant.h"
 #include "internal/state_machines/acceptors/epsilon_nfa.h"
-#include "internal/state_machines/state_machine_initializable.h"
+#include "internal/state_machines/fsm_initializable.h"
 #include "internal/state_machines/transitions/transition_factory.h"
 #include "internal/common/helpers.h"
 #include "core/errors.h"
@@ -11,12 +11,12 @@ struct _Range
     BinaryOperator parent_instance;
 };
 
-G_DEFINE_TYPE (Range, range, SEMANTIC_ANALYSIS_TYPE_BINARY_OPERATOR)
+G_DEFINE_TYPE (Range, range, AST_NODES_TYPE_BINARY_OPERATOR)
 
 G_DEFINE_QUARK (semantic-analysis-range-error-quark, semantic_analysis_range_error)
 #define SEMANTIC_ANALYSIS_RANGE_ERROR (semantic_analysis_range_error_quark())
 
-static StateMachineConvertible *range_build_state_machine (AstNode *self);
+static FsmConvertible *range_build_fsm (AstNode *self);
 
 static gboolean range_is_valid (AstNode  *self,
                                 GError  **error);
@@ -24,9 +24,9 @@ static gboolean range_is_valid (AstNode  *self,
 static void
 range_class_init (RangeClass *klass)
 {
-  AstNodeClass *ast_node_class = SEMANTIC_ANALYSIS_AST_NODE_CLASS (klass);
+  AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
 
-  ast_node_class->build_state_machine = range_build_state_machine;
+  ast_node_class->build_fsm = range_build_fsm;
   ast_node_class->is_valid = range_is_valid;
 }
 
@@ -36,10 +36,10 @@ range_init (Range *self)
   /* NOP */
 }
 
-static StateMachineConvertible *
-range_build_state_machine (AstNode *self)
+static FsmConvertible *
+range_build_fsm (AstNode *self)
 {
-  g_return_val_if_fail (SEMANTIC_ANALYSIS_IS_RANGE (self), NULL);
+  g_return_val_if_fail (AST_NODES_IS_RANGE (self), NULL);
 
   g_autoptr (AstNode) left_operand = NULL;
   g_autoptr (AstNode) right_operand = NULL;
@@ -49,8 +49,8 @@ range_build_state_machine (AstNode *self)
                 PROP_BINARY_OPERATOR_RIGHT_OPERAND, &right_operand,
                 NULL);
 
-  Constant *left_constant = SEMANTIC_ANALYSIS_CONSTANT (left_operand);
-  Constant *right_constant = SEMANTIC_ANALYSIS_CONSTANT (right_operand);
+  Constant *left_constant = AST_NODES_CONSTANT (left_operand);
+  Constant *right_constant = AST_NODES_CONSTANT (right_operand);
 
   gchar lower_value = 0;
   gchar upper_value = 0;
@@ -83,14 +83,14 @@ range_build_state_machine (AstNode *self)
                             start, final,
                             NULL);
 
-  return epsilon_nfa_new (PROP_STATE_MACHINE_INITIALIZABLE_ALL_STATES, all_states);
+  return epsilon_nfa_new (PROP_FSM_INITIALIZABLE_ALL_STATES, all_states);
 }
 
 static gboolean
 range_is_valid (AstNode  *self,
                 GError  **error)
 {
-  g_return_val_if_fail (SEMANTIC_ANALYSIS_IS_RANGE (self), FALSE);
+  g_return_val_if_fail (AST_NODES_IS_RANGE (self), FALSE);
 
   g_autoptr (AstNode) left_operand = NULL;
   g_autoptr (AstNode) right_operand = NULL;
@@ -100,11 +100,11 @@ range_is_valid (AstNode  *self,
                 PROP_BINARY_OPERATOR_RIGHT_OPERAND, &right_operand,
                 NULL);
 
-  g_assert (SEMANTIC_ANALYSIS_IS_CONSTANT (left_operand));
-  g_assert (SEMANTIC_ANALYSIS_IS_CONSTANT (right_operand));
+  g_assert (AST_NODES_IS_CONSTANT (left_operand));
+  g_assert (AST_NODES_IS_CONSTANT (right_operand));
 
-  Constant *left_constant = SEMANTIC_ANALYSIS_CONSTANT (left_operand);
-  Constant *right_constant = SEMANTIC_ANALYSIS_CONSTANT (right_operand);
+  Constant *left_constant = AST_NODES_CONSTANT (left_operand);
+  Constant *right_constant = AST_NODES_CONSTANT (right_operand);
 
   gchar left_value = 0;
   gchar right_value = 0;

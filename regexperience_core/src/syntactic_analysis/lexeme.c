@@ -1,16 +1,16 @@
 #include "internal/syntactic_analysis/lexeme.h"
 
+struct _Lexeme
+{
+    GObject parent_instance;
+};
+
 typedef struct
 {
     GString *content;
     guint start_position;
     guint end_position;
 } LexemePrivate;
-
-struct _Lexeme
-{
-    GObject parent_instance;
-};
 
 G_DEFINE_TYPE_WITH_PRIVATE (Lexeme, lexeme, G_TYPE_OBJECT)
 

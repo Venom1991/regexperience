@@ -1,14 +1,14 @@
-#include "internal/syntactic_analysis/grammar/rule.h"
-
-typedef struct
-{
-    GPtrArray *symbols;
-} RulePrivate;
+#include "internal/syntactic_analysis/rule.h"
 
 struct _Rule
 {
     GObject parent_instance;
 };
+
+typedef struct
+{
+    GPtrArray *symbols;
+} RulePrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (Rule, rule, G_TYPE_OBJECT)
 

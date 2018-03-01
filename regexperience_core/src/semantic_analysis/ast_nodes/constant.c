@@ -1,8 +1,13 @@
 #include "internal/semantic_analysis/ast_nodes/constant.h"
 #include "internal/state_machines/acceptors/epsilon_nfa.h"
-#include "internal/state_machines/state_machine_initializable.h"
+#include "internal/state_machines/fsm_initializable.h"
 #include "internal/state_machines/transitions/transition_factory.h"
 #include "internal/common/helpers.h"
+
+struct _Constant
+{
+    AstNode parent_instance;
+};
 
 typedef struct
 {
@@ -10,12 +15,7 @@ typedef struct
     guint position;
 } ConstantPrivate;
 
-struct _Constant
-{
-    AstNode parent_instance;
-};
-
-G_DEFINE_TYPE_WITH_PRIVATE (Constant, constant, SEMANTIC_ANALYSIS_TYPE_AST_NODE)
+G_DEFINE_TYPE_WITH_PRIVATE (Constant, constant, AST_NODES_TYPE_AST_NODE)
 
 enum
 {
@@ -26,7 +26,7 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static StateMachineConvertible *constant_build_state_machine (AstNode *self);
+static FsmConvertible *constant_build_fsm (AstNode *self);
 
 static void constant_get_property (GObject    *object,
                                    guint       property_id,
@@ -41,10 +41,10 @@ static void constant_set_property (GObject      *object,
 static void
 constant_class_init (ConstantClass *klass)
 {
-  AstNodeClass *ast_node_class = SEMANTIC_ANALYSIS_AST_NODE_CLASS (klass);
+  AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  ast_node_class->build_state_machine = constant_build_state_machine;
+  ast_node_class->build_fsm = constant_build_fsm;
 
   object_class->get_property = constant_get_property;
   object_class->set_property = constant_set_property;
@@ -78,20 +78,19 @@ constant_init (Constant *self)
   /* NOP */
 }
 
-static StateMachineConvertible *
-constant_build_state_machine (AstNode *self)
+static FsmConvertible *
+constant_build_fsm (AstNode *self)
 {
-  g_return_val_if_fail (SEMANTIC_ANALYSIS_IS_CONSTANT (self), NULL);
+  g_return_val_if_fail (AST_NODES_IS_CONSTANT (self), NULL);
 
-  ConstantPrivate *priv = constant_get_instance_private (SEMANTIC_ANALYSIS_CONSTANT (self));
+  ConstantPrivate *priv = constant_get_instance_private (AST_NODES_CONSTANT (self));
 
   gchar expected_character = priv->value;
   g_autoptr (GPtrArray) all_states = g_ptr_array_new_with_free_func (g_object_unref);
   State *start = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_START);
   State *final = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_FINAL);
   g_autoptr (GPtrArray) start_transitions = g_ptr_array_new_with_free_func (g_object_unref);
-  Transition *start_to_final_on_value = create_deterministic_transition (expected_character,
-                                                                         final);
+  Transition *start_to_final_on_value = create_deterministic_transition (expected_character, final);
 
   g_ptr_array_add (start_transitions, start_to_final_on_value);
   g_object_set (start,
@@ -102,7 +101,7 @@ constant_build_state_machine (AstNode *self)
                             start, final,
                             NULL);
 
-  return epsilon_nfa_new (PROP_STATE_MACHINE_INITIALIZABLE_ALL_STATES, all_states);
+  return epsilon_nfa_new (PROP_FSM_INITIALIZABLE_ALL_STATES, all_states);
 }
 
 static void
@@ -111,7 +110,7 @@ constant_get_property (GObject    *object,
                        GValue     *value,
                        GParamSpec *pspec)
 {
-  ConstantPrivate *priv = constant_get_instance_private (SEMANTIC_ANALYSIS_CONSTANT (object));
+  ConstantPrivate *priv = constant_get_instance_private (AST_NODES_CONSTANT (object));
 
   switch (property_id)
     {
@@ -135,7 +134,7 @@ constant_set_property (GObject      *object,
                        const GValue *value,
                        GParamSpec   *pspec)
 {
-  ConstantPrivate *priv = constant_get_instance_private (SEMANTIC_ANALYSIS_CONSTANT (object));
+  ConstantPrivate *priv = constant_get_instance_private (AST_NODES_CONSTANT (object));
 
   switch (property_id)
     {

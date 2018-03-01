@@ -3,25 +3,25 @@
 
 #include <glib-object.h>
 
-#include "internal/state_machines/state_machine_convertible.h"
+#include "internal/state_machines/fsm_convertible.h"
 
 G_BEGIN_DECLS
 
-#define SEMANTIC_ANALYSIS_TYPE_AST_NODE (ast_node_get_type ())
+#define AST_NODES_TYPE_AST_NODE (ast_node_get_type ())
 
-G_DECLARE_DERIVABLE_TYPE (AstNode, ast_node, SEMANTIC_ANALYSIS, AST_NODE, GObject)
+G_DECLARE_DERIVABLE_TYPE (AstNode, ast_node, AST_NODES, AST_NODE, GObject)
 
 struct _AstNodeClass
 {
     GObjectClass parent_class;
 
-    StateMachineConvertible * (*build_state_machine) (AstNode *self);
+    FsmConvertible * (*build_fsm) (AstNode *self);
     gboolean (*is_valid) (AstNode *self, GError **error);
 
     gpointer padding[8];
 };
 
-StateMachineConvertible *ast_node_build_state_machine (AstNode *self);
+FsmConvertible *ast_node_build_fsm (AstNode *self);
 
 gboolean ast_node_is_valid (AstNode  *self,
                             GError  **error);

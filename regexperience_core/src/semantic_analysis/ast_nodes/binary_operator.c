@@ -6,7 +6,7 @@ typedef struct
     AstNode *right_operand;
 } BinaryOperatorPrivate;
 
-G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (BinaryOperator, binary_operator, SEMANTIC_ANALYSIS_TYPE_AST_NODE)
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (BinaryOperator, binary_operator, AST_NODES_TYPE_AST_NODE)
 
 enum
 {
@@ -35,7 +35,7 @@ static void binary_operator_dispose (GObject *object);
 static void
 binary_operator_class_init (BinaryOperatorClass *klass)
 {
-  AstNodeClass *ast_node_class = SEMANTIC_ANALYSIS_AST_NODE_CLASS (klass);
+  AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   ast_node_class->is_valid = binary_operator_is_valid;
@@ -48,14 +48,14 @@ binary_operator_class_init (BinaryOperatorClass *klass)
       g_param_spec_object (PROP_BINARY_OPERATOR_LEFT_OPERAND,
                            "Left operand",
                            "Operand representing the left side of the operation.",
-                           SEMANTIC_ANALYSIS_TYPE_AST_NODE,
+                           AST_NODES_TYPE_AST_NODE,
                            G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   obj_properties[PROP_RIGHT_OPERAND] =
       g_param_spec_object (PROP_BINARY_OPERATOR_RIGHT_OPERAND,
                            "Right operand",
                            "Operand representing the right side of the operation.",
-                           SEMANTIC_ANALYSIS_TYPE_AST_NODE,
+                           AST_NODES_TYPE_AST_NODE,
                            G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
@@ -73,9 +73,9 @@ static
 gboolean binary_operator_is_valid (AstNode  *self,
                                    GError  **error)
 {
-  g_return_val_if_fail (SEMANTIC_ANALYSIS_IS_BINARY_OPERATOR (self), FALSE);
+  g_return_val_if_fail (AST_NODES_IS_BINARY_OPERATOR (self), FALSE);
 
-  BinaryOperatorPrivate *priv = binary_operator_get_instance_private (SEMANTIC_ANALYSIS_BINARY_OPERATOR (self));
+  BinaryOperatorPrivate *priv = binary_operator_get_instance_private (AST_NODES_BINARY_OPERATOR (self));
 
   AstNode *left_operand = priv->left_operand;
   AstNode *right_operand = priv->right_operand;
@@ -90,7 +90,7 @@ binary_operator_get_property (GObject    *object,
                               GValue     *value,
                               GParamSpec *pspec)
 {
-  BinaryOperatorPrivate *priv = binary_operator_get_instance_private (SEMANTIC_ANALYSIS_BINARY_OPERATOR (object));
+  BinaryOperatorPrivate *priv = binary_operator_get_instance_private (AST_NODES_BINARY_OPERATOR (object));
 
   switch (property_id)
     {
@@ -114,7 +114,7 @@ binary_operator_set_property (GObject      *object,
                               const GValue *value,
                               GParamSpec   *pspec)
 {
-  BinaryOperatorPrivate *priv = binary_operator_get_instance_private (SEMANTIC_ANALYSIS_BINARY_OPERATOR (object));
+  BinaryOperatorPrivate *priv = binary_operator_get_instance_private (AST_NODES_BINARY_OPERATOR (object));
 
   switch (property_id)
     {
@@ -141,7 +141,7 @@ binary_operator_set_property (GObject      *object,
 static void
 binary_operator_dispose (GObject *object)
 {
-  BinaryOperatorPrivate *priv = binary_operator_get_instance_private (SEMANTIC_ANALYSIS_BINARY_OPERATOR (object));
+  BinaryOperatorPrivate *priv = binary_operator_get_instance_private (AST_NODES_BINARY_OPERATOR (object));
 
   if (priv->left_operand != NULL)
     g_clear_object (&priv->left_operand);

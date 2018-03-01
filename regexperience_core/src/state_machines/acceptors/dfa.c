@@ -1,10 +1,15 @@
 #include "internal/state_machines/acceptors/dfa.h"
-#include "internal/state_machines/state_machine_modifiable.h"
-#include "internal/state_machines/state_machine_runnable.h"
-#include "internal/state_machines/state_machine_initializable.h"
+#include "internal/state_machines/acceptors/acceptor_runnable.h"
+#include "internal/state_machines/fsm_modifiable.h"
+#include "internal/state_machines/fsm_initializable.h"
 #include "internal/state_machines/transitions/deterministic_transition.h"
 #include "internal/state_machines/transitions/transition_factory.h"
 #include "internal/common/helpers.h"
+
+struct _Dfa
+{
+    Fsm parent_instance;
+};
 
 typedef struct
 {
@@ -12,29 +17,24 @@ typedef struct
     gboolean  is_input_exhausted;
 } DfaPrivate;
 
-struct _Dfa
-{
-    Acceptor parent_instance;
-};
+static void dfa_fsm_modifiable_interface_init (FsmModifiableInterface *iface);
 
-static void dfa_state_machine_modifiable_interface_init (StateMachineModifiableInterface *iface);
+static void dfa_acceptor_runnable_interface_init (AcceptorRunnableInterface *iface);
 
-static void dfa_state_machine_runnable_interface_init (StateMachineRunnableInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE (Dfa, dfa, STATE_MACHINES_TYPE_ACCEPTOR,
+G_DEFINE_TYPE_WITH_CODE (Dfa, dfa, STATE_MACHINES_TYPE_FSM,
                          G_ADD_PRIVATE (Dfa)
-                         G_IMPLEMENT_INTERFACE (STATE_MACHINES_TYPE_MODIFIABLE,
-                                                dfa_state_machine_modifiable_interface_init)
-                         G_IMPLEMENT_INTERFACE (STATE_MACHINES_TYPE_RUNNABLE,
-                                                dfa_state_machine_runnable_interface_init))
+                         G_IMPLEMENT_INTERFACE (STATE_MACHINES_TYPE_FSM_MODIFIABLE,
+                                                dfa_fsm_modifiable_interface_init)
+                         G_IMPLEMENT_INTERFACE (ACCEPTORS_TYPE_ACCEPTOR_RUNNABLE,
+                                                dfa_acceptor_runnable_interface_init))
 
-static void dfa_minimize (StateMachineModifiable *self);
+static void dfa_minimize (FsmModifiable *self);
 
-static void dfa_complement (StateMachineModifiable *self);
+static void dfa_complement (FsmModifiable *self);
 
-static void dfa_run (StateMachineRunnable *self, const gchar *input);
+static void dfa_run (AcceptorRunnable *self, const gchar *input);
 
-static gboolean dfa_can_accept (StateMachineRunnable *self);
+static gboolean dfa_can_accept (AcceptorRunnable *self);
 
 static void dfa_prepare_for_run (Dfa *self);
 
@@ -75,25 +75,25 @@ dfa_init (Dfa *self)
 }
 
 static void
-dfa_state_machine_modifiable_interface_init (StateMachineModifiableInterface *iface)
+dfa_fsm_modifiable_interface_init (FsmModifiableInterface *iface)
 {
   iface->minimize = dfa_minimize;
   iface->complement = dfa_complement;
 }
 
 static void
-dfa_state_machine_runnable_interface_init (StateMachineRunnableInterface *iface)
+dfa_acceptor_runnable_interface_init (AcceptorRunnableInterface *iface)
 {
   iface->run = dfa_run;
   iface->can_accept = dfa_can_accept;
 }
 
 static void
-dfa_minimize (StateMachineModifiable *self)
+dfa_minimize (FsmModifiable *self)
 {
-  g_return_if_fail (STATE_MACHINES_IS_DFA (self));
+  g_return_if_fail (ACCEPTORS_IS_DFA (self));
 
-  Dfa *dfa = STATE_MACHINES_DFA (self);
+  Dfa *dfa = ACCEPTORS_DFA (self);
 
   /* Performing minimization firstly by removing unreachable states (if they exist) - i.e., states in to which
    * no other state can transition.
@@ -107,14 +107,14 @@ dfa_minimize (StateMachineModifiable *self)
 }
 
 static void
-dfa_complement (StateMachineModifiable *self)
+dfa_complement (FsmModifiable *self)
 {
-  g_return_if_fail (STATE_MACHINES_IS_DFA (self));
+  g_return_if_fail (ACCEPTORS_IS_DFA (self));
 
   g_autoptr (GPtrArray) all_states = NULL;
 
   g_object_get (self,
-                PROP_STATE_MACHINE_INITIALIZABLE_ALL_STATES, &all_states,
+                PROP_FSM_INITIALIZABLE_ALL_STATES, &all_states,
                 NULL);
 
   if (g_ptr_array_has_items (all_states))
@@ -152,18 +152,18 @@ dfa_complement (StateMachineModifiable *self)
 
       /* Reinitializing the DFA's states. */
       g_object_set (self,
-                    PROP_STATE_MACHINE_INITIALIZABLE_ALL_STATES, all_states,
+                    PROP_FSM_INITIALIZABLE_ALL_STATES, all_states,
                     NULL);
     }
 }
 
 static void
-dfa_run (StateMachineRunnable *self, const gchar *input)
+dfa_run (AcceptorRunnable *self, const gchar *input)
 {
-  g_return_if_fail (STATE_MACHINES_IS_DFA (self));
+  g_return_if_fail (ACCEPTORS_IS_DFA (self));
   g_return_if_fail (input != NULL);
 
-  Dfa *dfa = STATE_MACHINES_DFA (self);
+  Dfa *dfa = ACCEPTORS_DFA (self);
   DfaPrivate *priv = dfa_get_instance_private (dfa);
   gchar current_character = *input;
 
@@ -188,11 +188,11 @@ dfa_run (StateMachineRunnable *self, const gchar *input)
 }
 
 static gboolean
-dfa_can_accept (StateMachineRunnable *self)
+dfa_can_accept (AcceptorRunnable *self)
 {
-  g_return_val_if_fail (STATE_MACHINES_IS_DFA (self), FALSE);
+  g_return_val_if_fail (ACCEPTORS_IS_DFA (self), FALSE);
 
-  Dfa *dfa = STATE_MACHINES_DFA (self);
+  Dfa *dfa = ACCEPTORS_DFA (self);
   DfaPrivate *priv = dfa_get_instance_private (dfa);
   State *current_state = priv->current_state;
   gboolean is_input_exhausted = priv->is_input_exhausted;
@@ -216,7 +216,7 @@ dfa_prepare_for_run (Dfa *self)
   State *start_state = NULL;
 
   g_object_get (self,
-                PROP_STATE_MACHINE_INITIALIZABLE_START_STATE, &start_state,
+                PROP_FSM_INITIALIZABLE_START_STATE, &start_state,
                 NULL);
 
   priv->current_state = start_state;
@@ -242,7 +242,7 @@ dfa_transition_to_next_state (Dfa *self, gchar input_character)
     {
       Transition *transition = g_ptr_array_index (transitions, i);
 
-      g_return_val_if_fail (STATE_MACHINES_IS_DETERMINISTIC_TRANSITION (transition), FALSE);
+      g_return_val_if_fail (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (transition), FALSE);
 
       if (transition_is_possible (transition, input_character))
         {
@@ -265,10 +265,10 @@ dfa_transition_to_next_state (Dfa *self, gchar input_character)
   g_autoptr (GPtrArray) all_states = NULL;
 
   g_object_get (self,
-                PROP_STATE_MACHINE_INITIALIZABLE_ALL_STATES, &all_states,
+                PROP_FSM_INITIALIZABLE_ALL_STATES, &all_states,
                 NULL);
 
-  State *dead_state = acceptor_get_or_create_dead_state (all_states);
+  State *dead_state = fsm_get_or_create_dead_state (all_states);
 
   priv->current_state = dead_state;
 
@@ -281,7 +281,7 @@ dfa_remove_unreachable_states_if_needed (Dfa *self)
   g_autoptr (GPtrArray) all_states = NULL;
 
   g_object_get (self,
-                PROP_STATE_MACHINE_INITIALIZABLE_ALL_STATES, &all_states,
+                PROP_FSM_INITIALIZABLE_ALL_STATES, &all_states,
                 NULL);
 
   g_autoptr (GArray) unreachable_states = dfa_fetch_unreachable_states_from (all_states);
@@ -297,7 +297,7 @@ dfa_remove_unreachable_states_if_needed (Dfa *self)
 
       /* Reinitializing the DFA's states. */
       g_object_set (self,
-                    PROP_STATE_MACHINE_INITIALIZABLE_ALL_STATES, all_states,
+                    PROP_FSM_INITIALIZABLE_ALL_STATES, all_states,
                     NULL);
     }
 }
@@ -373,9 +373,9 @@ dfa_compose_equivalent_states_if_needed (Dfa *self)
   g_autoptr (GPtrArray) non_final_states = NULL;
 
   g_object_get (self,
-                PROP_STATE_MACHINE_INITIALIZABLE_ALPHABET, &alphabet,
-                PROP_STATE_MACHINE_INITIALIZABLE_FINAL_STATES, &final_states,
-                PROP_STATE_MACHINE_INITIALIZABLE_NON_FINAL_STATES, &non_final_states,
+                PROP_FSM_INITIALIZABLE_ALPHABET, &alphabet,
+                PROP_FSM_INITIALIZABLE_FINAL_STATES, &final_states,
+                PROP_FSM_INITIALIZABLE_NON_FINAL_STATES, &non_final_states,
                 NULL);
 
   GPtrArray *initial_equivalence_classes = g_ptr_array_new ();
@@ -428,10 +428,10 @@ dfa_compose_equivalent_states_if_needed (Dfa *self)
                 }
               else
                 {
-                  input_state = acceptor_get_or_create_composite_state (all_states,
-                                                                        equivalence_class,
-                                                                        COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_ALL,
-                                                                        NULL);
+                  input_state = fsm_get_or_create_composite_state (all_states,
+                                                                   equivalence_class,
+                                                                   COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_ALL,
+                                                                   NULL);
                 }
 
               /* Defining new transitions for the input state. */
@@ -448,10 +448,10 @@ dfa_compose_equivalent_states_if_needed (Dfa *self)
                   if (matched_equivalence_class->len == acceptable_scalar_equivalence_class_size)
                     output_state = g_ptr_array_index (matched_equivalence_class, 0);
                   else
-                    output_state = acceptor_get_or_create_composite_state (all_states,
-                                                                           matched_equivalence_class,
-                                                                           COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_ALL,
-                                                                           NULL);
+                    output_state = fsm_get_or_create_composite_state (all_states,
+                                                                      matched_equivalence_class,
+                                                                      COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_ALL,
+                                                                      NULL);
 
                   Transition *transition = create_deterministic_transition (expected_character,
                                                                             output_state);
@@ -467,7 +467,7 @@ dfa_compose_equivalent_states_if_needed (Dfa *self)
 
       /* Reinitializing the DFA's states. */
       g_object_set (self,
-                    PROP_STATE_MACHINE_INITIALIZABLE_ALL_STATES, all_states,
+                    PROP_FSM_INITIALIZABLE_ALL_STATES, all_states,
                     NULL);
     }
 }
@@ -588,8 +588,8 @@ dfa_can_states_transition_to_same_equivalence_class (State     *first_state,
                             first_state, second_state,
                             NULL);
 
-  g_autoptr (GPtrArray) output_states = acceptor_fetch_output_states_from_multiple (input_states,
-                                                                                    expected_character);
+  g_autoptr (GPtrArray) output_states =fsm_fetch_output_states_from_multiple (input_states,
+                                                                              expected_character);
   gboolean states_transition_to_same_state = output_states->len == 1;
 
   /* Avoiding further checks if both states output to the same state on a given input. */
@@ -629,8 +629,8 @@ dfa_fetch_matched_equivalence_class_from (GPtrArray *input_equivalence_class,
                                           GPtrArray *all_equivalence_classes,
                                           gchar      expected_character)
 {
-  g_autoptr (GPtrArray) output_states = acceptor_fetch_output_states_from_multiple (input_equivalence_class,
-                                                                                    expected_character);
+  g_autoptr (GPtrArray) output_states = fsm_fetch_output_states_from_multiple (input_equivalence_class,
+                                                                               expected_character);
 
   for (guint i = 0; i < all_equivalence_classes->len; ++i)
     {
@@ -651,7 +651,7 @@ dfa_fetch_matched_equivalence_class_from (GPtrArray *input_equivalence_class,
 static void
 dfa_dispose (GObject *object)
 {
-  DfaPrivate *priv = dfa_get_instance_private (STATE_MACHINES_DFA (object));
+  DfaPrivate *priv = dfa_get_instance_private (ACCEPTORS_DFA (object));
 
   if (priv->current_state != NULL)
     g_clear_object (&priv->current_state);

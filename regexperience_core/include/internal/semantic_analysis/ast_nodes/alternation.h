@@ -7,10 +7,10 @@
 
 G_BEGIN_DECLS
 
-#define SEMANTIC_ANALYSIS_TYPE_ALTERNATION (alternation_get_type ())
-#define alternation_new(...) (g_object_new (SEMANTIC_ANALYSIS_TYPE_ALTERNATION, ##__VA_ARGS__, NULL))
+#define AST_NODES_TYPE_ALTERNATION (alternation_get_type ())
+#define alternation_new(...) (g_object_new (AST_NODES_TYPE_ALTERNATION, ##__VA_ARGS__, NULL))
 
-G_DECLARE_FINAL_TYPE (Alternation, alternation, SEMANTIC_ANALYSIS, ALTERNATION, BinaryOperator)
+G_DECLARE_FINAL_TYPE (Alternation, alternation, AST_NODES, ALTERNATION, BinaryOperator)
 
 G_END_DECLS
 

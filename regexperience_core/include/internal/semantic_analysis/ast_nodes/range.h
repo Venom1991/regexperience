@@ -7,10 +7,10 @@
 
 G_BEGIN_DECLS
 
-#define SEMANTIC_ANALYSIS_TYPE_RANGE (range_get_type ())
-#define range_new(...) (g_object_new (SEMANTIC_ANALYSIS_TYPE_RANGE, ##__VA_ARGS__, NULL))
+#define AST_NODES_TYPE_RANGE (range_get_type ())
+#define range_new(...) (g_object_new (AST_NODES_TYPE_RANGE, ##__VA_ARGS__, NULL))
 
-G_DECLARE_FINAL_TYPE (Range, range, SEMANTIC_ANALYSIS, RANGE, BinaryOperator)
+G_DECLARE_FINAL_TYPE (Range, range, AST_NODES, RANGE, BinaryOperator)
 
 G_END_DECLS
 

@@ -1,8 +1,13 @@
 #include "internal/semantic_analysis/ast_nodes/quantification.h"
 #include "internal/state_machines/acceptors/epsilon_nfa.h"
-#include "internal/state_machines/state_machine_initializable.h"
+#include "internal/state_machines/fsm_initializable.h"
 #include "internal/state_machines/transitions/transition_factory.h"
 #include "internal/common/helpers.h"
+
+struct _Quantification
+{
+    UnaryOperator parent_instance;
+};
 
 typedef struct
 {
@@ -10,12 +15,7 @@ typedef struct
     QuantificationBoundType upper_bound;
 } QuantificationPrivate;
 
-struct _Quantification
-{
-    UnaryOperator parent_instance;
-};
-
-G_DEFINE_TYPE_WITH_PRIVATE (Quantification, quantification, SEMANTIC_ANALYSIS_TYPE_UNARY_OPERATOR)
+G_DEFINE_TYPE_WITH_PRIVATE (Quantification, quantification, AST_NODES_TYPE_UNARY_OPERATOR)
 
 enum
 {
@@ -26,7 +26,7 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static StateMachineConvertible *quantification_build_state_machine (AstNode *self);
+static FsmConvertible *quantification_build_fsm (AstNode *self);
 
 static void quantification_set_property (GObject      *object,
                                          guint         property_id,
@@ -36,10 +36,10 @@ static void quantification_set_property (GObject      *object,
 static void
 quantification_class_init (QuantificationClass *klass)
 {
-  AstNodeClass *ast_node_class = SEMANTIC_ANALYSIS_AST_NODE_CLASS (klass);
+  AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  ast_node_class->build_state_machine = quantification_build_state_machine;
+  ast_node_class->build_fsm = quantification_build_fsm;
 
   object_class->set_property = quantification_set_property;
 
@@ -72,12 +72,12 @@ quantification_init (Quantification *self)
   /* NOP */
 }
 
-static StateMachineConvertible *
-quantification_build_state_machine (AstNode *self)
+static FsmConvertible *
+quantification_build_fsm (AstNode *self)
 {
-  g_return_val_if_fail (SEMANTIC_ANALYSIS_IS_QUANTIFICATION (self), NULL);
+  g_return_val_if_fail (AST_NODES_IS_QUANTIFICATION (self), NULL);
 
-  QuantificationPrivate *priv = quantification_get_instance_private (SEMANTIC_ANALYSIS_QUANTIFICATION (self));
+  QuantificationPrivate *priv = quantification_get_instance_private (AST_NODES_QUANTIFICATION (self));
 
   QuantificationBoundType lower_bound = priv->lower_bound;
   QuantificationBoundType upper_bound = priv->upper_bound;
@@ -88,7 +88,7 @@ quantification_build_state_machine (AstNode *self)
                 PROP_UNARY_OPERATOR_OPERAND, &operand,
                 NULL);
 
-  g_autoptr (StateMachineConvertible) operand_state_machine = ast_node_build_state_machine (operand);
+  g_autoptr (FsmConvertible) operand_fsm = ast_node_build_fsm (operand);
 
   g_autoptr (GPtrArray) all_states = NULL;
   g_autoptr (State) start = NULL;
@@ -98,9 +98,9 @@ quantification_build_state_machine (AstNode *self)
   State *quantification_start = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_START);
   State *quantification_final = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_FINAL);
 
-  g_object_get (operand_state_machine,
-                PROP_STATE_MACHINE_INITIALIZABLE_ALL_STATES, &all_states,
-                PROP_STATE_MACHINE_INITIALIZABLE_START_STATE, &start,
+  g_object_get (operand_fsm,
+                PROP_FSM_INITIALIZABLE_ALL_STATES, &all_states,
+                PROP_FSM_INITIALIZABLE_START_STATE, &start,
                 PROP_EPSILON_NFA_FINAL_STATE, &final,
                 NULL);
 
@@ -119,7 +119,7 @@ quantification_build_state_machine (AstNode *self)
                                   start, quantification_final,
                                   NULL);
 
-        quantification_start_transition_on_epsilon =create_nondeterministic_epsilon_transition (quantification_start_output_states);
+        quantification_start_transition_on_epsilon = create_nondeterministic_epsilon_transition (quantification_start_output_states);
       }
       break;
 
@@ -176,7 +176,7 @@ quantification_build_state_machine (AstNode *self)
                          all_states,
                          g_object_ref);
 
-  return epsilon_nfa_new (PROP_STATE_MACHINE_INITIALIZABLE_ALL_STATES, quantification_all_states);
+  return epsilon_nfa_new (PROP_FSM_INITIALIZABLE_ALL_STATES, quantification_all_states);
 }
 
 static void
@@ -185,7 +185,7 @@ quantification_set_property (GObject      *object,
                              const GValue *value,
                              GParamSpec   *pspec)
 {
-  QuantificationPrivate *priv = quantification_get_instance_private (SEMANTIC_ANALYSIS_QUANTIFICATION (object));
+  QuantificationPrivate *priv = quantification_get_instance_private (AST_NODES_QUANTIFICATION (object));
 
   switch (property_id)
     {

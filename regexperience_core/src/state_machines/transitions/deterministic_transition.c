@@ -6,12 +6,7 @@ typedef struct
     GWeakRef output_state;
 } DeterministicTransitionPrivate;
 
-struct _DeterministicTransition
-{
-    Transition parent_instance;
-};
-
-G_DEFINE_TYPE_WITH_PRIVATE (DeterministicTransition, deterministic_transition, STATE_MACHINES_TYPE_TRANSITION)
+G_DEFINE_TYPE_WITH_PRIVATE (DeterministicTransition, deterministic_transition, TRANSITIONS_TYPE_TRANSITION)
 
 enum
 {
@@ -70,7 +65,7 @@ deterministic_transition_get_property (GObject    *object,
                                        GParamSpec *pspec)
 {
   DeterministicTransitionPrivate *priv =
-      deterministic_transition_get_instance_private (STATE_MACHINES_DETERMINISTIC_TRANSITION (object));
+      deterministic_transition_get_instance_private (TRANSITIONS_DETERMINISTIC_TRANSITION (object));
 
   switch (property_id)
     {
@@ -95,7 +90,7 @@ deterministic_transition_set_property (GObject      *object,
                                        GParamSpec   *pspec)
 {
   DeterministicTransitionPrivate *priv =
-      deterministic_transition_get_instance_private (STATE_MACHINES_DETERMINISTIC_TRANSITION (object));
+      deterministic_transition_get_instance_private (TRANSITIONS_DETERMINISTIC_TRANSITION (object));
 
   switch (property_id)
     {
@@ -117,7 +112,7 @@ static void
 deterministic_transition_dispose (GObject *object)
 {
   DeterministicTransitionPrivate *priv =
-      deterministic_transition_get_instance_private (STATE_MACHINES_DETERMINISTIC_TRANSITION (object));
+      deterministic_transition_get_instance_private (TRANSITIONS_DETERMINISTIC_TRANSITION (object));
 
   g_weak_ref_clear (&priv->output_state);
 

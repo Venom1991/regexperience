@@ -1,17 +1,17 @@
 #include "internal/syntactic_analysis/derivation_item.h"
-#include "internal/syntactic_analysis/grammar/production.h"
-#include "internal/syntactic_analysis/grammar/rule.h"
+#include "internal/syntactic_analysis/production.h"
+#include "internal/syntactic_analysis/rule.h"
+
+struct _DerivationItem
+{
+    GObject parent_instance;
+};
 
 typedef struct
 {
     Production *left_hand_side;
     Rule       *right_hand_side;
 } DerivationItemPrivate;
-
-struct _DerivationItem
-{
-    GObject parent_instance;
-};
 
 G_DEFINE_TYPE_WITH_PRIVATE (DerivationItem, derivation_item, G_TYPE_OBJECT)
 

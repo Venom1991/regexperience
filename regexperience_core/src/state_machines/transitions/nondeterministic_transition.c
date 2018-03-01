@@ -2,18 +2,18 @@
 #include "internal/state_machines/state.h"
 #include "internal/common/helpers.h"
 
+struct _NondeterministicTransition
+{
+    Transition parent_instance;
+};
+
 typedef struct
 {
     GWeakRef *output_states;
     guint     count;
 } NondeterministicTransitionPrivate;
 
-struct _NondeterministicTransition
-{
-    Transition parent_instance;
-};
-
-G_DEFINE_TYPE_WITH_PRIVATE (NondeterministicTransition, nondeterministic_transition, STATE_MACHINES_TYPE_TRANSITION)
+G_DEFINE_TYPE_WITH_PRIVATE (NondeterministicTransition, nondeterministic_transition, TRANSITIONS_TYPE_TRANSITION)
 
 enum
 {
@@ -179,7 +179,7 @@ nondeterministic_transition_get_property (GObject    *object,
                                           GParamSpec *pspec)
 {
   NondeterministicTransitionPrivate *priv =
-      nondeterministic_transition_get_instance_private (STATE_MACHINES_NONDETERMINISTIC_TRANSITION (object));
+      nondeterministic_transition_get_instance_private (TRANSITIONS_NONDETERMINISTIC_TRANSITION (object));
 
   switch (property_id)
     {
@@ -200,7 +200,7 @@ nondeterministic_transition_set_property (GObject      *object,
                                           GParamSpec   *pspec)
 {
   NondeterministicTransitionPrivate *priv =
-      nondeterministic_transition_get_instance_private (STATE_MACHINES_NONDETERMINISTIC_TRANSITION (object));
+      nondeterministic_transition_get_instance_private (TRANSITIONS_NONDETERMINISTIC_TRANSITION (object));
 
   switch (property_id)
     {
@@ -218,7 +218,7 @@ static void
 nondeterministic_transition_dispose (GObject *object)
 {
   NondeterministicTransitionPrivate *priv =
-      nondeterministic_transition_get_instance_private (STATE_MACHINES_NONDETERMINISTIC_TRANSITION (object));
+      nondeterministic_transition_get_instance_private (TRANSITIONS_NONDETERMINISTIC_TRANSITION (object));
 
   if (priv->output_states != NULL)
     {

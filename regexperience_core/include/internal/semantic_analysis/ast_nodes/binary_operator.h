@@ -7,9 +7,9 @@
 
 G_BEGIN_DECLS
 
-#define SEMANTIC_ANALYSIS_TYPE_BINARY_OPERATOR (binary_operator_get_type ())
+#define AST_NODES_TYPE_BINARY_OPERATOR (binary_operator_get_type ())
 
-G_DECLARE_DERIVABLE_TYPE (BinaryOperator, binary_operator, SEMANTIC_ANALYSIS, BINARY_OPERATOR, AstNode)
+G_DECLARE_DERIVABLE_TYPE (BinaryOperator, binary_operator, AST_NODES, BINARY_OPERATOR, AstNode)
 
 struct _BinaryOperatorClass
 {

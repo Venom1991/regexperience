@@ -1,17 +1,17 @@
-#include "internal/syntactic_analysis/grammar/symbols/non_terminal.h"
-#include "internal/syntactic_analysis/grammar/production.h"
-
-typedef struct
-{
-    GWeakRef value;
-} NonTerminalPrivate;
+#include "internal/syntactic_analysis/symbols/non_terminal.h"
+#include "internal/syntactic_analysis/production.h"
 
 struct _NonTerminal
 {
     Symbol parent_instance;
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE (NonTerminal, non_terminal, SYNTACTIC_ANALYSIS_TYPE_SYMBOL)
+typedef struct
+{
+    GWeakRef value;
+} NonTerminalPrivate;
+
+G_DEFINE_TYPE_WITH_PRIVATE (NonTerminal, non_terminal, SYMBOLS_TYPE_SYMBOL)
 
 enum
 {
@@ -34,7 +34,7 @@ static void non_terminal_dispose (GObject *object);
 static void
 non_terminal_class_init (NonTerminalClass *klass)
 {
-  SymbolClass *symbol_class = SYNTACTIC_ANALYSIS_SYMBOL_CLASS (klass);
+  SymbolClass *symbol_class = SYMBOLS_SYMBOL_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   symbol_class->extract_value = non_terminal_extract_value;
@@ -66,10 +66,10 @@ static void
 non_terminal_extract_value (Symbol *self,
                             GValue *value)
 {
-  g_return_if_fail (SYNTACTIC_ANALYSIS_IS_NON_TERMINAL (self));
+  g_return_if_fail (SYMBOLS_IS_NON_TERMINAL (self));
   g_return_if_fail (value != NULL);
 
-  NonTerminalPrivate *priv = non_terminal_get_instance_private (SYNTACTIC_ANALYSIS_NON_TERMINAL (self));
+  NonTerminalPrivate *priv = non_terminal_get_instance_private (SYMBOLS_NON_TERMINAL (self));
   Production *production = g_weak_ref_get (&priv->value);
 
   g_value_init (value, G_TYPE_OBJECT);
@@ -82,7 +82,7 @@ non_terminal_set_property (GObject      *object,
                            const GValue *value,
                            GParamSpec   *pspec)
 {
-  NonTerminalPrivate *priv = non_terminal_get_instance_private (SYNTACTIC_ANALYSIS_NON_TERMINAL (object));
+  NonTerminalPrivate *priv = non_terminal_get_instance_private (SYMBOLS_NON_TERMINAL (object));
 
   switch (property_id)
     {
@@ -103,7 +103,7 @@ non_terminal_set_property (GObject      *object,
 static void
 non_terminal_dispose (GObject *object)
 {
-  NonTerminalPrivate *priv = non_terminal_get_instance_private (SYNTACTIC_ANALYSIS_NON_TERMINAL (object));
+  NonTerminalPrivate *priv = non_terminal_get_instance_private (SYMBOLS_NON_TERMINAL (object));
 
   g_weak_ref_clear (&priv->value);
 

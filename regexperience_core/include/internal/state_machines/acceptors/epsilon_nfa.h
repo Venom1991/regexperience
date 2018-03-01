@@ -3,14 +3,14 @@
 
 #include <glib-object.h>
 
-#include "acceptor.h"
+#include "internal/state_machines/fsm.h"
 
 G_BEGIN_DECLS
 
-#define STATE_MACHINES_TYPE_EPSILON_NFA (epsilon_nfa_get_type ())
-#define epsilon_nfa_new(...) (g_object_new (STATE_MACHINES_TYPE_EPSILON_NFA, ##__VA_ARGS__, NULL))
+#define ACCEPTORS_TYPE_EPSILON_NFA (epsilon_nfa_get_type ())
+#define epsilon_nfa_new(...) (g_object_new (ACCEPTORS_TYPE_EPSILON_NFA, ##__VA_ARGS__, NULL))
 
-G_DECLARE_FINAL_TYPE (EpsilonNfa, epsilon_nfa, STATE_MACHINES, EPSILON_NFA, Acceptor)
+G_DECLARE_FINAL_TYPE (EpsilonNfa, epsilon_nfa, ACCEPTORS, EPSILON_NFA, Fsm)
 
 #define PROP_EPSILON_NFA_FINAL_STATE "final-state"
 

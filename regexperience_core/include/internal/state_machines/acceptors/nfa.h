@@ -3,14 +3,14 @@
 
 #include <glib-object.h>
 
-#include "acceptor.h"
+#include "internal/state_machines/fsm.h"
 
 G_BEGIN_DECLS
 
-#define STATE_MACHINES_TYPE_NFA (nfa_get_type ())
-#define nfa_new(...) (g_object_new (STATE_MACHINES_TYPE_NFA, ##__VA_ARGS__, NULL))
+#define ACCEPTORS_TYPE_NFA (nfa_get_type ())
+#define nfa_new(...) (g_object_new (ACCEPTORS_TYPE_NFA, ##__VA_ARGS__, NULL))
 
-G_DECLARE_FINAL_TYPE (Nfa, nfa, STATE_MACHINES, NFA, Acceptor)
+G_DECLARE_FINAL_TYPE (Nfa, nfa, ACCEPTORS, NFA, Fsm)
 
 G_END_DECLS
 

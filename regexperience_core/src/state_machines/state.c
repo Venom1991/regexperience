@@ -112,7 +112,7 @@ state_is_dead (State *self)
         {
           Transition *transition = g_ptr_array_index (transitions, 0);
 
-          if (STATE_MACHINES_IS_DETERMINISTIC_TRANSITION (transition))
+          if (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (transition))
             {
               EqualityConditionType condition_type = EQUALITY_CONDITION_TYPE_UNDEFINED;
               g_autoptr (State) output_state = NULL;

@@ -1,5 +1,10 @@
 #include "internal/syntactic_analysis/lexer.h"
 #include "internal/syntactic_analysis/lexeme.h"
+#include "internal/state_machines/transducers/transducer_runnable.h"
+#include "internal/state_machines/transducers/mealy.h"
+#include "internal/state_machines/fsm_initializable.h"
+#include "internal/state_machines/transitions/transition_factory.h"
+#include "internal/common/helpers.h"
 #include "internal/common/macros.h"
 #include "core/errors.h"
 
@@ -8,7 +13,19 @@ struct _Lexer
     GObject parent_instance;
 };
 
-G_DEFINE_TYPE (Lexer, lexer, G_TYPE_OBJECT)
+typedef struct
+{
+    TransducerRunnable *transducer;
+} LexerPrivate;
+
+typedef struct
+{
+    gchar          character;
+    State         *next_state;
+    TokenCategory  token_category;
+} TransducerMapping;
+
+G_DEFINE_TYPE_WITH_PRIVATE (Lexer, lexer, G_TYPE_OBJECT)
 
 typedef enum _LexingContext
 {
@@ -20,28 +37,35 @@ typedef enum _LexingContext
 G_DEFINE_QUARK (syntactic-analysis-lexer-error-quark, syntactic_analysis_lexer_error)
 #define SYNTACTIC_ANALYSIS_LEXER_ERROR (syntactic_analysis_lexer_error_quark())
 
-static Token *lexer_create_token (Token *previous_token,
-                                  gchar *content,
-                                  guint *character_position);
+static Token *lexer_create_token (TokenCategory  category,
+                                  gchar         *content,
+                                  guint         *character_position);
 
-static TokenCategory lexer_determine_token_category_type (TokenCategory  previous_token_category,
-                                                          GString       *lexeme_content);
+static FsmInitializable *lexer_create_transducer (void);
 
-static Token *lexer_fetch_previous_token (GPtrArray *tokens);
+static GPtrArray *lexer_create_transitions_from (TransducerMapping *mappings,
+                                                 gsize              mappings_size);
 
 static void lexer_report_error_if_needed (const gchar  *regular_expression,
                                           GError      **error);
 
+static void lexer_dispose (GObject *object);
+
 static void
 lexer_class_init (LexerClass *klass)
 {
-  /* NOP */
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->dispose = lexer_dispose;
 }
 
 static void
 lexer_init (Lexer *self)
 {
-  /* NOP */
+  LexerPrivate *priv = lexer_get_instance_private (self);
+  FsmInitializable *mealy = lexer_create_transducer ();
+
+  priv->transducer = TRANSDUCERS_TRANSDUCER_RUNNABLE (mealy);
 }
 
 GPtrArray *
@@ -52,13 +76,23 @@ lexer_tokenize (Lexer        *self,
   g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_LEXER (self), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
+  LexerPrivate *priv = lexer_get_instance_private (self);
+
+  TransducerRunnable *transducer = priv->transducer;
   GPtrArray *tokens = g_ptr_array_new_with_free_func (g_object_unref);
   guint character_position = 1;
+  GError *temporary_error = NULL;
 
-  lexer_report_error_if_needed (regular_expression, error);
+  lexer_report_error_if_needed (regular_expression, &temporary_error);
 
-  if (*error != NULL)
-    return NULL;
+  if (temporary_error != NULL)
+    {
+      g_propagate_error (error, temporary_error);
+
+      return NULL;
+    }
+
+  transducer_runnable_reset (transducer);
 
   while (TRUE)
     {
@@ -67,9 +101,10 @@ lexer_tokenize (Lexer        *self,
       if (current_character == '\0')
         break;
 
+      TokenCategory category = (TokenCategory) GPOINTER_TO_INT (transducer_runnable_run (transducer,
+                                                                                         current_character));
       g_autofree gchar *content = g_strdup_printf ("%c", current_character);
-      Token *previous_token = lexer_fetch_previous_token (tokens);
-      Token *current_token = lexer_create_token (previous_token,
+      Token *current_token = lexer_create_token (category,
                                                  content,
                                                  &character_position);
 
@@ -77,7 +112,7 @@ lexer_tokenize (Lexer        *self,
     }
 
   /* Appending the end of input marker. */
-  Token *end_of_input_marker = lexer_create_token (NULL,
+  Token *end_of_input_marker = lexer_create_token (TOKEN_CATEGORY_END_OF_INPUT_MARKER,
                                                    EOI,
                                                    &character_position);
 
@@ -87,23 +122,13 @@ lexer_tokenize (Lexer        *self,
 }
 
 static Token*
-lexer_create_token (Token *previous_token,
-                    gchar *content,
-                    guint *character_position)
+lexer_create_token (TokenCategory  category,
+                    gchar         *content,
+                    guint         *character_position)
 {
   g_autoptr (Lexeme) lexeme = NULL;
   g_autoptr (GString) lexeme_content = g_string_new (content);
   gsize lexeme_content_length = lexeme_content->len;
-  TokenCategory current_token_category = TOKEN_CATEGORY_UNDEFINED;
-  TokenCategory previous_token_category = TOKEN_CATEGORY_UNDEFINED;
-
-  if (previous_token != NULL)
-    g_object_get (previous_token,
-                  PROP_TOKEN_CATEGORY, &previous_token_category,
-                  NULL);
-
-  current_token_category = lexer_determine_token_category_type (previous_token_category,
-                                                                lexeme_content);
 
   lexeme = lexeme_new (PROP_LEXEME_CONTENT, lexeme_content,
                        PROP_LEXEME_START_POSITION, *character_position,
@@ -111,96 +136,110 @@ lexer_create_token (Token *previous_token,
 
   *character_position += lexeme_content_length;
 
-  return token_new (PROP_TOKEN_CATEGORY, current_token_category,
+  return token_new (PROP_TOKEN_CATEGORY, category,
                     PROP_TOKEN_LEXEME, lexeme);
 }
 
-static TokenCategory
-lexer_determine_token_category_type (TokenCategory  previous_token_category,
-                                     GString       *lexeme_content)
+static FsmInitializable *
+lexer_create_transducer (void)
 {
-  gchar *content_string = lexeme_content->str;
-  static LexingContext context = LEXING_CONTEXT_UNDEFINED;
+  g_autoptr (GPtrArray) all_states = g_ptr_array_new_with_free_func (g_object_unref);
+  State *regular_character = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_START);
+  State *regular_escape = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
+  State *bracket_expression_character = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
+  State *bracket_expression_escape = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
 
-  if (context == LEXING_CONTEXT_UNDEFINED &&
-      previous_token_category == TOKEN_CATEGORY_UNDEFINED)
-    {
-      if (g_strcmp0 (content_string, "[") == 0)
-          context = LEXING_CONTEXT_SET_TOKENS;
-      else
-          context = LEXING_CONTEXT_COMMON_TOKENS;
-    }
+  TransducerMapping regular_metacharacter_mappings[] =
+  {
+    { '[',  bracket_expression_character, TOKEN_CATEGORY_OPEN_BRACKET,                         },
+    { '(',  regular_character,            TOKEN_CATEGORY_OPEN_PARENTHESIS                      },
+    { ')',  regular_character,            TOKEN_CATEGORY_CLOSE_PARENTHESIS                     },
+    { '*',  regular_character,            TOKEN_CATEGORY_STAR_QUANTIFICATION_OPERATOR          },
+    { '+',  regular_character,            TOKEN_CATEGORY_PLUS_QUANTIFICATION_OPERATOR          },
+    { '?',  regular_character,            TOKEN_CATEGORY_QUESTION_MARK_QUANTIFICATION_OPERATOR },
+    { '|',  regular_character,            TOKEN_CATEGORY_ALTERNATION_OPERATOR                  },
+    { '\\', regular_escape,               TOKEN_CATEGORY_METACHARACTER_ESCAPE                  },
+    { 0,    regular_character,            TOKEN_CATEGORY_ORDINARY_CHARACTER                    }
+  };
+  g_autoptr (GPtrArray) regular_transitions =
+      lexer_create_transitions_from (regular_metacharacter_mappings,
+                                     G_N_ELEMENTS (regular_metacharacter_mappings));
 
-  if (previous_token_category != TOKEN_CATEGORY_METACHARACTER_ESCAPE)
-    {
-      if (g_strcmp0 (content_string, "\\") == 0)
-        return TOKEN_CATEGORY_METACHARACTER_ESCAPE;
+  TransducerMapping regular_escape_mappings[] =
+  {
+    { 0, regular_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
+  };
+  g_autoptr (GPtrArray) regular_escape_transitions =
+      lexer_create_transitions_from (regular_escape_mappings,
+                                     G_N_ELEMENTS (regular_escape_mappings));
 
-      if (context == LEXING_CONTEXT_COMMON_TOKENS)
-        {
-          if (g_strcmp0 (content_string, "[") == 0)
-            {
-              context = LEXING_CONTEXT_SET_TOKENS;
+  TransducerMapping bracket_expression_mappings[] =
+  {
+    { '-',  bracket_expression_character, TOKEN_CATEGORY_RANGE_OPERATOR       },
+    { ']',  regular_character,            TOKEN_CATEGORY_CLOSE_BRACKET        },
+    { '\\', bracket_expression_escape,    TOKEN_CATEGORY_METACHARACTER_ESCAPE },
+    { 0,    bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER   }
+  };
+  g_autoptr (GPtrArray) bracket_expression_transitions =
+      lexer_create_transitions_from (bracket_expression_mappings,
+                                     G_N_ELEMENTS (bracket_expression_mappings));
 
-              return TOKEN_CATEGORY_OPEN_BRACKET;
-            }
+  TransducerMapping bracket_expression_escape_mappings[] =
+  {
+    { 0, bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
+  };
+  g_autoptr (GPtrArray) bracket_expression_escape_transitions =
+      lexer_create_transitions_from (bracket_expression_escape_mappings,
+                                     G_N_ELEMENTS (bracket_expression_escape_mappings));
 
-          if (g_strcmp0 (content_string, "(") == 0)
-            return TOKEN_CATEGORY_OPEN_PARENTHESIS;
+  g_object_set (regular_character,
+                PROP_STATE_TRANSITIONS, regular_transitions,
+                NULL);
+  g_object_set (regular_escape,
+                PROP_STATE_TRANSITIONS, regular_escape_transitions,
+                NULL);
+  g_object_set (bracket_expression_character,
+                PROP_STATE_TRANSITIONS, bracket_expression_transitions,
+                NULL);
+  g_object_set (bracket_expression_escape,
+                PROP_STATE_TRANSITIONS, bracket_expression_escape_transitions,
+                NULL);
 
-          if (g_strcmp0 (content_string, ")") == 0)
-            return TOKEN_CATEGORY_CLOSE_PARENTHESIS;
+  g_ptr_array_add_multiple (all_states,
+                            regular_character,
+                            regular_escape,
+                            bracket_expression_character,
+                            bracket_expression_escape,
+                            NULL);
 
-          if (g_strcmp0 (content_string, "*") == 0)
-            return TOKEN_CATEGORY_STAR_QUANTIFICATION_OPERATOR;
-
-          if (g_strcmp0 (content_string, "+") == 0)
-            return TOKEN_CATEGORY_PLUS_QUANTIFICATION_OPERATOR;
-
-          if (g_strcmp0 (content_string, "?") == 0)
-            return TOKEN_CATEGORY_QUESTION_MARK_QUANTIFICATION_OPERATOR;
-
-          if (g_strcmp0 (content_string, "|") == 0)
-            return TOKEN_CATEGORY_ALTERNATION_OPERATOR;
-        }
-
-      if (context == LEXING_CONTEXT_SET_TOKENS)
-        {
-          if (g_strcmp0 (content_string, "[") == 0)
-            return TOKEN_CATEGORY_OPEN_BRACKET;
-
-          if (g_strcmp0 (content_string, "^") == 0)
-            return TOKEN_CATEGORY_BRACKET_EXPRESSION_NEGATION_OPERATOR;
-
-          if (g_strcmp0 (content_string, "-") == 0)
-            return TOKEN_CATEGORY_RANGE_OPERATOR;
-
-          if (g_strcmp0 (content_string, "]") == 0)
-            {
-              context = LEXING_CONTEXT_COMMON_TOKENS;
-
-              return TOKEN_CATEGORY_CLOSE_BRACKET;
-            }
-        }
-    }
-
-  if (g_strcmp0 (content_string, EOI) == 0)
-    return TOKEN_CATEGORY_END_OF_INPUT_MARKER;
-
-  return TOKEN_CATEGORY_ORDINARY_CHARACTER;
+  return mealy_new (PROP_FSM_INITIALIZABLE_ALL_STATES, all_states);
 }
 
-static Token *
-lexer_fetch_previous_token (GPtrArray *tokens)
+static GPtrArray *
+lexer_create_transitions_from (TransducerMapping *mappings,
+                               gsize              mappings_size)
 {
-  guint tokens_length = tokens->len;
+  GPtrArray *transitions = g_ptr_array_new_with_free_func (g_object_unref);
+  const gchar uninitialized_character = 0;
 
-  if (tokens_length > 0)
+  for (guint i = 0; i < mappings_size; ++i)
     {
-      return g_ptr_array_index (tokens, tokens_length - 1);
+      TransducerMapping mapping = mappings[i];
+      Transition *transition = NULL;
+
+      if (mapping.character != uninitialized_character)
+        transition = create_mealy_transition (mapping.character,
+                                              mapping.next_state,
+                                              GINT_TO_POINTER (mapping.token_category));
+      else
+        transition = create_mealy_unconditional_transition (mapping.next_state,
+                                                            GINT_TO_POINTER (mapping.token_category));
+
+
+      g_ptr_array_add (transitions, transition);
     }
 
-  return NULL;
+  return transitions;
 }
 
 static void
@@ -233,4 +272,14 @@ lexer_report_error_if_needed (const gchar  *regular_expression,
                    error_code,
                    error_message);
     }
+}
+
+static void lexer_dispose (GObject *object)
+{
+  LexerPrivate *priv = lexer_get_instance_private (SYNTACTIC_ANALYSIS_LEXER (object));
+
+  if (priv->transducer != NULL)
+    g_clear_object (&priv->transducer);
+
+  G_OBJECT_CLASS (lexer_parent_class)->dispose (object);
 }

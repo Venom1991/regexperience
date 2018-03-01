@@ -5,9 +5,9 @@
 
 G_BEGIN_DECLS
 
-#define STATE_MACHINES_TYPE_TRANSITION (transition_get_type())
+#define TRANSITIONS_TYPE_TRANSITION (transition_get_type())
 
-G_DECLARE_DERIVABLE_TYPE (Transition, transition, STATE_MACHINES, TRANSITION, GObject)
+G_DECLARE_DERIVABLE_TYPE (Transition, transition, TRANSITIONS, TRANSITION, GObject)
 
 struct _TransitionClass
 {

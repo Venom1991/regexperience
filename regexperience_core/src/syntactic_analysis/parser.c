@@ -1,11 +1,16 @@
 #include "internal/syntactic_analysis/parser.h"
 #include "internal/syntactic_analysis/derivation_item.h"
 #include "internal/syntactic_analysis/lexeme.h"
-#include "internal/syntactic_analysis/grammar/rule.h"
-#include "internal/syntactic_analysis/grammar/symbols/terminal.h"
-#include "internal/syntactic_analysis/grammar/symbols/non_terminal.h"
+#include "internal/syntactic_analysis/rule.h"
+#include "internal/syntactic_analysis/symbols/terminal.h"
+#include "internal/syntactic_analysis/symbols/non_terminal.h"
 #include "internal/common/helpers.h"
 #include "core/errors.h"
+
+struct _Parser
+{
+    GObject parent_instance;
+};
 
 typedef struct
 {
@@ -13,11 +18,6 @@ typedef struct
     GPtrArray  *prediction_queues;
     Grammar    *grammar;
 } ParserPrivate;
-
-struct _Parser
-{
-    GObject parent_instance;
-};
 
 G_DEFINE_TYPE_WITH_PRIVATE (Parser, parser, G_TYPE_OBJECT)
 
@@ -119,6 +119,7 @@ parser_build_concrete_syntax_tree (Parser     *self,
   GPtrArray *prediction_queues = priv->prediction_queues;
   GNode *concrete_syntax_tree = NULL;
   guint token_position = 0;
+  GError *temporary_error = NULL;
 
   /* Breadth-first top-down parsing. */
   while (TRUE)
@@ -157,10 +158,14 @@ parser_build_concrete_syntax_tree (Parser     *self,
                                      token_position,
                                      tokens,
                                      prediction_queues->len,
-                                     error);
+                                     &temporary_error);
 
-      if (*error != NULL)
-        break;
+      if (temporary_error != NULL)
+        {
+          g_propagate_error (error, temporary_error);
+
+          return NULL;
+        }
 
       /* Removing terminals from all the current prediction queues' heads
        * so as to enable further predictions.
@@ -187,13 +192,13 @@ parser_prepare_for_parsing (Parser *self)
   g_ptr_array_set_size (prediction_queues, 0);
 
   g_autoptr (GHashTable) productions = NULL;
-  const gchar *start_production_key = "start";
+  const gchar *start_production_caption = START;
 
   g_object_get (grammar,
                 PROP_GRAMMAR_PRODUCTIONS, &productions,
                 NULL);
 
-  Production *start = g_hash_table_lookup (productions, start_production_key);
+  Production *start = g_hash_table_lookup (productions, start_production_caption);
 
   /* Initializing the analysis and prediction queues using the start production. */
   parser_fill_queues (analysis_queues,
@@ -312,7 +317,7 @@ parser_predict (GPtrArray  *analysis_queues,
       GQueue *prediction_queue = g_ptr_array_index (prediction_queues, index_for_expansion);
       Symbol *prediction_head = g_queue_pop_head (prediction_queue);
 
-      g_assert (SYNTACTIC_ANALYSIS_IS_NON_TERMINAL (prediction_head));
+      g_assert (SYMBOLS_IS_NON_TERMINAL (prediction_head));
 
       g_array_append_val (analyses_for_removal, analysis_queue);
       g_array_append_val (predictions_for_removal, prediction_queue);
@@ -364,7 +369,7 @@ parser_can_make_prediction (GPtrArray  *prediction_queues,
       GQueue *prediction_queue = g_ptr_array_index (prediction_queues, i);
       Symbol *prediction_head = g_queue_peek_head (prediction_queue);
 
-      if (SYNTACTIC_ANALYSIS_IS_NON_TERMINAL (prediction_head))
+      if (SYMBOLS_IS_NON_TERMINAL (prediction_head))
         {
           if (local_indexes_for_expansion == NULL)
               local_indexes_for_expansion = g_array_new (FALSE, FALSE, sizeof (guint));
@@ -404,7 +409,7 @@ parser_discard (GPtrArray *analysis_queues,
       GQueue *prediction_queue = g_ptr_array_index (prediction_queues, i);
       Symbol *prediction_head = g_queue_peek_head (prediction_queue);
 
-      g_assert (SYNTACTIC_ANALYSIS_IS_TERMINAL (prediction_head));
+      g_assert (SYMBOLS_IS_TERMINAL (prediction_head));
 
       if (!symbol_is_match (prediction_head, lexeme_content->str))
         {
@@ -444,7 +449,7 @@ parser_can_accept (GPtrArray *analysis_queues,
           GQueue *remaining_prediction_queue = g_ptr_array_index (prediction_queues, 0);
           Symbol *prediction_head = g_queue_peek_head (remaining_prediction_queue);
 
-          if (SYNTACTIC_ANALYSIS_IS_TERMINAL (prediction_head))
+          if (SYMBOLS_IS_TERMINAL (prediction_head))
             {
               g_autoptr (Lexeme) lexeme = NULL;
               g_autoptr (GString) lexeme_content = NULL;
@@ -484,7 +489,7 @@ parser_match (GPtrArray *analysis_queues,
       GQueue *prediction_queue = g_ptr_array_index (prediction_queues, i);
       Symbol *prediction_head = g_queue_pop_head (prediction_queue);
 
-      g_assert (SYNTACTIC_ANALYSIS_IS_TERMINAL (prediction_head));
+      g_assert (SYMBOLS_IS_TERMINAL (prediction_head));
 
       g_queue_push_tail (analysis_queue, g_object_ref (token));
     }
@@ -541,7 +546,7 @@ parser_insert_children (GNode  *root,
        * as these objects are more useful in the succeeding stages
        * of processing.
        */
-      if (SYNTACTIC_ANALYSIS_IS_TERMINAL (symbol))
+      if (SYMBOLS_IS_TERMINAL (symbol))
         {
           Token *token = g_queue_pop_tail (remaining_analysis_queue);
 
@@ -550,7 +555,7 @@ parser_insert_children (GNode  *root,
           g_node_insert (root, i, child);
         }
       /* Non-terminals need to be transformed further, recursively. */
-      else if (SYNTACTIC_ANALYSIS_IS_NON_TERMINAL (symbol))
+      else if (SYMBOLS_IS_NON_TERMINAL (symbol))
         {
           child = g_node_new (g_object_ref (symbol));
 

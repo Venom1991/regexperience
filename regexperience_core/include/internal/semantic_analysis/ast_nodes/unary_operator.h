@@ -7,9 +7,9 @@
 
 G_BEGIN_DECLS
 
-#define SEMANTIC_ANALYSIS_TYPE_UNARY_OPERATOR (unary_operator_get_type ())
+#define AST_NODES_TYPE_UNARY_OPERATOR (unary_operator_get_type ())
 
-G_DECLARE_DERIVABLE_TYPE (UnaryOperator, unary_operator, SEMANTIC_ANALYSIS, UNARY_OPERATOR, AstNode)
+G_DECLARE_DERIVABLE_TYPE (UnaryOperator, unary_operator, AST_NODES, UNARY_OPERATOR, AstNode)
 
 struct _UnaryOperatorClass
 {

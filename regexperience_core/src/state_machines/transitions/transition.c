@@ -82,7 +82,7 @@ gboolean
 transition_is_possible (Transition *self,
                         gchar       input_character)
 {
-  g_return_val_if_fail (STATE_MACHINES_IS_TRANSITION (self), FALSE);
+  g_return_val_if_fail (TRANSITIONS_IS_TRANSITION (self), FALSE);
 
   if (transition_is_epsilon (self))
     return FALSE;
@@ -101,7 +101,7 @@ transition_is_possible (Transition *self,
 gboolean
 transition_is_epsilon (Transition *self)
 {
-  g_return_val_if_fail (STATE_MACHINES_IS_TRANSITION (self), FALSE);
+  g_return_val_if_fail (TRANSITIONS_IS_TRANSITION (self), FALSE);
 
   TransitionPrivate *priv = transition_get_instance_private (self);
 
@@ -135,7 +135,7 @@ transition_get_property (GObject    *object,
                          GValue     *value,
                          GParamSpec *pspec)
 {
-  TransitionPrivate *priv = transition_get_instance_private (STATE_MACHINES_TRANSITION (object));
+  TransitionPrivate *priv = transition_get_instance_private (TRANSITIONS_TRANSITION (object));
 
   switch (property_id)
     {
@@ -163,7 +163,7 @@ transition_set_property (GObject      *object,
                          const GValue *value,
                          GParamSpec   *pspec)
 {
-  TransitionPrivate *priv = transition_get_instance_private (STATE_MACHINES_TRANSITION (object));
+  TransitionPrivate *priv = transition_get_instance_private (TRANSITIONS_TRANSITION (object));
 
   switch (property_id)
     {

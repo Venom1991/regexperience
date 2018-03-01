@@ -3,8 +3,8 @@
 
 #include <glib-object.h>
 
-#include "internal/syntactic_analysis/grammar/grammar.h"
-#include "internal/syntactic_analysis/grammar/production.h"
+#include "grammar.h"
+#include "production.h"
 #include "internal/syntactic_analysis/token.h"
 
 G_BEGIN_DECLS

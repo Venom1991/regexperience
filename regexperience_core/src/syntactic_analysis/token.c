@@ -1,16 +1,16 @@
 #include "internal/syntactic_analysis/token.h"
 #include "internal/syntactic_analysis/lexeme.h"
 
+struct _Token
+{
+    GObject parent_instance;
+};
+
 typedef struct
 {
     TokenCategory category;
     Lexeme *lexeme;
 } TokenPrivate;
-
-struct _Token
-{
-    GObject parent_instance;
-};
 
 G_DEFINE_TYPE_WITH_PRIVATE (Token, token, G_TYPE_OBJECT)
 

@@ -8,7 +8,7 @@ static gboolean ast_node_default_is_valid (AstNode  *self,
 static void
 ast_node_class_init (AstNodeClass *klass)
 {
-  klass->build_state_machine = NULL;
+  klass->build_fsm = NULL;
   klass->is_valid = ast_node_default_is_valid;
 }
 
@@ -25,18 +25,18 @@ ast_node_default_is_valid (AstNode  *self,
   return TRUE;
 }
 
-StateMachineConvertible *
-ast_node_build_state_machine (AstNode *self)
+FsmConvertible *
+ast_node_build_fsm (AstNode *self)
 {
   AstNodeClass *klass;
 
-  g_return_val_if_fail (SEMANTIC_ANALYSIS_IS_AST_NODE (self), NULL);
+  g_return_val_if_fail (AST_NODES_IS_AST_NODE (self), NULL);
 
-  klass = SEMANTIC_ANALYSIS_AST_NODE_GET_CLASS (self);
+  klass = AST_NODES_AST_NODE_GET_CLASS (self);
 
-  g_return_val_if_fail (klass->build_state_machine != NULL, NULL);
+  g_return_val_if_fail (klass->build_fsm != NULL, NULL);
 
-  return klass->build_state_machine (self);
+  return klass->build_fsm (self);
 }
 
 gboolean
@@ -45,9 +45,9 @@ ast_node_is_valid (AstNode  *self,
 {
   AstNodeClass *klass;
 
-  g_return_val_if_fail (SEMANTIC_ANALYSIS_IS_AST_NODE (self), FALSE);
+  g_return_val_if_fail (AST_NODES_IS_AST_NODE (self), FALSE);
 
-  klass = SEMANTIC_ANALYSIS_AST_NODE_GET_CLASS (self);
+  klass = AST_NODES_AST_NODE_GET_CLASS (self);
 
   g_assert (klass->is_valid != NULL);
 

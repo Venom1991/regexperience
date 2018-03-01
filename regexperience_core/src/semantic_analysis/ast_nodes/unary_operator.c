@@ -5,7 +5,7 @@ typedef struct
     AstNode *operand;
 } UnaryOperatorPrivate;
 
-G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (UnaryOperator, unary_operator, SEMANTIC_ANALYSIS_TYPE_AST_NODE)
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (UnaryOperator, unary_operator, AST_NODES_TYPE_AST_NODE)
 
 enum
 {
@@ -33,7 +33,7 @@ static void unary_operator_dispose (GObject *object);
 static void
 unary_operator_class_init (UnaryOperatorClass *klass)
 {
-  AstNodeClass *ast_node_class = SEMANTIC_ANALYSIS_AST_NODE_CLASS (klass);
+  AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   ast_node_class->is_valid = unary_operator_is_valid;
@@ -46,7 +46,7 @@ unary_operator_class_init (UnaryOperatorClass *klass)
       g_param_spec_object (PROP_UNARY_OPERATOR_OPERAND,
                            "Operand",
                            "Sole operand of the operation.",
-                           SEMANTIC_ANALYSIS_TYPE_AST_NODE,
+                           AST_NODES_TYPE_AST_NODE,
                            G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
@@ -64,9 +64,9 @@ static
 gboolean unary_operator_is_valid (AstNode  *self,
                                   GError  **error)
 {
-  g_return_val_if_fail (SEMANTIC_ANALYSIS_IS_UNARY_OPERATOR (self), FALSE);
+  g_return_val_if_fail (AST_NODES_IS_UNARY_OPERATOR (self), FALSE);
 
-  UnaryOperatorPrivate *priv = unary_operator_get_instance_private (SEMANTIC_ANALYSIS_UNARY_OPERATOR (self));
+  UnaryOperatorPrivate *priv = unary_operator_get_instance_private (AST_NODES_UNARY_OPERATOR (self));
 
   AstNode *operand = priv->operand;
 
@@ -79,7 +79,7 @@ unary_operator_get_property (GObject    *object,
                              GValue     *value,
                              GParamSpec *pspec)
 {
-  UnaryOperatorPrivate *priv = unary_operator_get_instance_private (SEMANTIC_ANALYSIS_UNARY_OPERATOR (object));
+  UnaryOperatorPrivate *priv = unary_operator_get_instance_private (AST_NODES_UNARY_OPERATOR (object));
 
   switch (property_id)
     {
@@ -99,7 +99,7 @@ unary_operator_set_property (GObject      *object,
                              const GValue *value,
                              GParamSpec   *pspec)
 {
-  UnaryOperatorPrivate *priv = unary_operator_get_instance_private (SEMANTIC_ANALYSIS_UNARY_OPERATOR (object));
+  UnaryOperatorPrivate *priv = unary_operator_get_instance_private (AST_NODES_UNARY_OPERATOR (object));
 
   switch (property_id)
     {
@@ -119,7 +119,7 @@ unary_operator_set_property (GObject      *object,
 static void
 unary_operator_dispose (GObject *object)
 {
-  UnaryOperatorPrivate *priv = unary_operator_get_instance_private (SEMANTIC_ANALYSIS_UNARY_OPERATOR (object));
+  UnaryOperatorPrivate *priv = unary_operator_get_instance_private (AST_NODES_UNARY_OPERATOR (object));
 
   if (priv->operand != NULL)
     g_clear_object (&priv->operand);

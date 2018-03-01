@@ -5,9 +5,9 @@
 
 G_BEGIN_DECLS
 
-#define SYNTACTIC_ANALYSIS_TYPE_SYMBOL (symbol_get_type ())
+#define SYMBOLS_TYPE_SYMBOL (symbol_get_type ())
 
-G_DECLARE_DERIVABLE_TYPE (Symbol, symbol, SYNTACTIC_ANALYSIS, SYMBOL, GObject)
+G_DECLARE_DERIVABLE_TYPE (Symbol, symbol, SYMBOLS, SYMBOL, GObject)
 
 struct _SymbolClass
 {

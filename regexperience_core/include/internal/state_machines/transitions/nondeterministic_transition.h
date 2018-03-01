@@ -7,12 +7,12 @@
 
 G_BEGIN_DECLS
 
-#define STATE_MACHINES_TYPE_NONDETERMINISTIC_TRANSITION (nondeterministic_transition_get_type ())
-#define nondeterministic_transition_new(...) (g_object_new (STATE_MACHINES_TYPE_NONDETERMINISTIC_TRANSITION, ##__VA_ARGS__, NULL))
+#define TRANSITIONS_TYPE_NONDETERMINISTIC_TRANSITION (nondeterministic_transition_get_type ())
+#define nondeterministic_transition_new(...) (g_object_new (TRANSITIONS_TYPE_NONDETERMINISTIC_TRANSITION, ##__VA_ARGS__, NULL))
 
 G_DECLARE_FINAL_TYPE (NondeterministicTransition,
                       nondeterministic_transition,
-                      STATE_MACHINES,
+                      TRANSITIONS,
                       NONDETERMINISTIC_TRANSITION,
                       Transition)
 

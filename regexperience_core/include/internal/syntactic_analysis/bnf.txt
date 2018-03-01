@@ -15,15 +15,16 @@
 <plus-quantifier>                  ::= <elementary-expression> "+"
 <question-mark-quantifier>         ::= <elementary-expression> "?"
 <elementary-expression>            ::= <group>
+                                   ::= <bracket-expression>
                                     |  <upper-case-letter>
                                     |  <lower-case-letter>
                                     |  <digit>
                                     |  <special-character>
                                     |  <bracket-expression-metacharacter>
-                                    |  "[" <bracket-expression> "]"
                                     |  "\" <regular-metacharacter>
                                     |  "\" <metacharacter-escape>
 <group>                            ::= "(" <expression> ")"
+<bracket-expression>               ::= "[" <bracket-expression-items> "]"
 <upper-case-letter>                ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M"
                                     |  "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 <lower-case-letter>                ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m"
@@ -34,7 +35,6 @@
 <regular-metacharacter>            ::= "[" | "(" | ")" | "*" | "+" | "?" | "|"
 <bracket-expression-metacharacter> ::= "-" | "]"
 <metacharacter-escape>             ::= "\"
-<bracket-expression>               ::= <bracket-expression-items>
 <bracket-expression-items>         ::= <bracket-expression-item>
                                     |  <bracket-expression-item> <bracket-expression-items>
 <bracket-expression-item>          ::= <range>

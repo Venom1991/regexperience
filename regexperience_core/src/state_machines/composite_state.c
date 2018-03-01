@@ -1,16 +1,16 @@
 #include "internal/state_machines/composite_state.h"
 #include "internal/common/helpers.h"
 
+struct _CompositeState
+{
+    State parent_instance;
+};
+
 typedef struct
 {
     GPtrArray                          *composed_from_states;
     CompositeStateResolveTypeFlagsMode  resolve_type_flags_mode;
 } CompositeStatePrivate;
-
-struct _CompositeState
-{
-    State parent_instance;
-};
 
 G_DEFINE_TYPE_WITH_PRIVATE (CompositeState, composite_state, STATE_MACHINES_TYPE_STATE)
 

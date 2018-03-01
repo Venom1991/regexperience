@@ -1,5 +1,5 @@
-#include "internal/state_machines/acceptors/acceptor.h"
-#include "internal/state_machines/state_machine_initializable.h"
+#include "internal/state_machines/fsm.h"
+#include "internal/state_machines/fsm_initializable.h"
 #include "internal/state_machines/transitions/deterministic_transition.h"
 #include "internal/state_machines/transitions/nondeterministic_transition.h"
 #include "internal/state_machines/state_factory.h"
@@ -12,14 +12,14 @@ typedef struct
     GPtrArray *final_states;
     GPtrArray *non_final_states;
     GSList    *alphabet;
-} AcceptorPrivate;
+} FsmPrivate;
 
-static void acceptor_state_machine_initializable_interface_init (StateMachineInitializableInterface *iface);
+static void fsm_fsm_initializable_interface_init (FsmInitializableInterface *iface);
 
-G_DEFINE_ABSTRACT_TYPE_WITH_CODE (Acceptor, acceptor, G_TYPE_OBJECT,
-                                  G_ADD_PRIVATE (Acceptor)
-                                  G_IMPLEMENT_INTERFACE (STATE_MACHINES_TYPE_INITIALIZABLE,
-                                                         acceptor_state_machine_initializable_interface_init))
+G_DEFINE_ABSTRACT_TYPE_WITH_CODE (Fsm, fsm, G_TYPE_OBJECT,
+                                  G_ADD_PRIVATE (Fsm)
+                                  G_IMPLEMENT_INTERFACE (STATE_MACHINES_TYPE_FSM_INITIALIZABLE,
+                                                         fsm_fsm_initializable_interface_init))
 
 enum
 {
@@ -31,69 +31,69 @@ enum
     N_PROPERTIES
 };
 
-static void acceptor_prepare_states (AcceptorPrivate *priv);
+static void fsm_prepare_states (FsmPrivate *priv);
 
-static void acceptor_prepare_alphabet (AcceptorPrivate *priv);
+static void fsm_prepare_alphabet (FsmPrivate *priv);
 
-static void acceptor_get_property (GObject    *object,
-                                   guint       property_id,
-                                   GValue     *value,
-                                   GParamSpec *pspec);
+static void fsm_get_property (GObject    *object,
+                              guint       property_id,
+                              GValue     *value,
+                              GParamSpec *pspec);
 
-static void acceptor_set_property (GObject      *object,
-                                   guint         property_id,
-                                   const GValue *value,
-                                   GParamSpec   *pspec);
+static void fsm_set_property (GObject      *object,
+                              guint         property_id,
+                              const GValue *value,
+                              GParamSpec   *pspec);
 
-static void acceptor_dispose (GObject *object);
+static void fsm_dispose (GObject *object);
 
 static void
-acceptor_class_init (AcceptorClass *klass)
+fsm_class_init (FsmClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->get_property = acceptor_get_property;
-  object_class->set_property = acceptor_set_property;
-  object_class->dispose = acceptor_dispose;
+  object_class->get_property = fsm_get_property;
+  object_class->set_property = fsm_set_property;
+  object_class->dispose = fsm_dispose;
 
   g_object_class_override_property (object_class,
                                     PROP_ALL_STATES,
-                                    PROP_STATE_MACHINE_INITIALIZABLE_ALL_STATES);
+                                    PROP_FSM_INITIALIZABLE_ALL_STATES);
   g_object_class_override_property (object_class,
                                     PROP_START_STATE,
-                                    PROP_STATE_MACHINE_INITIALIZABLE_START_STATE);
+                                    PROP_FSM_INITIALIZABLE_START_STATE);
   g_object_class_override_property (object_class,
                                     PROP_FINAL_STATES,
-                                    PROP_STATE_MACHINE_INITIALIZABLE_FINAL_STATES);
+                                    PROP_FSM_INITIALIZABLE_FINAL_STATES);
   g_object_class_override_property (object_class,
                                     PROP_NON_FINAL_STATES,
-                                    PROP_STATE_MACHINE_INITIALIZABLE_NON_FINAL_STATES);
+                                    PROP_FSM_INITIALIZABLE_NON_FINAL_STATES);
   g_object_class_override_property (object_class,
                                     PROP_ALPHABET,
-                                    PROP_STATE_MACHINE_INITIALIZABLE_ALPHABET);
+                                    PROP_FSM_INITIALIZABLE_ALPHABET);
 }
 
 static void
-acceptor_init (Acceptor *self)
+fsm_init (Fsm *self)
 {
   /* NOP */
 }
 
 GPtrArray *
-acceptor_fetch_output_states_from_single (State *input_state,
-                                          gchar  expected_character)
+fsm_fetch_output_states_from_single (State *input_state,
+                                     gchar  expected_character)
 {
   g_autoptr (GPtrArray) input_states = g_ptr_array_new ();
 
   g_ptr_array_add (input_states, input_state);
 
-  return acceptor_fetch_output_states_from_multiple (input_states,
+  return fsm_fetch_output_states_from_multiple (input_states,
                                                      expected_character);
 }
 
 GPtrArray *
-acceptor_fetch_output_states_from_multiple (GPtrArray *input_states,
-                                            gchar      expected_character)
+fsm_fetch_output_states_from_multiple (GPtrArray *input_states,
+                                       gchar      expected_character)
 {
   GPtrArray *output_states = g_ptr_array_new ();
   GCompareFunc state_equal_func = g_direct_equal;
@@ -115,7 +115,7 @@ acceptor_fetch_output_states_from_multiple (GPtrArray *input_states,
 
               if (transition_is_possible (transition, expected_character))
                 {
-                  if (STATE_MACHINES_IS_DETERMINISTIC_TRANSITION (transition))
+                  if (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (transition))
                     {
                       g_autoptr (State) deterministic_transition_output_state = NULL;
 
@@ -127,7 +127,7 @@ acceptor_fetch_output_states_from_multiple (GPtrArray *input_states,
                                                      deterministic_transition_output_state,
                                                      state_equal_func);
                     }
-                  else if (STATE_MACHINES_IS_NONDETERMINISTIC_TRANSITION (transition))
+                  else if (TRANSITIONS_IS_NONDETERMINISTIC_TRANSITION (transition))
                     {
                       g_autoptr (GPtrArray) nondeterministic_transition_output_states = NULL;
 
@@ -148,10 +148,10 @@ acceptor_fetch_output_states_from_multiple (GPtrArray *input_states,
 }
 
 State *
-acceptor_get_or_create_composite_state (GPtrArray                          *all_states,
-                                        GPtrArray                          *composed_from_states,
-                                        CompositeStateResolveTypeFlagsMode  resolve_type_flags_mode,
-                                        gboolean                           *already_existed)
+fsm_get_or_create_composite_state (GPtrArray                          *all_states,
+                                   GPtrArray                          *composed_from_states,
+                                   CompositeStateResolveTypeFlagsMode  resolve_type_flags_mode,
+                                   gboolean                           *already_existed)
 {
   State *composite_state = NULL;
 
@@ -175,8 +175,8 @@ acceptor_get_or_create_composite_state (GPtrArray                          *all_
 
   if (composite_state == NULL)
     {
-      composite_state = create_composite_state_from (composed_from_states,
-                                                     resolve_type_flags_mode);
+      composite_state = create_composite_state (composed_from_states,
+                                                resolve_type_flags_mode);
 
       if (already_existed != NULL)
         *already_existed = FALSE;
@@ -188,7 +188,7 @@ acceptor_get_or_create_composite_state (GPtrArray                          *all_
 }
 
 State *
-acceptor_get_or_create_dead_state (GPtrArray *all_states)
+fsm_get_or_create_dead_state (GPtrArray *all_states)
 {
   State *dead_state = NULL;
 
@@ -217,15 +217,14 @@ acceptor_get_or_create_dead_state (GPtrArray *all_states)
   return dead_state;
 }
 
-
 static void
-acceptor_state_machine_initializable_interface_init (StateMachineInitializableInterface *iface)
+fsm_fsm_initializable_interface_init (FsmInitializableInterface *iface)
 {
   /* NOP */
 }
 
 static void
-acceptor_prepare_states (AcceptorPrivate *priv)
+fsm_prepare_states (FsmPrivate *priv)
 {
   if (priv->start_state != NULL)
     g_object_unref (priv->start_state);
@@ -278,7 +277,7 @@ acceptor_prepare_states (AcceptorPrivate *priv)
 }
 
 static void
-acceptor_prepare_alphabet (AcceptorPrivate *priv)
+fsm_prepare_alphabet (FsmPrivate *priv)
 {
   if (priv->alphabet != NULL)
     g_slist_free (priv->alphabet);
@@ -325,72 +324,72 @@ acceptor_prepare_alphabet (AcceptorPrivate *priv)
 }
 
 static void
-acceptor_get_property (GObject    *object,
-                       guint       property_id,
-                       GValue     *value,
-                       GParamSpec *pspec)
+fsm_get_property (GObject    *object,
+                  guint       property_id,
+                  GValue     *value,
+                  GParamSpec *pspec)
 {
-  AcceptorPrivate *priv = acceptor_get_instance_private (STATE_MACHINES_ACCEPTOR (object));
+  FsmPrivate *priv = fsm_get_instance_private (STATE_MACHINES_FSM (object));
 
   switch (property_id)
     {
-    case PROP_ALL_STATES:
-      g_value_set_boxed (value, priv->all_states);
+      case PROP_ALL_STATES:
+        g_value_set_boxed (value, priv->all_states);
       break;
 
-    case PROP_START_STATE:
-      g_value_set_object (value, priv->start_state);
+      case PROP_START_STATE:
+        g_value_set_object (value, priv->start_state);
       break;
 
-    case PROP_FINAL_STATES:
-      g_value_set_boxed (value, priv->final_states);
+      case PROP_FINAL_STATES:
+        g_value_set_boxed (value, priv->final_states);
       break;
 
-    case PROP_NON_FINAL_STATES:
-      g_value_set_boxed (value, priv->non_final_states);
+      case PROP_NON_FINAL_STATES:
+        g_value_set_boxed (value, priv->non_final_states);
       break;
 
-    case PROP_ALPHABET:
-      g_value_set_pointer (value, priv->alphabet);
+      case PROP_ALPHABET:
+        g_value_set_pointer (value, priv->alphabet);
       break;
 
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+      default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
     }
 }
 
 static void
-acceptor_set_property (GObject      *object,
-                       guint         property_id,
-                       const GValue *value,
-                       GParamSpec   *pspec)
+fsm_set_property (GObject      *object,
+                  guint         property_id,
+                  const GValue *value,
+                  GParamSpec   *pspec)
 {
-  AcceptorPrivate *priv = acceptor_get_instance_private (STATE_MACHINES_ACCEPTOR (object));
+  FsmPrivate *priv = fsm_get_instance_private (STATE_MACHINES_FSM (object));
 
   switch (property_id)
     {
-    case PROP_ALL_STATES:
-      if (priv->all_states != NULL)
-        g_ptr_array_unref (priv->all_states);
+      case PROP_ALL_STATES:
+        if (priv->all_states != NULL)
+          g_ptr_array_unref (priv->all_states);
 
       priv->all_states = g_value_dup_boxed (value);
 
-      acceptor_prepare_states (priv);
-      acceptor_prepare_alphabet (priv);
+      fsm_prepare_states (priv);
+      fsm_prepare_alphabet (priv);
 
       break;
 
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+      default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
     }
 }
 
 static void
-acceptor_dispose (GObject *object)
+fsm_dispose (GObject *object)
 {
-  AcceptorPrivate *priv = acceptor_get_instance_private (STATE_MACHINES_ACCEPTOR (object));
+  FsmPrivate *priv = fsm_get_instance_private (STATE_MACHINES_FSM (object));
 
   if (priv->all_states != NULL)
     g_clear_pointer (&priv->all_states, g_ptr_array_unref);
@@ -407,5 +406,5 @@ acceptor_dispose (GObject *object)
   if (priv->alphabet != NULL)
     g_clear_pointer (&priv->alphabet, g_slist_free);
 
-  G_OBJECT_CLASS (acceptor_parent_class)->dispose (object);
+  G_OBJECT_CLASS (fsm_parent_class)->dispose (object);
 }

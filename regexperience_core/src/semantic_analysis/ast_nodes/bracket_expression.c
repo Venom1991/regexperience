@@ -5,16 +5,16 @@ struct _BracketExpression
     UnaryOperator parent_instance;
 };
 
-G_DEFINE_TYPE (BracketExpression, bracket_expression, SEMANTIC_ANALYSIS_TYPE_UNARY_OPERATOR)
+G_DEFINE_TYPE (BracketExpression, bracket_expression, AST_NODES_TYPE_UNARY_OPERATOR)
 
-static StateMachineConvertible *bracket_expression_build_state_machine (AstNode *self);
+static FsmConvertible *bracket_expression_build_fsm (AstNode *self);
 
 static void
 bracket_expression_class_init (BracketExpressionClass *klass)
 {
-  AstNodeClass *ast_node_class = SEMANTIC_ANALYSIS_AST_NODE_CLASS (klass);
+  AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
 
-  ast_node_class->build_state_machine = bracket_expression_build_state_machine;
+  ast_node_class->build_fsm = bracket_expression_build_fsm;
 }
 
 static void
@@ -23,10 +23,10 @@ bracket_expression_init (BracketExpression *self)
   /* NOP */
 }
 
-static StateMachineConvertible *
-bracket_expression_build_state_machine (AstNode *self)
+static FsmConvertible *
+bracket_expression_build_fsm (AstNode *self)
 {
-  g_return_val_if_fail (SEMANTIC_ANALYSIS_IS_BRACKET_EXPRESSION (self), NULL);
+  g_return_val_if_fail (AST_NODES_IS_BRACKET_EXPRESSION (self), NULL);
 
   g_autoptr (AstNode) operand = NULL;
 
@@ -34,5 +34,5 @@ bracket_expression_build_state_machine (AstNode *self)
                 PROP_UNARY_OPERATOR_OPERAND, &operand,
                 NULL);
 
-  return ast_node_build_state_machine (operand);
+  return ast_node_build_fsm (operand);
 }

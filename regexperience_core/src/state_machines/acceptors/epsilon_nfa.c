@@ -1,7 +1,7 @@
 #include "internal/state_machines/acceptors/epsilon_nfa.h"
 #include "internal/state_machines/acceptors/nfa.h"
-#include "internal/state_machines/state_machine_initializable.h"
-#include "internal/state_machines/state_machine_convertible.h"
+#include "internal/state_machines/fsm_initializable.h"
+#include "internal/state_machines/fsm_convertible.h"
 #include "internal/state_machines/transitions/deterministic_transition.h"
 #include "internal/state_machines/transitions/nondeterministic_transition.h"
 #include "internal/state_machines/transitions/transition_factory.h"
@@ -10,14 +10,14 @@
 
 struct _EpsilonNfa
 {
-    Acceptor parent_instance;
+    Fsm parent_instance;
 };
 
-static void epsilon_nfa_state_machine_convertible_interface_init (StateMachineConvertibleInterface *iface);
+static void epsilon_nfa_fsm_convertible_interface_init (FsmConvertibleInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (EpsilonNfa, epsilon_nfa, STATE_MACHINES_TYPE_ACCEPTOR,
-                         G_IMPLEMENT_INTERFACE (STATE_MACHINES_TYPE_CONVERTIBLE,
-                                                epsilon_nfa_state_machine_convertible_interface_init))
+G_DEFINE_TYPE_WITH_CODE (EpsilonNfa, epsilon_nfa, STATE_MACHINES_TYPE_FSM,
+                         G_IMPLEMENT_INTERFACE (STATE_MACHINES_TYPE_FSM_CONVERTIBLE,
+                                                epsilon_nfa_fsm_convertible_interface_init))
 
 enum
 {
@@ -40,9 +40,9 @@ static void epsilon_nfa_get_property (GObject    *object,
                                       GValue     *value,
                                       GParamSpec *pspec);
 
-static StateMachineConvertible *epsilon_nfa_compute_epsilon_closures (StateMachineConvertible *self);
+static FsmConvertible *epsilon_nfa_compute_epsilon_closures (FsmConvertible *self);
 
-static StateMachineModifiable *epsilon_nfa_construct_subset (StateMachineConvertible *self);
+static FsmModifiable *epsilon_nfa_construct_subset (FsmConvertible *self);
 
 static gboolean epsilon_nfa_has_epsilon_transitions (GPtrArray *all_states);
 
@@ -85,7 +85,7 @@ epsilon_nfa_init (EpsilonNfa *self)
 }
 
 static void
-epsilon_nfa_state_machine_convertible_interface_init (StateMachineConvertibleInterface *iface)
+epsilon_nfa_fsm_convertible_interface_init (FsmConvertibleInterface *iface)
 {
   iface->compute_epsilon_closures = epsilon_nfa_compute_epsilon_closures;
   iface->construct_subset = epsilon_nfa_construct_subset;
@@ -105,7 +105,7 @@ epsilon_nfa_get_property (GObject    *object,
           const guint acceptable_epsilon_nfa_final_states_count = 1;
 
           g_object_get (object,
-                        PROP_STATE_MACHINE_INITIALIZABLE_FINAL_STATES, &final_states,
+                        PROP_FSM_INITIALIZABLE_FINAL_STATES, &final_states,
                         NULL);
 
           g_return_if_fail (g_ptr_array_has_items (final_states));
@@ -122,17 +122,17 @@ epsilon_nfa_get_property (GObject    *object,
     }
 }
 
-static StateMachineConvertible *
-epsilon_nfa_compute_epsilon_closures (StateMachineConvertible *self)
+static FsmConvertible *
+epsilon_nfa_compute_epsilon_closures (FsmConvertible *self)
 {
-  g_return_val_if_fail (STATE_MACHINES_IS_EPSILON_NFA (self), NULL);
+  g_return_val_if_fail (ACCEPTORS_IS_EPSILON_NFA (self), NULL);
 
   GSList *alphabet = NULL;
   g_autoptr (GPtrArray) all_states = NULL;
 
   g_object_get (self,
-                PROP_STATE_MACHINE_INITIALIZABLE_ALPHABET, &alphabet,
-                PROP_STATE_MACHINE_INITIALIZABLE_ALL_STATES, &all_states,
+                PROP_FSM_INITIALIZABLE_ALPHABET, &alphabet,
+                PROP_FSM_INITIALIZABLE_ALL_STATES, &all_states,
                 NULL);
 
   /* Performing the computations only if there is an actual need to do so - i.e., the state machine contains
@@ -174,19 +174,19 @@ epsilon_nfa_compute_epsilon_closures (StateMachineConvertible *self)
         }
     }
 
-  return nfa_new (PROP_STATE_MACHINE_INITIALIZABLE_ALL_STATES, all_states);
+  return nfa_new (PROP_FSM_INITIALIZABLE_ALL_STATES, all_states);
 }
 
-static StateMachineModifiable *
-epsilon_nfa_construct_subset (StateMachineConvertible *self)
+static FsmModifiable *
+epsilon_nfa_construct_subset (FsmConvertible *self)
 {
-  g_return_val_if_fail (STATE_MACHINES_IS_EPSILON_NFA (self), NULL);
+  g_return_val_if_fail (ACCEPTORS_IS_EPSILON_NFA (self), NULL);
 
   g_return_val_if_reached (NULL);
 }
 
-static
-gboolean epsilon_nfa_has_epsilon_transitions (GPtrArray *all_states)
+static gboolean
+epsilon_nfa_has_epsilon_transitions (GPtrArray *all_states)
 {
   for (guint i = 0; i < all_states->len; ++i)
     {
@@ -307,7 +307,7 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                       Transition *transition = g_ptr_array_index (transitions, j);
                       g_autoptr (GPtrArray) transition_output_states = g_ptr_array_new ();
 
-                      if (STATE_MACHINES_IS_DETERMINISTIC_TRANSITION (transition))
+                      if (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (transition))
                         {
                           g_autoptr (State) deterministic_transition_output_state = NULL;
 
@@ -318,7 +318,7 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                           g_ptr_array_add (transition_output_states,
                                            deterministic_transition_output_state);
                         }
-                      else if (STATE_MACHINES_IS_NONDETERMINISTIC_TRANSITION (transition))
+                      else if (TRANSITIONS_IS_NONDETERMINISTIC_TRANSITION (transition))
                         {
                           g_autoptr (GPtrArray) nondeterministic_transition_output_states = NULL;
 

@@ -7,10 +7,10 @@
 
 G_BEGIN_DECLS
 
-#define SEMANTIC_ANALYSIS_TYPE_CONSTANT (constant_get_type ())
-#define constant_new(...) (g_object_new (SEMANTIC_ANALYSIS_TYPE_CONSTANT, ##__VA_ARGS__, NULL))
+#define AST_NODES_TYPE_CONSTANT (constant_get_type ())
+#define constant_new(...) (g_object_new (AST_NODES_TYPE_CONSTANT, ##__VA_ARGS__, NULL))
 
-G_DECLARE_FINAL_TYPE (Constant, constant, SEMANTIC_ANALYSIS, CONSTANT, AstNode)
+G_DECLARE_FINAL_TYPE (Constant, constant, AST_NODES, CONSTANT, AstNode)
 
 #define PROP_CONSTANT_VALUE    "value"
 #define PROP_CONSTANT_POSITION "position"

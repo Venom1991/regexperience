@@ -2,9 +2,14 @@
 #include "internal/syntactic_analysis/lexer.h"
 #include "internal/syntactic_analysis/parser.h"
 #include "internal/semantic_analysis/analyzer.h"
-#include "internal/state_machines/state_machine_runnable.h"
+#include "internal/state_machines/acceptors/acceptor_runnable.h"
 #include "internal/common/helpers.h"
 #include "core/errors.h"
+
+struct _Regexperience
+{
+    GObject parent_instance;
+};
 
 typedef struct
 {
@@ -14,13 +19,8 @@ typedef struct
     Analyzer *analyzer;
 
     /* Matching */
-    StateMachineRunnable *state_machine;
+    AcceptorRunnable *acceptor;
 } RegexperiencePrivate;
-
-struct _Regexperience
-{
-    GObject parent_instance;
-};
 
 G_DEFINE_TYPE_WITH_PRIVATE (Regexperience, regexperience, G_TYPE_OBJECT)
 
@@ -55,46 +55,59 @@ void regexperience_compile (Regexperience  *self,
 
   RegexperiencePrivate *priv = regexperience_get_instance_private (self);
 
-  if (priv->state_machine != NULL)
-    g_object_unref (priv->state_machine);
-
   Lexer *lexer = priv->lexer;
   Parser *parser = priv->parser;
   Analyzer *analyzer = priv->analyzer;
+  GError *temporary_error = NULL;
 
   g_autoptr (GPtrArray) tokens = lexer_tokenize (lexer,
                                                  regular_expression,
-                                                 error);
+                                                 &temporary_error);
 
-  if (*error != NULL)
-    return;
+  if (temporary_error != NULL)
+    {
+      g_propagate_error (error, temporary_error);
+
+      return;
+    }
 
   GNode *concrete_syntax_tree = parser_build_concrete_syntax_tree (parser,
                                                                    tokens,
-                                                                   error);
+                                                                   &temporary_error);
 
-  if (*error != NULL)
-    return;
+  if (temporary_error != NULL)
+    {
+      g_propagate_error (error, temporary_error);
+
+      return;
+    }
 
   g_autoptr (AstNode) abstract_syntax_tree = analyzer_build_abstract_syntax_tree (analyzer,
                                                                                   concrete_syntax_tree,
-                                                                                  error);
+                                                                                  &temporary_error);
 
   /* Manually decreasing the reference count of every object found
    * in the concrete syntax tree and finally destroying the GNode itself.
    */
   g_node_unref_g_objects (concrete_syntax_tree);
 
-  if (*error != NULL)
-    return;
+  if (temporary_error != NULL)
+    {
+      g_propagate_error (error, temporary_error);
 
-  g_autoptr (StateMachineConvertible) epsilon_nfa = ast_node_build_state_machine (abstract_syntax_tree);
-  g_autoptr (StateMachineConvertible) nfa = state_machine_convertible_compute_epsilon_closures (epsilon_nfa);
-  StateMachineModifiable *dfa = state_machine_convertible_construct_subset (nfa);
+      return;
+    }
+
+  if (priv->acceptor != NULL)
+    g_object_unref (priv->acceptor);
+
+  g_autoptr (FsmConvertible) epsilon_nfa = ast_node_build_fsm (abstract_syntax_tree);
+  g_autoptr (FsmConvertible) nfa = fsm_convertible_compute_epsilon_closures (epsilon_nfa);
+  FsmModifiable *dfa = fsm_convertible_construct_subset (nfa);
 
   state_machine_modifiable_minimize (dfa);
 
-  priv->state_machine = STATE_MACHINES_RUNNABLE (dfa);
+  priv->acceptor = ACCEPTORS_ACCEPTOR_RUNNABLE (dfa);
 }
 
 gboolean regexperience_match (Regexperience  *self,
@@ -105,11 +118,11 @@ gboolean regexperience_match (Regexperience  *self,
 
   RegexperiencePrivate *priv = regexperience_get_instance_private (self);
 
-  StateMachineRunnable *state_machine = priv->state_machine;
+  AcceptorRunnable *acceptor = priv->acceptor;
   CoreRegexperienceError error_code = CORE_REGEXPERIENCE_ERROR_UNDEFINED;
   const gchar *error_message = NULL;
 
-  if (state_machine == NULL)
+  if (acceptor == NULL)
     {
       error_message = "The regular expression must be compiled beforehand";
       error_code = CORE_REGEXPERIENCE_ERROR_REGULAR_EXPRESSION_NOT_COMPILED;
@@ -135,9 +148,9 @@ gboolean regexperience_match (Regexperience  *self,
       return FALSE;
     }
 
-  state_machine_runnable_run (state_machine, input);
+  acceptor_runnable_run (acceptor, input);
 
-  return state_machine_runnable_can_accept (state_machine);
+  return acceptor_runnable_can_accept (acceptor);
 }
 
 static void
@@ -154,8 +167,8 @@ regexperience_dispose (GObject *object)
   if (priv->analyzer != NULL)
     g_clear_object (&priv->analyzer);
 
-  if (priv->state_machine != NULL)
-    g_clear_object (&priv->state_machine);
+  if (priv->acceptor != NULL)
+    g_clear_object (&priv->acceptor);
 
   G_OBJECT_CLASS (regexperience_parent_class)->dispose (object);
 }

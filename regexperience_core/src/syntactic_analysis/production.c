@@ -1,15 +1,15 @@
-#include "internal/syntactic_analysis/grammar/production.h"
+#include "internal/syntactic_analysis/production.h"
+
+struct _Production
+{
+    GObject parent_instance;
+};
 
 typedef struct
 {
     gchar *caption;
     GPtrArray *rules;
 } ProductionPrivate;
-
-struct _Production
-{
-    GObject parent_instance;
-};
 
 G_DEFINE_TYPE_WITH_PRIVATE (Production, production, G_TYPE_OBJECT)
 

@@ -1,4 +1,4 @@
-#include "internal/syntactic_analysis/grammar/symbols/symbol.h"
+#include "internal/syntactic_analysis/symbols/symbol.h"
 
 G_DEFINE_ABSTRACT_TYPE (Symbol, symbol, G_TYPE_OBJECT)
 
@@ -31,9 +31,9 @@ symbol_extract_value (Symbol *self,
 {
   SymbolClass *klass;
 
-  g_return_if_fail (SYNTACTIC_ANALYSIS_IS_SYMBOL (self));
+  g_return_if_fail (SYMBOLS_IS_SYMBOL (self));
 
-  klass = SYNTACTIC_ANALYSIS_SYMBOL_GET_CLASS (self);
+  klass = SYMBOLS_SYMBOL_GET_CLASS (self);
 
   g_return_if_fail (klass->extract_value != NULL);
 
@@ -46,9 +46,9 @@ symbol_is_match (Symbol      *self,
 {
   SymbolClass *klass;
 
-  g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_SYMBOL (self), FALSE);
+  g_return_val_if_fail (SYMBOLS_IS_SYMBOL (self), FALSE);
 
-  klass = SYNTACTIC_ANALYSIS_SYMBOL_GET_CLASS (self);
+  klass = SYMBOLS_SYMBOL_GET_CLASS (self);
 
   g_assert (klass->is_match != NULL);
 

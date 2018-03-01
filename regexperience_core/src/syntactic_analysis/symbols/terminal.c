@@ -1,6 +1,11 @@
-#include "internal/syntactic_analysis/grammar/symbols/terminal.h"
+#include "internal/syntactic_analysis/symbols/terminal.h"
 #include "internal/common/macros.h"
 #include "internal/common/helpers.h"
+
+struct _Terminal
+{
+    Symbol parent_instance;
+};
 
 typedef struct
 {
@@ -8,12 +13,7 @@ typedef struct
     GPtrArray *split_values;
 } TerminalPrivate;
 
-struct _Terminal
-{
-    Symbol parent_instance;
-};
-
-G_DEFINE_TYPE_WITH_PRIVATE (Terminal, terminal, SYNTACTIC_ANALYSIS_TYPE_SYMBOL)
+G_DEFINE_TYPE_WITH_PRIVATE (Terminal, terminal, SYMBOLS_TYPE_SYMBOL)
 
 enum
 {
@@ -41,7 +41,7 @@ static void terminal_finalize (GObject *object);
 static void
 terminal_class_init (TerminalClass *klass)
 {
-  SymbolClass *symbol_class = SYNTACTIC_ANALYSIS_SYMBOL_CLASS (klass);
+  SymbolClass *symbol_class = SYMBOLS_SYMBOL_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   symbol_class->extract_value = terminal_extract_value;
@@ -75,10 +75,10 @@ static void
 terminal_extract_value (Symbol *self,
                         GValue *value)
 {
-  g_return_if_fail (SYNTACTIC_ANALYSIS_IS_TERMINAL (self));
+  g_return_if_fail (SYMBOLS_IS_TERMINAL (self));
   g_return_if_fail (value != NULL);
 
-  TerminalPrivate *priv = terminal_get_instance_private (SYNTACTIC_ANALYSIS_TERMINAL (self));
+  TerminalPrivate *priv = terminal_get_instance_private (SYMBOLS_TERMINAL (self));
 
   g_value_init (value, G_TYPE_STRING);
   g_value_set_string (value, priv->concatenated_value);
@@ -88,10 +88,10 @@ static gboolean
 terminal_is_match (Symbol      *self,
                    const gchar *value)
 {
-  g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_TERMINAL (self), FALSE);
+  g_return_val_if_fail (SYMBOLS_IS_TERMINAL (self), FALSE);
   g_return_val_if_fail (value != NULL, FALSE);
 
-  TerminalPrivate *priv = terminal_get_instance_private (SYNTACTIC_ANALYSIS_TERMINAL (self));
+  TerminalPrivate *priv = terminal_get_instance_private (SYMBOLS_TERMINAL (self));
 
   GPtrArray *split_values = priv->split_values;
   GCompareFunc terminal_compare_func = g_compare_strings;
@@ -105,7 +105,7 @@ terminal_is_match (Symbol      *self,
 static void
 terminal_constructed (GObject *object)
 {
-  TerminalPrivate *priv = terminal_get_instance_private (SYNTACTIC_ANALYSIS_TERMINAL (object));
+  TerminalPrivate *priv = terminal_get_instance_private (SYMBOLS_TERMINAL (object));
 
   gchar *concatenated_value = priv->concatenated_value;
   GPtrArray *split_values = priv->split_values;
@@ -132,7 +132,7 @@ terminal_set_property (GObject      *object,
                        const GValue *value,
                        GParamSpec   *pspec)
 {
-  TerminalPrivate *priv = terminal_get_instance_private (SYNTACTIC_ANALYSIS_TERMINAL (object));
+  TerminalPrivate *priv = terminal_get_instance_private (SYMBOLS_TERMINAL (object));
 
   switch (property_id)
     {
@@ -152,7 +152,7 @@ terminal_set_property (GObject      *object,
 static void
 terminal_finalize (GObject *object)
 {
-  TerminalPrivate *priv = terminal_get_instance_private (SYNTACTIC_ANALYSIS_TERMINAL (object));
+  TerminalPrivate *priv = terminal_get_instance_private (SYMBOLS_TERMINAL (object));
 
   if (priv->concatenated_value != NULL)
     g_free (priv->concatenated_value);

@@ -2,8 +2,8 @@
 #include "internal/state_machines/transitions/transition_factory.h"
 #include "internal/common/helpers.h"
 
-State *create_composite_state_from (GPtrArray                          *composed_from_states,
-                                    CompositeStateResolveTypeFlagsMode  resolve_type_flags_mode)
+State *create_composite_state (GPtrArray                          *composed_from_states,
+                               CompositeStateResolveTypeFlagsMode  resolve_type_flags_mode)
 {
   g_return_val_if_fail (g_ptr_array_has_items (composed_from_states), NULL);
 

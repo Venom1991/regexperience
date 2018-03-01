@@ -1,19 +1,19 @@
 #include "internal/semantic_analysis/analyzer.h"
 #include "internal/semantic_analysis/ast_node_factory.h"
-#include "internal/syntactic_analysis/grammar/grammar.h"
-#include "internal/syntactic_analysis/grammar/production.h"
-#include "internal/syntactic_analysis/grammar/symbols/non_terminal.h"
+#include "internal/syntactic_analysis/grammar.h"
+#include "internal/syntactic_analysis/production.h"
+#include "internal/syntactic_analysis/symbols/non_terminal.h"
 #include "internal/syntactic_analysis/token.h"
-
-typedef struct
-{
-    GHashTable *operator_types;
-} AnalyzerPrivate;
 
 struct _Analyzer
 {
     GObject parent_instance;
 };
+
+typedef struct
+{
+    GHashTable *operator_types;
+} AnalyzerPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (Analyzer, analyzer, G_TYPE_OBJECT)
 
@@ -92,7 +92,6 @@ analyzer_build_abstract_syntax_tree (Analyzer  *self,
   if (!ast_node_is_valid (abstract_syntax_tree, error))
     {
       g_assert (error != NULL || *error != NULL);
-
       g_clear_object (&abstract_syntax_tree);
     }
 
@@ -136,8 +135,7 @@ analyzer_transform_concrete_syntax_tree (GNode      *cst_root,
     }
   else
     {
-      ast_node = analyzer_continue (cst_root,
-                                    operator_types);
+      ast_node = analyzer_continue (cst_root, operator_types);
     }
 
   return ast_node;
@@ -277,7 +275,7 @@ analyzer_is_match (GNode *cst_root,
 {
   gboolean result = FALSE;
 
-  if (SYNTACTIC_ANALYSIS_IS_NON_TERMINAL (cst_root->data))
+  if (SYMBOLS_IS_NON_TERMINAL (cst_root->data))
     {
       va_list ap;
       g_autofree const gchar *cst_root_caption = analyzer_fetch_node_caption (cst_root);
@@ -334,7 +332,7 @@ analyzer_fetch_cst_children (GNode                 *cst_root,
       GNode *child = g_node_nth_child (cst_root, i);
 
       if (((fetchCstChildrenFlags & FETCH_CST_CHILDREN_NON_TERMINAL) &&
-           SYNTACTIC_ANALYSIS_IS_NON_TERMINAL (child->data)) ||
+           SYMBOLS_IS_NON_TERMINAL (child->data)) ||
           ((fetchCstChildrenFlags & FETCH_CST_CHILDREN_TOKEN) &&
            SYNTACTIC_ANALYSIS_IS_TOKEN (child->data)))
         {
@@ -355,7 +353,7 @@ analyzer_fetch_node_caption (GNode *cst_root)
 {
   gchar *caption = NULL;
 
-  if (SYNTACTIC_ANALYSIS_IS_NON_TERMINAL (cst_root->data))
+  if (SYMBOLS_IS_NON_TERMINAL (cst_root->data))
     {
       Symbol *symbol = cst_root->data;
       g_autoptr (Production) production = NULL;

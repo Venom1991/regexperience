@@ -1,20 +1,20 @@
-#include "internal/syntactic_analysis/grammar/grammar.h"
-#include "internal/syntactic_analysis/grammar/production.h"
-#include "internal/syntactic_analysis/grammar/rule.h"
-#include "internal/syntactic_analysis/grammar/symbols/symbol.h"
-#include "internal/syntactic_analysis/grammar/symbols/non_terminal.h"
-#include "internal/syntactic_analysis/grammar/symbols/terminal.h"
+#include "internal/syntactic_analysis/grammar.h"
+#include "internal/syntactic_analysis/production.h"
+#include "internal/syntactic_analysis/rule.h"
+#include "internal/syntactic_analysis/symbols/symbol.h"
+#include "internal/syntactic_analysis/symbols/non_terminal.h"
+#include "internal/syntactic_analysis/symbols/terminal.h"
 #include "internal/common/macros.h"
-
-typedef struct
-{
-    GHashTable *productions;
-} GrammarPrivate;
 
 struct _Grammar
 {
     GObject parent_instance;
 };
+
+typedef struct
+{
+    GHashTable *productions;
+} GrammarPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (Grammar, grammar, G_TYPE_OBJECT)
 
@@ -98,6 +98,7 @@ grammar_define_productions (GHashTable *productions)
     QUESTION_MARK_QUANTIFICATION,
     ELEMENTARY_EXPRESSION,
     GROUP,
+    BRACKET_EXPRESSION,
     UPPER_CASE_LETTER,
     LOWER_CASE_LETTER,
     DIGIT,
@@ -105,7 +106,6 @@ grammar_define_productions (GHashTable *productions)
     REGULAR_METACHARACTER,
     BRACKET_EXPRESSION_METACHARACTER,
     METACHARACTER_ESCAPE,
-    BRACKET_EXPRESSION,
     BRACKET_EXPRESSION_ITEMS,
     BRACKET_EXPRESSION_ITEM,
     RANGE
@@ -187,12 +187,12 @@ grammar_define_productions (GHashTable *productions)
     {
       (gchar*[]) {ELEMENTARY_EXPRESSION},
       (gchar*[]) {GROUP, NULL},
+      (gchar*[]) {BRACKET_EXPRESSION, NULL},
       (gchar*[]) {UPPER_CASE_LETTER, NULL},
       (gchar*[]) {LOWER_CASE_LETTER, NULL},
       (gchar*[]) {DIGIT, NULL},
       (gchar*[]) {SPECIAL_CHARACTER, NULL},
       (gchar*[]) {BRACKET_EXPRESSION_METACHARACTER, NULL},
-      (gchar*[]) {"[", BRACKET_EXPRESSION, "]", NULL},
       (gchar*[]) {"\\", REGULAR_METACHARACTER, NULL},
       (gchar*[]) {"\\", METACHARACTER_ESCAPE, NULL},
       NULL
@@ -201,6 +201,12 @@ grammar_define_productions (GHashTable *productions)
     {
       (gchar*[]) {GROUP},
       (gchar*[]) {"(", EXPRESSION, ")", NULL},
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) {BRACKET_EXPRESSION},
+      (gchar*[]) {"[", BRACKET_EXPRESSION_ITEMS, "]", NULL},
       NULL
     },
     (gchar**[])
@@ -277,12 +283,6 @@ grammar_define_productions (GHashTable *productions)
       {
         "\\", NULL
       },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) {BRACKET_EXPRESSION},
-      (gchar*[]) {BRACKET_EXPRESSION_ITEMS, NULL},
       NULL
     },
     (gchar**[])
@@ -395,9 +395,10 @@ grammar_define_symbols (gchar      **symbol_array,
   return symbols;
 }
 
-static GObject *grammar_constructor (GType                  type,
-                                     guint                  n_construct_properties,
-                                     GObjectConstructParam *construct_properties)
+static GObject *
+grammar_constructor (GType                  type,
+                     guint                  n_construct_properties,
+                     GObjectConstructParam *construct_properties)
 {
   if (singleton != NULL)
     return g_object_ref (singleton);

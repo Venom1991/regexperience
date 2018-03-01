@@ -7,10 +7,10 @@
 
 G_BEGIN_DECLS
 
-#define SEMANTIC_ANALYSIS_TYPE_BRACKET_EXPRESSION (bracket_expression_get_type ())
-#define bracket_expression_new(...) (g_object_new (SEMANTIC_ANALYSIS_TYPE_BRACKET_EXPRESSION, ##__VA_ARGS__, NULL))
+#define AST_NODES_TYPE_BRACKET_EXPRESSION (bracket_expression_get_type ())
+#define bracket_expression_new(...) (g_object_new (AST_NODES_TYPE_BRACKET_EXPRESSION, ##__VA_ARGS__, NULL))
 
-G_DECLARE_FINAL_TYPE (BracketExpression, bracket_expression, SEMANTIC_ANALYSIS, BRACKET_EXPRESSION, UnaryOperator)
+G_DECLARE_FINAL_TYPE (BracketExpression, bracket_expression, AST_NODES, BRACKET_EXPRESSION, UnaryOperator)
 
 G_END_DECLS
 
