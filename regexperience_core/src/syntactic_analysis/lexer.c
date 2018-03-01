@@ -27,13 +27,6 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (Lexer, lexer, G_TYPE_OBJECT)
 
-typedef enum _LexingContext
-{
-    LEXING_CONTEXT_UNDEFINED,
-    LEXING_CONTEXT_COMMON_TOKENS,
-    LEXING_CONTEXT_SET_TOKENS
-} LexingContext;
-
 G_DEFINE_QUARK (syntactic-analysis-lexer-error-quark, syntactic_analysis_lexer_error)
 #define SYNTACTIC_ANALYSIS_LEXER_ERROR (syntactic_analysis_lexer_error_quark())
 
