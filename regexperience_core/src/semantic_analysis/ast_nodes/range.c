@@ -11,22 +11,22 @@ struct _Range
     BinaryOperator parent_instance;
 };
 
-G_DEFINE_TYPE (Range, range, AST_NODES_TYPE_BINARY_OPERATOR)
-
 G_DEFINE_QUARK (semantic-analysis-range-error-quark, semantic_analysis_range_error)
-#define SEMANTIC_ANALYSIS_RANGE_ERROR (semantic_analysis_range_error_quark())
+#define SEMANTIC_ANALYSIS_RANGE_ERROR (semantic_analysis_range_error_quark ())
 
-static FsmConvertible *range_build_fsm (AstNode *self);
+static FsmConvertible *range_build_acceptor (AstNode  *self);
 
-static gboolean range_is_valid (AstNode  *self,
-                                GError  **error);
+static gboolean        range_is_valid       (AstNode  *self,
+                                             GError  **error);
+
+G_DEFINE_TYPE (Range, range, AST_NODES_TYPE_BINARY_OPERATOR)
 
 static void
 range_class_init (RangeClass *klass)
 {
   AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
 
-  ast_node_class->build_fsm = range_build_fsm;
+  ast_node_class->build_acceptor = range_build_acceptor;
   ast_node_class->is_valid = range_is_valid;
 }
 
@@ -37,7 +37,7 @@ range_init (Range *self)
 }
 
 static FsmConvertible *
-range_build_fsm (AstNode *self)
+range_build_acceptor (AstNode *self)
 {
   g_return_val_if_fail (AST_NODES_IS_RANGE (self), NULL);
 
@@ -69,10 +69,10 @@ range_build_fsm (AstNode *self)
 
   for (gchar expected_character = lower_value; expected_character <= upper_value; ++expected_character)
     {
-      Transition *start_to_final_on_value = create_deterministic_transition (expected_character,
-                                                                             final);
+      Transition *start_on_value = create_deterministic_transition (expected_character,
+                                                                    final);
 
-      g_ptr_array_add (start_transitions, start_to_final_on_value);
+      g_ptr_array_add (start_transitions, start_on_value);
     }
 
   g_object_set (start,

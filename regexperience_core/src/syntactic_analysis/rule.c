@@ -10,8 +10,6 @@ typedef struct
     GPtrArray *symbols;
 } RulePrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (Rule, rule, G_TYPE_OBJECT)
-
 enum
 {
     PROP_SYMBOLS = 1,
@@ -20,20 +18,22 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static void rule_get_property (GObject    *object,
-                               guint       property_id,
-                               GValue     *value,
-                               GParamSpec *pspec);
+static void rule_get_property (GObject      *object,
+                               guint         property_id,
+                               GValue       *value,
+                               GParamSpec   *pspec);
 
 static void rule_set_property (GObject      *object,
                                guint         property_id,
                                const GValue *value,
                                GParamSpec   *pspec);
 
-static void rule_dispose (GObject *object);
+static void rule_dispose      (GObject      *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (Rule, rule, G_TYPE_OBJECT)
 
 static void
-rule_class_init(RuleClass *klass)
+rule_class_init (RuleClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -42,11 +42,11 @@ rule_class_init(RuleClass *klass)
   object_class->dispose = rule_dispose;
 
   obj_properties[PROP_SYMBOLS] =
-      g_param_spec_boxed (PROP_RULE_SYMBOLS,
-                          "Symbols",
-                          "Array of terminal and non-terminal symbols.",
-                          G_TYPE_PTR_ARRAY,
-                          G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_boxed (PROP_RULE_SYMBOLS,
+                        "Symbols",
+                        "Array of terminal and non-terminal symbols.",
+                        G_TYPE_PTR_ARRAY,
+                        G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -65,7 +65,7 @@ rule_get_property (GObject    *object,
                    GValue     *value,
                    GParamSpec *pspec)
 {
-  RulePrivate *priv = rule_get_instance_private (SYNTACTIC_ANALYSIS_RULE(object));
+  RulePrivate *priv = rule_get_instance_private (SYNTACTIC_ANALYSIS_RULE (object));
 
   switch (property_id)
     {
@@ -85,7 +85,7 @@ rule_set_property (GObject      *object,
                    const GValue *value,
                    GParamSpec   *pspec)
 {
-  RulePrivate *priv = rule_get_instance_private (SYNTACTIC_ANALYSIS_RULE(object));
+  RulePrivate *priv = rule_get_instance_private (SYNTACTIC_ANALYSIS_RULE (object));
 
   switch (property_id)
     {

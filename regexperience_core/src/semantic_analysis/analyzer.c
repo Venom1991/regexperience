@@ -15,9 +15,7 @@ typedef struct
     GHashTable *operator_types;
 } AnalyzerPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (Analyzer, analyzer, G_TYPE_OBJECT)
-
-typedef enum _FetchCstChildrenFlags
+typedef enum
 {
     FETCH_CST_CHILDREN_NON_TERMINAL = 1 << 0,
     FETCH_CST_CHILDREN_TOKEN = 1 << 1,
@@ -25,36 +23,38 @@ typedef enum _FetchCstChildrenFlags
     FETCH_CST_CHILDREN_FIRST = 1 << 3
 } FetchCstChildrenFlags;
 
-static AstNode *analyzer_transform_concrete_syntax_tree (GNode      *cst_root,
-                                                         GHashTable *operator_types);
+static AstNode      *analyzer_transform_concrete_syntax_tree (GNode                  *cst_root,
+                                                              GHashTable             *operator_types);
 
-static void analyzer_define_operator_types (GHashTable *operator_types);
+static void          analyzer_define_operator_types          (GHashTable             *operator_types);
 
-static gboolean analyzer_is_constant (GNode  *cst_root,
-                                      GNode **first_cst_child);
+static gboolean      analyzer_is_constant                    (GNode                  *cst_root,
+                                                              GNode                 **first_cst_child);
 
-static gboolean analyzer_is_unary_operator (GNode  *cst_root,
-                                            GNode **first_cst_child);
+static gboolean      analyzer_is_unary_operator              (GNode                  *cst_root,
+                                                              GNode                 **first_cst_child);
 
-static gboolean analyzer_is_binary_operator (GNode  *cst_root,
-                                             GNode **first_cst_child,
-                                             GNode **second_cst_child);
+static gboolean      analyzer_is_binary_operator             (GNode                  *cst_root,
+                                                              GNode                 **first_cst_child,
+                                                              GNode                 **second_cst_child);
 
-static gboolean analyzer_is_match (GNode *cst_root,
-                                   ...);
+static gboolean      analyzer_is_match                       (GNode                  *cst_root,
+                                                              ...);
 
-static AstNode *analyzer_continue (GNode      *cst_root,
-                                   GHashTable *operator_types);
+static AstNode      *analyzer_continue                       (GNode                  *cst_root,
+                                                              GHashTable             *operator_types);
 
-static GPtrArray *analyzer_fetch_cst_children (GNode                 *cst_root,
-                                               FetchCstChildrenFlags  fetchCstChildrenFlags);
+static GPtrArray    *analyzer_fetch_cst_children             (GNode                  *cst_root,
+                                                              FetchCstChildrenFlags   fetchCstChildrenFlags);
 
-static const gchar *analyzer_fetch_node_caption (GNode *cst_root);
+static const gchar  *analyzer_fetch_node_caption             (GNode                  *cst_root);
 
-static OperatorType analyzer_discern_operator_type (GNode      *cst_root,
-                                                    GHashTable *operator_types);
+static OperatorType  analyzer_discern_operator_type          (GNode                  *cst_root,
+                                                              GHashTable             *operator_types);
 
-static void analyzer_dispose (GObject *object);
+static void          analyzer_dispose                        (GObject                *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (Analyzer, analyzer, G_TYPE_OBJECT)
 
 static void
 analyzer_class_init (AnalyzerClass *klass)
@@ -117,7 +117,8 @@ analyzer_transform_concrete_syntax_tree (GNode      *cst_root,
       g_autoptr (AstNode) operand = analyzer_transform_concrete_syntax_tree (first_cst_child,
                                                                              operator_types);
 
-      ast_node = create_unary_operator (analyzer_discern_operator_type (cst_root, operator_types),
+      ast_node = create_unary_operator (analyzer_discern_operator_type (cst_root,
+                                                                        operator_types),
                                         operand);
     }
   else if (analyzer_is_binary_operator (cst_root,
@@ -129,7 +130,8 @@ analyzer_transform_concrete_syntax_tree (GNode      *cst_root,
       g_autoptr (AstNode) right_operand = analyzer_transform_concrete_syntax_tree (second_cst_child,
                                                                                    operator_types);
 
-      ast_node = create_binary_operator (analyzer_discern_operator_type (cst_root, operator_types),
+      ast_node = create_binary_operator (analyzer_discern_operator_type (cst_root,
+                                                                         operator_types),
                                          left_operand,
                                          right_operand);
     }
@@ -196,8 +198,8 @@ analyzer_is_constant (GNode  *cst_root,
                          NULL))
     {
       g_autoptr (GPtrArray) cst_children =
-          analyzer_fetch_cst_children (cst_root,
-                                       FETCH_CST_CHILDREN_TOKEN | FETCH_CST_CHILDREN_FIRST);
+        analyzer_fetch_cst_children (cst_root,
+                                     FETCH_CST_CHILDREN_TOKEN | FETCH_CST_CHILDREN_FIRST);
 
       *first_cst_child = g_ptr_array_index (cst_children, 0);
 
@@ -221,8 +223,8 @@ analyzer_is_unary_operator (GNode  *cst_root,
                          NULL))
     {
       g_autoptr (GPtrArray) cst_children =
-          analyzer_fetch_cst_children (cst_root,
-                                       FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_FIRST);
+        analyzer_fetch_cst_children (cst_root,
+                                     FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_FIRST);
       const guint unary_operator_operands_count = 1;
 
       if (cst_children->len == unary_operator_operands_count)
@@ -253,8 +255,8 @@ analyzer_is_binary_operator (GNode  *cst_root,
                          NULL))
     {
       g_autoptr (GPtrArray) cst_children =
-          analyzer_fetch_cst_children (cst_root,
-                                       FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_ALL);
+        analyzer_fetch_cst_children (cst_root,
+                                     FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_ALL);
       const guint binary_operator_operands_count = 2;
 
       if (cst_children->len == binary_operator_operands_count)
@@ -312,8 +314,8 @@ analyzer_continue (GNode      *cst_root,
                    GHashTable *operator_types)
 {
   g_autoptr (GPtrArray) cst_children =
-      analyzer_fetch_cst_children (cst_root,
-                                   FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_FIRST);
+    analyzer_fetch_cst_children (cst_root,
+                                 FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_FIRST);
   GNode *first_cst_child = g_ptr_array_index (cst_children, 0);
 
   return analyzer_transform_concrete_syntax_tree (first_cst_child,

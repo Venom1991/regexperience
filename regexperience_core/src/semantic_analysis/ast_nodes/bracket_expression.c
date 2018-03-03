@@ -5,16 +5,16 @@ struct _BracketExpression
     UnaryOperator parent_instance;
 };
 
-G_DEFINE_TYPE (BracketExpression, bracket_expression, AST_NODES_TYPE_UNARY_OPERATOR)
+static FsmConvertible *bracket_expression_build_acceptor (AstNode *self);
 
-static FsmConvertible *bracket_expression_build_fsm (AstNode *self);
+G_DEFINE_TYPE (BracketExpression, bracket_expression, AST_NODES_TYPE_UNARY_OPERATOR)
 
 static void
 bracket_expression_class_init (BracketExpressionClass *klass)
 {
   AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
 
-  ast_node_class->build_fsm = bracket_expression_build_fsm;
+  ast_node_class->build_acceptor = bracket_expression_build_acceptor;
 }
 
 static void
@@ -24,7 +24,7 @@ bracket_expression_init (BracketExpression *self)
 }
 
 static FsmConvertible *
-bracket_expression_build_fsm (AstNode *self)
+bracket_expression_build_acceptor (AstNode *self)
 {
   g_return_val_if_fail (AST_NODES_IS_BRACKET_EXPRESSION (self), NULL);
 
@@ -34,5 +34,5 @@ bracket_expression_build_fsm (AstNode *self)
                 PROP_UNARY_OPERATOR_OPERAND, &operand,
                 NULL);
 
-  return ast_node_build_fsm (operand);
+  return ast_node_build_acceptor (operand);
 }

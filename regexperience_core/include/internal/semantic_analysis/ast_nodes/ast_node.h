@@ -15,18 +15,19 @@ struct _AstNodeClass
 {
     GObjectClass parent_class;
 
-    FsmConvertible * (*build_fsm) (AstNode *self);
-    gboolean (*is_valid) (AstNode *self, GError **error);
+    FsmConvertible * (*build_acceptor) (AstNode  *self);
+    gboolean         (*is_valid)       (AstNode  *self,
+                                        GError  **error);
 
-    gpointer padding[8];
+    gpointer     padding[8];
 };
 
-FsmConvertible *ast_node_build_fsm (AstNode *self);
+FsmConvertible *ast_node_build_acceptor (AstNode  *self);
 
-gboolean ast_node_is_valid (AstNode  *self,
-                            GError  **error);
+gboolean        ast_node_is_valid       (AstNode  *self,
+                                         GError  **error);
 
-typedef enum _OperatorType
+typedef enum
 {
     OPERATOR_TYPE_UNDEFINED,
     OPERATOR_TYPE_ALTERNATION,

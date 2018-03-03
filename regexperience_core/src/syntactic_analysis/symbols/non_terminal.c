@@ -43,11 +43,11 @@ non_terminal_class_init (NonTerminalClass *klass)
   object_class->dispose = non_terminal_dispose;
 
   obj_properties[PROP_VALUE] =
-      g_param_spec_object (PROP_SYMBOL_VALUE,
-                           "Value",
-                           "Production whose rules can be used to rewrite the non-terminal symbol.",
-                           SYNTACTIC_ANALYSIS_TYPE_PRODUCTION,
-                           G_PARAM_WRITABLE);
+    g_param_spec_object (PROP_SYMBOL_VALUE,
+                         "Value",
+                         "Production whose rules can be used to rewrite the non-terminal symbol.",
+                         SYNTACTIC_ANALYSIS_TYPE_PRODUCTION,
+                         G_PARAM_WRITABLE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

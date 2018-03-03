@@ -10,7 +10,7 @@ typedef struct
     gpointer output_data;
 } MealyTransitionPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (MealyTransition, mealy_transition, TRANSITIONS_TYPE_DETERMINISTIC_TRANSITION)
+
 
 enum
 {
@@ -20,15 +20,17 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static void mealy_transition_get_property (GObject    *object,
-                                           guint       property_id,
-                                           GValue     *value,
-                                           GParamSpec *pspec);
+static void mealy_transition_get_property (GObject      *object,
+                                           guint         property_id,
+                                           GValue       *value,
+                                           GParamSpec   *pspec);
 
 static void mealy_transition_set_property (GObject      *object,
                                            guint         property_id,
                                            const GValue *value,
                                            GParamSpec   *pspec);
+
+G_DEFINE_TYPE_WITH_PRIVATE (MealyTransition, mealy_transition, TRANSITIONS_TYPE_DETERMINISTIC_TRANSITION)
 
 static void
 mealy_transition_class_init (MealyTransitionClass *klass)
@@ -39,10 +41,10 @@ mealy_transition_class_init (MealyTransitionClass *klass)
   object_class->set_property = mealy_transition_set_property;
 
   obj_properties[PROP_OUTPUT_DATA] =
-      g_param_spec_pointer (PROP_MEALY_TRANSITION_OUTPUT_DATA,
-                           "Output data",
-                           "Arbitrary output data mapped to the output state.",
-                            G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_pointer (PROP_MEALY_TRANSITION_OUTPUT_DATA,
+                         "Output data",
+                         "Arbitrary output data mapped to both the expected character as well as the output state.",
+                          G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -62,7 +64,7 @@ mealy_transition_get_property (GObject    *object,
                                GParamSpec *pspec)
 {
   MealyTransitionPrivate *priv =
-      mealy_transition_get_instance_private (TRANSITIONS_MEALY_TRANSITION (object));
+    mealy_transition_get_instance_private (TRANSITIONS_MEALY_TRANSITION (object));
 
   switch (property_id)
     {
@@ -83,7 +85,7 @@ mealy_transition_set_property (GObject      *object,
                                GParamSpec   *pspec)
 {
   MealyTransitionPrivate *priv =
-      mealy_transition_get_instance_private (TRANSITIONS_MEALY_TRANSITION (object));
+    mealy_transition_get_instance_private (TRANSITIONS_MEALY_TRANSITION (object));
 
   switch (property_id)
     {

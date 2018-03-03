@@ -1,14 +1,14 @@
 #include "internal/semantic_analysis/ast_nodes/ast_node.h"
 
-G_DEFINE_ABSTRACT_TYPE (AstNode, ast_node, G_TYPE_OBJECT)
-
 static gboolean ast_node_default_is_valid (AstNode  *self,
                                            GError  **error);
+
+G_DEFINE_ABSTRACT_TYPE (AstNode, ast_node, G_TYPE_OBJECT)
 
 static void
 ast_node_class_init (AstNodeClass *klass)
 {
-  klass->build_fsm = NULL;
+  klass->build_acceptor = NULL;
   klass->is_valid = ast_node_default_is_valid;
 }
 
@@ -26,7 +26,7 @@ ast_node_default_is_valid (AstNode  *self,
 }
 
 FsmConvertible *
-ast_node_build_fsm (AstNode *self)
+ast_node_build_acceptor (AstNode *self)
 {
   AstNodeClass *klass;
 
@@ -34,9 +34,9 @@ ast_node_build_fsm (AstNode *self)
 
   klass = AST_NODES_AST_NODE_GET_CLASS (self);
 
-  g_return_val_if_fail (klass->build_fsm != NULL, NULL);
+  g_return_val_if_fail (klass->build_acceptor != NULL, NULL);
 
-  return klass->build_fsm (self);
+  return klass->build_acceptor (self);
 }
 
 gboolean

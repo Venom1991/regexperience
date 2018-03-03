@@ -16,8 +16,6 @@ typedef struct
     GHashTable *productions;
 } GrammarPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (Grammar, grammar, G_TYPE_OBJECT)
-
 enum
 {
     PROP_PRODUCTIONS = 1,
@@ -27,24 +25,26 @@ enum
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 static Grammar *singleton = NULL;
 
-static void grammar_define_productions (GHashTable *productions);
+static void       grammar_define_productions (GHashTable              *productions);
 
-static GPtrArray *grammar_define_rules (gchar      ***right_hand_sides,
-                                        GHashTable   *productions);
+static GPtrArray *grammar_define_rules       (gchar                 ***right_hand_sides,
+                                              GHashTable              *productions);
 
-static GPtrArray *grammar_define_symbols (gchar      **symbol_array,
-                                          GHashTable  *productions);
+static GPtrArray *grammar_define_symbols     (gchar                  **symbol_array,
+                                              GHashTable              *productions);
 
-static GObject *grammar_constructor (GType                  type,
-                                     guint                  n_construct_properties,
-                                     GObjectConstructParam *construct_properties);
+static GObject   *grammar_constructor        (GType                    type,
+                                              guint                    n_construct_properties,
+                                              GObjectConstructParam   *construct_properties);
 
-static void grammar_get_property (GObject    *object,
-                                  guint       property_id,
-                                  GValue     *value,
-                                  GParamSpec *pspec);
+static void       grammar_get_property       (GObject                 *object,
+                                              guint                    property_id,
+                                              GValue                  *value,
+                                              GParamSpec              *pspec);
 
-static void grammar_dispose (GObject *object);
+static void       grammar_dispose            (GObject                 *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (Grammar, grammar, G_TYPE_OBJECT)
 
 static void
 grammar_class_init (GrammarClass *klass)
@@ -56,11 +56,11 @@ grammar_class_init (GrammarClass *klass)
   object_class->dispose = grammar_dispose;
 
   obj_properties[PROP_PRODUCTIONS] =
-      g_param_spec_boxed (PROP_GRAMMAR_PRODUCTIONS,
-                          "Productions",
-                          "Hash table of productions used to formally describe the grammar.",
-                          G_TYPE_HASH_TABLE,
-                          G_PARAM_READABLE);
+    g_param_spec_boxed (PROP_GRAMMAR_PRODUCTIONS,
+                        "Productions",
+                        "Hash table of productions used to formally describe the grammar.",
+                        G_TYPE_HASH_TABLE,
+                        G_PARAM_READABLE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -124,193 +124,172 @@ grammar_define_productions (GHashTable *productions)
   {
     (gchar**[])
     {
-      (gchar*[]) {START},
-      (gchar*[]) {EXPRESSION, EOI, NULL},
+      (gchar*[]) { START },
+      (gchar*[]) { EXPRESSION, EOI, NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {EXPRESSION},
-      (gchar*[]) {SIMPLE_EXPRESSION, ALTERNATION, NULL},
-      (gchar*[]) {SIMPLE_EXPRESSION, NULL},
+      (gchar*[]) { EXPRESSION },
+      (gchar*[]) { SIMPLE_EXPRESSION, ALTERNATION, NULL },
+      (gchar*[]) { SIMPLE_EXPRESSION, NULL              },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {ALTERNATION},
-      (gchar*[]) {"|", SIMPLE_EXPRESSION, ALTERNATION, NULL},
-      (gchar*[]) {"|", SIMPLE_EXPRESSION, NULL},
+      (gchar*[]) { ALTERNATION },
+      (gchar*[]) { "|", SIMPLE_EXPRESSION, ALTERNATION, NULL },
+      (gchar*[]) { "|", SIMPLE_EXPRESSION, NULL              },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {SIMPLE_EXPRESSION},
-      (gchar*[]) {BASIC_EXPRESSION, CONCATENATION, NULL},
-      (gchar*[]) {BASIC_EXPRESSION, NULL},
+      (gchar*[]) { SIMPLE_EXPRESSION },
+      (gchar*[]) { BASIC_EXPRESSION, CONCATENATION, NULL },
+      (gchar*[]) { BASIC_EXPRESSION, NULL                },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {CONCATENATION},
-      (gchar*[]) {BASIC_EXPRESSION, CONCATENATION, NULL},
-      (gchar*[]) {BASIC_EXPRESSION, NULL},
+      (gchar*[]) { CONCATENATION },
+      (gchar*[]) { BASIC_EXPRESSION, CONCATENATION, NULL },
+      (gchar*[]) { BASIC_EXPRESSION, NULL                },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {BASIC_EXPRESSION},
-      (gchar*[]) {STAR_QUANTIFICATION, NULL},
-      (gchar*[]) {PLUS_QUANTIFICATION, NULL},
-      (gchar*[]) {QUESTION_MARK_QUANTIFICATION, NULL},
-      (gchar*[]) {ELEMENTARY_EXPRESSION, NULL},
+      (gchar*[]) { BASIC_EXPRESSION },
+      (gchar*[]) { STAR_QUANTIFICATION, NULL          },
+      (gchar*[]) { PLUS_QUANTIFICATION, NULL          },
+      (gchar*[]) { QUESTION_MARK_QUANTIFICATION, NULL },
+      (gchar*[]) { ELEMENTARY_EXPRESSION, NULL        },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {STAR_QUANTIFICATION},
-      (gchar*[]) {ELEMENTARY_EXPRESSION, "*", NULL},
+      (gchar*[]) { STAR_QUANTIFICATION },
+      (gchar*[]) { ELEMENTARY_EXPRESSION, "*", NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {PLUS_QUANTIFICATION},
-      (gchar*[]) {ELEMENTARY_EXPRESSION, "+", NULL},
+      (gchar*[]) { PLUS_QUANTIFICATION },
+      (gchar*[]) { ELEMENTARY_EXPRESSION, "+", NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {QUESTION_MARK_QUANTIFICATION},
-      (gchar*[]) {ELEMENTARY_EXPRESSION, "?", NULL},
+      (gchar*[]) { QUESTION_MARK_QUANTIFICATION },
+      (gchar*[]) { ELEMENTARY_EXPRESSION, "?", NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {ELEMENTARY_EXPRESSION},
-      (gchar*[]) {GROUP, NULL},
-      (gchar*[]) {BRACKET_EXPRESSION, NULL},
-      (gchar*[]) {UPPER_CASE_LETTER, NULL},
-      (gchar*[]) {LOWER_CASE_LETTER, NULL},
-      (gchar*[]) {DIGIT, NULL},
-      (gchar*[]) {SPECIAL_CHARACTER, NULL},
-      (gchar*[]) {BRACKET_EXPRESSION_METACHARACTER, NULL},
-      (gchar*[]) {"\\", REGULAR_METACHARACTER, NULL},
-      (gchar*[]) {"\\", METACHARACTER_ESCAPE, NULL},
+      (gchar*[]) { ELEMENTARY_EXPRESSION },
+      (gchar*[]) { GROUP, NULL                            },
+      (gchar*[]) { BRACKET_EXPRESSION, NULL               },
+      (gchar*[]) { UPPER_CASE_LETTER, NULL                },
+      (gchar*[]) { LOWER_CASE_LETTER, NULL                },
+      (gchar*[]) { DIGIT, NULL                            },
+      (gchar*[]) { SPECIAL_CHARACTER, NULL                },
+      (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER, NULL },
+      (gchar*[]) { "\\", REGULAR_METACHARACTER, NULL      },
+      (gchar*[]) { "\\", METACHARACTER_ESCAPE, NULL       },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {GROUP},
-      (gchar*[]) {"(", EXPRESSION, ")", NULL},
+      (gchar*[]) { GROUP },
+      (gchar*[]) {"(", EXPRESSION, ")", NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {BRACKET_EXPRESSION},
-      (gchar*[]) {"[", BRACKET_EXPRESSION_ITEMS, "]", NULL},
+      (gchar*[]) { BRACKET_EXPRESSION },
+      (gchar*[]) {"[", BRACKET_EXPRESSION_ITEMS, "]", NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {UPPER_CASE_LETTER},
-      (gchar*[])
-      {
-        "A" DELIMITER "B" DELIMITER "C" DELIMITER "D" DELIMITER "E" DELIMITER "F" DELIMITER
-        "G" DELIMITER "H" DELIMITER "I" DELIMITER "J" DELIMITER "K" DELIMITER "L" DELIMITER
-        "M" DELIMITER "N" DELIMITER "O" DELIMITER "P" DELIMITER "Q" DELIMITER "R" DELIMITER
-        "S" DELIMITER "T" DELIMITER "U" DELIMITER "V" DELIMITER "W" DELIMITER "X" DELIMITER
-        "Y" DELIMITER "Z", NULL
-      },
+      (gchar*[]) { UPPER_CASE_LETTER },
+      (gchar*[]) { "A" DELIMITER "B" DELIMITER "C" DELIMITER "D" DELIMITER "E" DELIMITER "F" DELIMITER
+                   "G" DELIMITER "H" DELIMITER "I" DELIMITER "J" DELIMITER "K" DELIMITER "L" DELIMITER
+                   "M" DELIMITER "N" DELIMITER "O" DELIMITER "P" DELIMITER "Q" DELIMITER "R" DELIMITER
+                   "S" DELIMITER "T" DELIMITER "U" DELIMITER "V" DELIMITER "W" DELIMITER "X" DELIMITER
+                   "Y" DELIMITER "Z", NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {LOWER_CASE_LETTER},
-      (gchar*[])
-      {
-        "a" DELIMITER "b" DELIMITER "c" DELIMITER "d" DELIMITER "e" DELIMITER "f" DELIMITER
-        "g" DELIMITER "h" DELIMITER "i" DELIMITER "j" DELIMITER "k" DELIMITER "l" DELIMITER
-        "m" DELIMITER "n" DELIMITER "o" DELIMITER "p" DELIMITER "q" DELIMITER "r" DELIMITER
-        "s" DELIMITER "t" DELIMITER "u" DELIMITER "v" DELIMITER "w" DELIMITER "x" DELIMITER
-        "y" DELIMITER "z", NULL
-      },
+      (gchar*[]) { LOWER_CASE_LETTER },
+      (gchar*[]) { "a" DELIMITER "b" DELIMITER "c" DELIMITER "d" DELIMITER "e" DELIMITER "f" DELIMITER
+                   "g" DELIMITER "h" DELIMITER "i" DELIMITER "j" DELIMITER "k" DELIMITER "l" DELIMITER
+                   "m" DELIMITER "n" DELIMITER "o" DELIMITER "p" DELIMITER "q" DELIMITER "r" DELIMITER
+                   "s" DELIMITER "t" DELIMITER "u" DELIMITER "v" DELIMITER "w" DELIMITER "x" DELIMITER
+                   "y" DELIMITER "z", NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {DIGIT},
-      (gchar*[])
-      {
-        "0" DELIMITER "1" DELIMITER "2" DELIMITER "3" DELIMITER "4" DELIMITER "5" DELIMITER
-        "6" DELIMITER "7" DELIMITER "8" DELIMITER "9", NULL
-      },
+      (gchar*[]) { DIGIT },
+      (gchar*[]) { "0" DELIMITER "1" DELIMITER "2" DELIMITER "3" DELIMITER "4" DELIMITER "5" DELIMITER
+                   "6" DELIMITER "7" DELIMITER "8" DELIMITER "9", NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {SPECIAL_CHARACTER},
-      (gchar*[])
-      {
-        "!" DELIMITER "#" DELIMITER "$" DELIMITER "%" DELIMITER "&" DELIMITER "," DELIMITER
-        "." DELIMITER "/" DELIMITER ":" DELIMITER ";" DELIMITER ">" DELIMITER "=" DELIMITER
-        "<" DELIMITER "@" DELIMITER "^" DELIMITER "_" DELIMITER "`" DELIMITER "{" DELIMITER
-        "}" DELIMITER " " DELIMITER "\n" DELIMITER "\t", NULL
-      },
+      (gchar*[]) { SPECIAL_CHARACTER },
+      (gchar*[]) { "!" DELIMITER "#" DELIMITER "$" DELIMITER "%" DELIMITER "&" DELIMITER "," DELIMITER
+                   "." DELIMITER "/" DELIMITER ":" DELIMITER ";" DELIMITER ">" DELIMITER "=" DELIMITER
+                   "<" DELIMITER "@" DELIMITER "^" DELIMITER "_" DELIMITER "`" DELIMITER "{" DELIMITER
+                   "}" DELIMITER " " DELIMITER "\n" DELIMITER "\t", NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {REGULAR_METACHARACTER},
-      (gchar*[])
-      {
-        "[" DELIMITER "(" DELIMITER ")" DELIMITER "*" DELIMITER "+" DELIMITER "?" DELIMITER
-        "|", NULL
-      },
+      (gchar*[]) { REGULAR_METACHARACTER },
+      (gchar*[]) { "[" DELIMITER "(" DELIMITER ")" DELIMITER "*" DELIMITER "+" DELIMITER "?" DELIMITER
+                   "|", NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {BRACKET_EXPRESSION_METACHARACTER},
-      (gchar*[])
-      {
-        "-" DELIMITER "]", NULL
-      },
+      (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER },
+      (gchar*[]) { "-" DELIMITER "]", NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar *[]) {METACHARACTER_ESCAPE},
-      (gchar *[])
-      {
-        "\\", NULL
-      },
+      (gchar *[]) { METACHARACTER_ESCAPE },
+      (gchar *[]) { "\\", NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {BRACKET_EXPRESSION_ITEMS},
-      (gchar*[]) {BRACKET_EXPRESSION_ITEM, NULL},
-      (gchar*[]) {BRACKET_EXPRESSION_ITEM, BRACKET_EXPRESSION_ITEMS, NULL},
+      (gchar*[]) { BRACKET_EXPRESSION_ITEMS },
+      (gchar*[]) { BRACKET_EXPRESSION_ITEM, NULL                           },
+      (gchar*[]) { BRACKET_EXPRESSION_ITEM, BRACKET_EXPRESSION_ITEMS, NULL },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {BRACKET_EXPRESSION_ITEM},
-      (gchar*[]) {RANGE, NULL},
-      (gchar*[]) {UPPER_CASE_LETTER, NULL},
-      (gchar*[]) {LOWER_CASE_LETTER, NULL},
-      (gchar*[]) {DIGIT, NULL},
-      (gchar*[]) {SPECIAL_CHARACTER, NULL},
-      (gchar*[]) {REGULAR_METACHARACTER, NULL},
-      (gchar*[]) {"\\", BRACKET_EXPRESSION_METACHARACTER, NULL},
-      (gchar*[]) {"\\", METACHARACTER_ESCAPE, NULL},
+      (gchar*[]) { BRACKET_EXPRESSION_ITEM },
+      (gchar*[]) { RANGE, NULL                                  },
+      (gchar*[]) { UPPER_CASE_LETTER, NULL                      },
+      (gchar*[]) { LOWER_CASE_LETTER, NULL                      },
+      (gchar*[]) { DIGIT, NULL                                  },
+      (gchar*[]) { SPECIAL_CHARACTER, NULL                      },
+      (gchar*[]) { REGULAR_METACHARACTER, NULL                  },
+      (gchar*[]) { "\\", BRACKET_EXPRESSION_METACHARACTER, NULL },
+      (gchar*[]) { "\\", METACHARACTER_ESCAPE, NULL             },
       NULL
     },
     (gchar**[])
     {
-      (gchar*[]) {RANGE},
-      (gchar*[]) {UPPER_CASE_LETTER, "-", UPPER_CASE_LETTER, NULL},
-      (gchar*[]) {LOWER_CASE_LETTER, "-", LOWER_CASE_LETTER, NULL},
-      (gchar*[]) {DIGIT, "-", DIGIT, NULL},
+      (gchar*[]) { RANGE },
+      (gchar*[]) { UPPER_CASE_LETTER, "-", UPPER_CASE_LETTER, NULL },
+      (gchar*[]) { LOWER_CASE_LETTER, "-", LOWER_CASE_LETTER, NULL },
+      (gchar*[]) { DIGIT, "-", DIGIT, NULL                         },
       NULL
     }
   };

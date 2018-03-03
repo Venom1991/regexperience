@@ -9,16 +9,16 @@ struct _Concatenation
     BinaryOperator parent_instance;
 };
 
-G_DEFINE_TYPE (Concatenation, concatenation, AST_NODES_TYPE_BINARY_OPERATOR)
+static FsmConvertible *concatenation_build_acceptor (AstNode *self);
 
-static FsmConvertible *concatenation_build_fsm (AstNode *self);
+G_DEFINE_TYPE (Concatenation, concatenation, AST_NODES_TYPE_BINARY_OPERATOR)
 
 static void
 concatenation_class_init (ConcatenationClass *klass)
 {
   AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
 
-  ast_node_class->build_fsm = concatenation_build_fsm;
+  ast_node_class->build_acceptor = concatenation_build_acceptor;
 }
 
 static void
@@ -28,7 +28,7 @@ concatenation_init (Concatenation *self)
 }
 
 static FsmConvertible *
-concatenation_build_fsm (AstNode *self)
+concatenation_build_acceptor (AstNode *self)
 {
   g_return_val_if_fail (AST_NODES_IS_CONCATENATION (self), NULL);
 
@@ -40,8 +40,8 @@ concatenation_build_fsm (AstNode *self)
                 PROP_BINARY_OPERATOR_RIGHT_OPERAND, &right_operand,
                 NULL);
 
-  g_autoptr (FsmConvertible) left_operand_fsm = ast_node_build_fsm (left_operand);
-  g_autoptr (FsmConvertible) right_operand_fsm = ast_node_build_fsm (right_operand);
+  g_autoptr (FsmConvertible) left_operand_acceptor = ast_node_build_acceptor (left_operand);
+  g_autoptr (FsmConvertible) right_operand_acceptor = ast_node_build_acceptor (right_operand);
 
   g_autoptr (GPtrArray) left_all_states = NULL;
   g_autoptr (GPtrArray) right_all_states = NULL;
@@ -49,19 +49,19 @@ concatenation_build_fsm (AstNode *self)
   g_autoptr (State) right_start = NULL;
   g_autoptr (GPtrArray) concatenation_all_states = g_ptr_array_new_with_free_func (g_object_unref);
 
-  g_object_get (left_operand_fsm,
+  g_object_get (left_operand_acceptor,
                 PROP_FSM_INITIALIZABLE_ALL_STATES, &left_all_states,
                 PROP_EPSILON_NFA_FINAL_STATE, &left_final,
                 NULL);
-  g_object_get (right_operand_fsm,
+  g_object_get (right_operand_acceptor,
                 PROP_FSM_INITIALIZABLE_ALL_STATES, &right_all_states,
                 PROP_FSM_INITIALIZABLE_START_STATE, &right_start,
                 NULL);
 
   g_autoptr (GPtrArray) left_final_transitions = g_ptr_array_new_with_free_func (g_object_unref);
-  Transition *left_to_right_on_epsilon = create_deterministic_epsilon_transition (right_start);
+  Transition *left_on_epsilon = create_deterministic_epsilon_transition (right_start);
 
-  g_ptr_array_add (left_final_transitions, left_to_right_on_epsilon);
+  g_ptr_array_add (left_final_transitions, left_on_epsilon);
 
   g_object_set (left_final,
                 PROP_STATE_TRANSITIONS, left_final_transitions,

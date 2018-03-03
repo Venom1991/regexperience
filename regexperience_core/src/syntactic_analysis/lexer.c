@@ -1,8 +1,8 @@
 #include "internal/syntactic_analysis/lexer.h"
 #include "internal/syntactic_analysis/lexeme.h"
+#include "internal/state_machines/fsm_initializable.h"
 #include "internal/state_machines/transducers/transducer_runnable.h"
 #include "internal/state_machines/transducers/mealy.h"
-#include "internal/state_machines/fsm_initializable.h"
 #include "internal/state_machines/transitions/transition_factory.h"
 #include "internal/common/helpers.h"
 #include "internal/common/macros.h"
@@ -23,26 +23,26 @@ typedef struct
     gchar          character;
     State         *next_state;
     TokenCategory  token_category;
-} TransducerMapping;
-
-G_DEFINE_TYPE_WITH_PRIVATE (Lexer, lexer, G_TYPE_OBJECT)
+} MealyMapping;
 
 G_DEFINE_QUARK (syntactic-analysis-lexer-error-quark, syntactic_analysis_lexer_error)
-#define SYNTACTIC_ANALYSIS_LEXER_ERROR (syntactic_analysis_lexer_error_quark())
+#define SYNTACTIC_ANALYSIS_LEXER_ERROR (syntactic_analysis_lexer_error_quark ())
 
-static Token *lexer_create_token (TokenCategory  category,
-                                  gchar         *content,
-                                  guint         *character_position);
+static Token            *lexer_create_token            (TokenCategory  category,
+                                                        gchar         *content,
+                                                        guint         *character_position);
 
-static FsmInitializable *lexer_create_transducer (void);
+static FsmInitializable *lexer_build_transducer        (void);
 
-static GPtrArray *lexer_create_transitions_from (TransducerMapping *mappings,
-                                                 gsize              mappings_size);
+static GPtrArray        *lexer_create_transitions_from (MealyMapping  *mappings,
+                                                        gsize          mappings_size);
 
-static void lexer_report_error_if_needed (const gchar  *regular_expression,
-                                          GError      **error);
+static void              lexer_report_error_if_needed  (const gchar   *regular_expression,
+                                                        GError       **error);
 
-static void lexer_dispose (GObject *object);
+static void              lexer_dispose                 (GObject       *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (Lexer, lexer, G_TYPE_OBJECT)
 
 static void
 lexer_class_init (LexerClass *klass)
@@ -56,7 +56,11 @@ static void
 lexer_init (Lexer *self)
 {
   LexerPrivate *priv = lexer_get_instance_private (self);
-  FsmInitializable *mealy = lexer_create_transducer ();
+
+  /* Initializing the Mealy transducer which is used to
+   * determine the category of each token.
+   */
+  FsmInitializable *mealy = lexer_build_transducer ();
 
   priv->transducer = TRANSDUCERS_TRANSDUCER_RUNNABLE (mealy);
 }
@@ -134,7 +138,7 @@ lexer_create_token (TokenCategory  category,
 }
 
 static FsmInitializable *
-lexer_create_transducer (void)
+lexer_build_transducer (void)
 {
   g_autoptr (GPtrArray) all_states = g_ptr_array_new_with_free_func (g_object_unref);
   State *regular_character = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_START);
@@ -142,7 +146,7 @@ lexer_create_transducer (void)
   State *bracket_expression_character = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
   State *bracket_expression_escape = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
 
-  TransducerMapping regular_metacharacter_mappings[] =
+  MealyMapping regular_metacharacter_mappings[] =
   {
     { '[',  bracket_expression_character, TOKEN_CATEGORY_OPEN_BRACKET,                         },
     { '(',  regular_character,            TOKEN_CATEGORY_OPEN_PARENTHESIS                      },
@@ -155,18 +159,18 @@ lexer_create_transducer (void)
     { 0,    regular_character,            TOKEN_CATEGORY_ORDINARY_CHARACTER                    }
   };
   g_autoptr (GPtrArray) regular_transitions =
-      lexer_create_transitions_from (regular_metacharacter_mappings,
-                                     G_N_ELEMENTS (regular_metacharacter_mappings));
+    lexer_create_transitions_from (regular_metacharacter_mappings,
+                                   G_N_ELEMENTS (regular_metacharacter_mappings));
 
-  TransducerMapping regular_escape_mappings[] =
+  MealyMapping regular_escape_mappings[] =
   {
     { 0, regular_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
   };
   g_autoptr (GPtrArray) regular_escape_transitions =
-      lexer_create_transitions_from (regular_escape_mappings,
-                                     G_N_ELEMENTS (regular_escape_mappings));
+    lexer_create_transitions_from (regular_escape_mappings,
+                                   G_N_ELEMENTS (regular_escape_mappings));
 
-  TransducerMapping bracket_expression_mappings[] =
+  MealyMapping bracket_expression_mappings[] =
   {
     { '-',  bracket_expression_character, TOKEN_CATEGORY_RANGE_OPERATOR       },
     { ']',  regular_character,            TOKEN_CATEGORY_CLOSE_BRACKET        },
@@ -174,16 +178,16 @@ lexer_create_transducer (void)
     { 0,    bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER   }
   };
   g_autoptr (GPtrArray) bracket_expression_transitions =
-      lexer_create_transitions_from (bracket_expression_mappings,
-                                     G_N_ELEMENTS (bracket_expression_mappings));
+    lexer_create_transitions_from (bracket_expression_mappings,
+                                   G_N_ELEMENTS (bracket_expression_mappings));
 
-  TransducerMapping bracket_expression_escape_mappings[] =
+  MealyMapping bracket_expression_escape_mappings[] =
   {
     { 0, bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
   };
   g_autoptr (GPtrArray) bracket_expression_escape_transitions =
-      lexer_create_transitions_from (bracket_expression_escape_mappings,
-                                     G_N_ELEMENTS (bracket_expression_escape_mappings));
+    lexer_create_transitions_from (bracket_expression_escape_mappings,
+                                   G_N_ELEMENTS (bracket_expression_escape_mappings));
 
   g_object_set (regular_character,
                 PROP_STATE_TRANSITIONS, regular_transitions,
@@ -199,35 +203,34 @@ lexer_create_transducer (void)
                 NULL);
 
   g_ptr_array_add_multiple (all_states,
-                            regular_character,
-                            regular_escape,
-                            bracket_expression_character,
-                            bracket_expression_escape,
+                            regular_character, regular_escape, bracket_expression_character, bracket_expression_escape,
                             NULL);
 
   return mealy_new (PROP_FSM_INITIALIZABLE_ALL_STATES, all_states);
 }
 
 static GPtrArray *
-lexer_create_transitions_from (TransducerMapping *mappings,
-                               gsize              mappings_size)
+lexer_create_transitions_from (MealyMapping *mappings,
+                               gsize         mappings_size)
 {
   GPtrArray *transitions = g_ptr_array_new_with_free_func (g_object_unref);
   const gchar uninitialized_character = 0;
 
   for (guint i = 0; i < mappings_size; ++i)
     {
-      TransducerMapping mapping = mappings[i];
+      MealyMapping mapping = mappings[i];
+      gchar expected_character = mapping.character;
+      State *output_state = mapping.next_state;
+      gpointer output_data = GINT_TO_POINTER (mapping.token_category);
       Transition *transition = NULL;
 
-      if (mapping.character != uninitialized_character)
-        transition = create_mealy_transition (mapping.character,
-                                              mapping.next_state,
-                                              GINT_TO_POINTER (mapping.token_category));
+      if (expected_character != uninitialized_character)
+        transition = create_mealy_transition (expected_character,
+                                              output_state,
+                                              output_data);
       else
-        transition = create_mealy_unconditional_transition (mapping.next_state,
-                                                            GINT_TO_POINTER (mapping.token_category));
-
+        transition = create_mealy_unconditional_transition (output_state,
+                                                            output_data);
 
       g_ptr_array_add (transitions, transition);
     }

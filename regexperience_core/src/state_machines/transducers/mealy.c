@@ -15,18 +15,19 @@ typedef struct
     State *current_state;
 } MealyPrivate;
 
-static void mealy_transducer_runnable_interface_init (TransducerRunnableInterface *iface);
+static void     mealy_transducer_runnable_interface_init (TransducerRunnableInterface *iface);
+
+static void     mealy_reset                              (TransducerRunnable          *self);
+
+static gpointer mealy_run                                (TransducerRunnable          *self,
+                                                          gchar                        input);
+
+static void     mealy_dispose                            (GObject                     *object);
 
 G_DEFINE_TYPE_WITH_CODE (Mealy, mealy, STATE_MACHINES_TYPE_FSM,
                          G_ADD_PRIVATE (Mealy)
                          G_IMPLEMENT_INTERFACE (TRANSDUCERS_TYPE_TRANSDUCER_RUNNABLE,
                                                 mealy_transducer_runnable_interface_init))
-
-static void mealy_reset (TransducerRunnable *self);
-
-static gpointer mealy_run (TransducerRunnable *self, gchar input);
-
-static void mealy_dispose (GObject *object);
 
 static void
 mealy_class_init (MealyClass *klass)
@@ -67,7 +68,8 @@ mealy_reset (TransducerRunnable *self)
 }
 
 static gpointer
-mealy_run (TransducerRunnable *self, gchar input)
+mealy_run (TransducerRunnable *self,
+           gchar               input)
 {
   MealyPrivate *priv = mealy_get_instance_private (TRANSDUCERS_MEALY (self));
 

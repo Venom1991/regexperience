@@ -14,13 +14,6 @@ typedef struct
     GSList    *alphabet;
 } FsmPrivate;
 
-static void fsm_fsm_initializable_interface_init (FsmInitializableInterface *iface);
-
-G_DEFINE_ABSTRACT_TYPE_WITH_CODE (Fsm, fsm, G_TYPE_OBJECT,
-                                  G_ADD_PRIVATE (Fsm)
-                                  G_IMPLEMENT_INTERFACE (STATE_MACHINES_TYPE_FSM_INITIALIZABLE,
-                                                         fsm_fsm_initializable_interface_init))
-
 enum
 {
     PROP_ALL_STATES = 1,
@@ -31,21 +24,28 @@ enum
     N_PROPERTIES
 };
 
-static void fsm_prepare_states (FsmPrivate *priv);
+static void fsm_fsm_initializable_interface_init (FsmInitializableInterface *iface);
 
-static void fsm_prepare_alphabet (FsmPrivate *priv);
+static void fsm_prepare_states                   (FsmPrivate                *priv);
 
-static void fsm_get_property (GObject    *object,
-                              guint       property_id,
-                              GValue     *value,
-                              GParamSpec *pspec);
+static void fsm_prepare_alphabet                 (FsmPrivate                *priv);
 
-static void fsm_set_property (GObject      *object,
-                              guint         property_id,
-                              const GValue *value,
-                              GParamSpec   *pspec);
+static void fsm_get_property                     (GObject                   *object,
+                                                  guint                      property_id,
+                                                  GValue                    *value,
+                                                  GParamSpec                *pspec);
 
-static void fsm_dispose (GObject *object);
+static void fsm_set_property                     (GObject                   *object,
+                                                  guint                      property_id,
+                                                  const GValue              *value,
+                                                  GParamSpec                *pspec);
+
+static void fsm_dispose                          (GObject                   *object);
+
+G_DEFINE_ABSTRACT_TYPE_WITH_CODE (Fsm, fsm, G_TYPE_OBJECT,
+                                  G_ADD_PRIVATE (Fsm)
+                                  G_IMPLEMENT_INTERFACE (STATE_MACHINES_TYPE_FSM_INITIALIZABLE,
+                                                         fsm_fsm_initializable_interface_init))
 
 static void
 fsm_class_init (FsmClass *klass)
@@ -88,7 +88,7 @@ fsm_fetch_output_states_from_single (State *input_state,
   g_ptr_array_add (input_states, input_state);
 
   return fsm_fetch_output_states_from_multiple (input_states,
-                                                     expected_character);
+                                                expected_character);
 }
 
 GPtrArray *

@@ -5,7 +5,7 @@
 
 G_BEGIN_DECLS
 
-#define TRANSITIONS_TYPE_TRANSITION (transition_get_type())
+#define TRANSITIONS_TYPE_TRANSITION (transition_get_type ())
 
 G_DECLARE_DERIVABLE_TYPE (Transition, transition, TRANSITIONS, TRANSITION, GObject)
 
@@ -17,13 +17,13 @@ struct _TransitionClass
 gboolean transition_is_possible (Transition *self,
                                  gchar       input_character);
 
-gboolean transition_is_epsilon (Transition *self);
+gboolean transition_is_epsilon  (Transition *self);
 
 #define PROP_TRANSITION_EXPECTED_CHARACTER      "expected-character"
 #define PROP_TRANSITION_REQUIRES_INPUT          "requires-input"
 #define PROP_TRANSITION_EQUALITY_CONDITION_TYPE "equality-condition-type"
 
-typedef enum _EqualityConditionType
+typedef enum
 {
     EQUALITY_CONDITION_TYPE_UNDEFINED,
     EQUALITY_CONDITION_TYPE_ANY,

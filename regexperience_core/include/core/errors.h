@@ -1,7 +1,7 @@
 #ifndef REGEXPERIENCE_CORE_ERRORS_H
 #define REGEXPERIENCE_CORE_ERRORS_H
 
-typedef enum _CoreRegexperienceError
+typedef enum
 {
     CORE_REGEXPERIENCE_ERROR_UNDEFINED = 0,
     CORE_REGEXPERIENCE_ERROR_REGULAR_EXPRESSION_NOT_COMPILED,
@@ -10,7 +10,7 @@ typedef enum _CoreRegexperienceError
     CORE_REGEXPERIENCE_N_ERRORS
 } CoreRegexperienceError;
 
-typedef enum _SyntacticAnalysisLexerError
+typedef enum
 {
     SYNTACTIC_ANALYSIS_LEXER_ERROR_UNDEFINED = CORE_REGEXPERIENCE_N_ERRORS,
     SYNTACTIC_ANALYSIS_LEXER_ERROR_INPUT_NULL,
@@ -19,7 +19,7 @@ typedef enum _SyntacticAnalysisLexerError
     SYNTACTIC_ANALYSIS_LEXER_N_ERRORS
 } SyntacticAnalysisLexerError;
 
-typedef enum _SyntacticAnalysisParserError
+typedef enum
 {
     SYNTACTIC_ANALYSIS_PARSER_ERROR_UNDEFINED = SYNTACTIC_ANALYSIS_LEXER_N_ERRORS,
     SYNTACTIC_ANALYSIS_PARSER_ERROR_UNEXPECTED_CHARACTER,
@@ -35,7 +35,7 @@ typedef enum _SyntacticAnalysisParserError
     SYNTACTIC_ANALYSIS_PARSER_N_ERRORS
 } SyntacticAnalysisParserError;
 
-typedef enum _SemanticAnalysisRangeError
+typedef enum
 {
     SEMANTIC_ANALYSIS_RANGE_ERROR_INVALID_VALUES = SYNTACTIC_ANALYSIS_PARSER_N_ERRORS
 } SemanticAnalysisAnalyzerError;

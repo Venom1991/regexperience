@@ -5,8 +5,6 @@ typedef struct
     AstNode *operand;
 } UnaryOperatorPrivate;
 
-G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (UnaryOperator, unary_operator, AST_NODES_TYPE_AST_NODE)
-
 enum
 {
     PROP_OPERAND = 1,
@@ -15,20 +13,22 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static gboolean unary_operator_is_valid (AstNode  *self,
-                                         GError  **error);
+static gboolean unary_operator_is_valid     (AstNode       *self,
+                                             GError       **error);
 
-static void unary_operator_get_property (GObject    *object,
-                                         guint       property_id,
-                                         GValue     *value,
-                                         GParamSpec *pspec);
+static void     unary_operator_get_property (GObject       *object,
+                                             guint          property_id,
+                                             GValue        *value,
+                                             GParamSpec    *pspec);
 
-static void unary_operator_set_property (GObject      *object,
-                                         guint         property_id,
-                                         const GValue *value,
-                                         GParamSpec   *pspec);
+static void     unary_operator_set_property (GObject       *object,
+                                             guint          property_id,
+                                             const GValue  *value,
+                                             GParamSpec    *pspec);
 
-static void unary_operator_dispose (GObject *object);
+static void     unary_operator_dispose      (GObject       *object);
+
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (UnaryOperator, unary_operator, AST_NODES_TYPE_AST_NODE)
 
 static void
 unary_operator_class_init (UnaryOperatorClass *klass)

@@ -24,7 +24,8 @@ transducer_runnable_reset (TransducerRunnable *self)
 }
 
 gpointer
-transducer_runnable_run (TransducerRunnable *self, gchar input)
+transducer_runnable_run (TransducerRunnable *self,
+                         gchar               input)
 {
   TransducerRunnableInterface *iface;
 

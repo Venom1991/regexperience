@@ -7,6 +7,6 @@
 State *create_composite_state (GPtrArray                          *composed_from_states,
                                CompositeStateResolveTypeFlagsMode  resolve_type_flags_mode);
 
-State *create_dead_state (void);
+State *create_dead_state      (void);
 
 #endif /* REGEXPERIENCE_CORE_STATE_FACTORY_H */

@@ -5,13 +5,15 @@
 #include <glib-object.h>
 
 gboolean
-g_char_any (gconstpointer a, gconstpointer b)
+g_char_any (gconstpointer a,
+            gconstpointer b)
 {
   return TRUE;
 }
 
 gboolean
-g_char_equal (gconstpointer a, gconstpointer b)
+g_char_equal (gconstpointer a,
+              gconstpointer b)
 {
   const gchar a_ptr = (const gchar) a;
   const gchar b_ptr = (const gchar) b;
@@ -20,7 +22,8 @@ g_char_equal (gconstpointer a, gconstpointer b)
 }
 
 gboolean
-g_char_not_equal (gconstpointer a, gconstpointer b)
+g_char_not_equal (gconstpointer a,
+                  gconstpointer b)
 {
   const gchar a_ptr = (const gchar ) a;
   const gchar b_ptr = (const gchar ) b;
@@ -63,7 +66,8 @@ g_ptr_array_equal_with_equal_func (gconstpointer a,
 }
 
 gint
-g_compare_strings (gconstpointer a, gconstpointer b)
+g_compare_strings (gconstpointer a,
+                   gconstpointer b)
 {
   const gchar **a_ptr = (const gchar **) a;
   const gchar **b_ptr = (const gchar **) b;

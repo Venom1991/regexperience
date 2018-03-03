@@ -6,7 +6,7 @@ typedef struct
     AstNode *right_operand;
 } BinaryOperatorPrivate;
 
-G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (BinaryOperator, binary_operator, AST_NODES_TYPE_AST_NODE)
+
 
 enum
 {
@@ -17,20 +17,22 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static gboolean binary_operator_is_valid (AstNode  *self,
-                                          GError  **error);
+static gboolean    binary_operator_is_valid     (AstNode       *self,
+                                                 GError       **error);
 
-static void binary_operator_get_property (GObject    *object,
-                                          guint       property_id,
-                                          GValue     *value,
-                                          GParamSpec *pspec);
+static void        binary_operator_get_property (GObject       *object,
+                                                 guint          property_id,
+                                                 GValue        *value,
+                                                 GParamSpec    *pspec);
 
-static void binary_operator_set_property (GObject      *object,
-                                          guint         property_id,
-                                          const GValue *value,
-                                          GParamSpec   *pspec);
+static void        binary_operator_set_property (GObject       *object,
+                                                 guint          property_id,
+                                                 const GValue  *value,
+                                                 GParamSpec    *pspec);
 
-static void binary_operator_dispose (GObject *object);
+static void        binary_operator_dispose      (GObject       *object);
+
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (BinaryOperator, binary_operator, AST_NODES_TYPE_AST_NODE)
 
 static void
 binary_operator_class_init (BinaryOperatorClass *klass)
@@ -45,18 +47,18 @@ binary_operator_class_init (BinaryOperatorClass *klass)
   object_class->dispose = binary_operator_dispose;
 
   obj_properties[PROP_LEFT_OPERAND] =
-      g_param_spec_object (PROP_BINARY_OPERATOR_LEFT_OPERAND,
-                           "Left operand",
-                           "Operand representing the left side of the operation.",
-                           AST_NODES_TYPE_AST_NODE,
-                           G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_object (PROP_BINARY_OPERATOR_LEFT_OPERAND,
+                         "Left operand",
+                         "Operand representing the left side of the operation.",
+                         AST_NODES_TYPE_AST_NODE,
+                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   obj_properties[PROP_RIGHT_OPERAND] =
-      g_param_spec_object (PROP_BINARY_OPERATOR_RIGHT_OPERAND,
-                           "Right operand",
-                           "Operand representing the right side of the operation.",
-                           AST_NODES_TYPE_AST_NODE,
-                           G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_object (PROP_BINARY_OPERATOR_RIGHT_OPERAND,
+                         "Right operand",
+                         "Operand representing the right side of the operation.",
+                         AST_NODES_TYPE_AST_NODE,
+                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

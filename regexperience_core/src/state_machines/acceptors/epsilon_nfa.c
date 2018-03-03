@@ -13,12 +13,6 @@ struct _EpsilonNfa
     Fsm parent_instance;
 };
 
-static void epsilon_nfa_fsm_convertible_interface_init (FsmConvertibleInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE (EpsilonNfa, epsilon_nfa, STATE_MACHINES_TYPE_FSM,
-                         G_IMPLEMENT_INTERFACE (STATE_MACHINES_TYPE_FSM_CONVERTIBLE,
-                                                epsilon_nfa_fsm_convertible_interface_init))
-
 enum
 {
     PROP_FINAL_STATE = 1,
@@ -27,7 +21,7 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-typedef enum _InitializeOutputStatesMode
+typedef enum
 {
     INITIALIZE_OUTPUT_STATES_MODE_UNDEFINED,
     INITIALIZE_OUTPUT_STATES_MODE_EPSILON_INITIAL,
@@ -40,24 +34,30 @@ static void epsilon_nfa_get_property (GObject    *object,
                                       GValue     *value,
                                       GParamSpec *pspec);
 
-static FsmConvertible *epsilon_nfa_compute_epsilon_closures (FsmConvertible *self);
+static void            epsilon_nfa_fsm_convertible_interface_init          (FsmConvertibleInterface     *iface);
 
-static FsmModifiable *epsilon_nfa_construct_subset (FsmConvertible *self);
+static FsmConvertible *epsilon_nfa_compute_epsilon_closures                (FsmConvertible              *self);
 
-static gboolean epsilon_nfa_has_epsilon_transitions (GPtrArray *all_states);
+static FsmModifiable  *epsilon_nfa_construct_subset                        (FsmConvertible              *self);
 
-static Transition *epsilon_nfa_build_epsilon_closed_transition (State      *state,
-                                                                gchar       explicit_character,
-                                                                GHashTable *input_output_combinations);
+static gboolean        epsilon_nfa_has_epsilon_transitions                 (GPtrArray                   *all_states);
 
-static void epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  *input_states,
-                                                                 GPtrArray                 **epsilon_closed_transition_output_states,
-                                                                 gchar                       explicit_character,
-                                                                 GHashTable                 *input_output_combinations,
-                                                                 InitializeOutputStatesMode  find_output_states_mode);
+static Transition     *epsilon_nfa_build_epsilon_closed_transition         (State                       *state,
+                                                                            gchar                        explicit_character,
+                                                                            GHashTable                  *input_output_combinations);
 
-static void mark_input_state_as_final_if_needed (State     *input_state,
-                                                 GPtrArray *transitive_epsilon_closed_output_states);
+static void            epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                   *input_states,
+                                                                            GPtrArray                  **epsilon_closed_transition_output_states,
+                                                                            gchar                        explicit_character,
+                                                                            GHashTable                  *input_output_combinations,
+                                                                            InitializeOutputStatesMode   find_output_states_mode);
+
+static void            mark_input_state_as_final_if_needed                 (State                       *input_state,
+                                                                            GPtrArray                   *transitive_epsilon_closed_output_states);
+
+G_DEFINE_TYPE_WITH_CODE (EpsilonNfa, epsilon_nfa, STATE_MACHINES_TYPE_FSM,
+                         G_IMPLEMENT_INTERFACE (STATE_MACHINES_TYPE_FSM_CONVERTIBLE,
+                                                epsilon_nfa_fsm_convertible_interface_init))
 
 static void
 epsilon_nfa_class_init (EpsilonNfaClass *klass)
@@ -67,11 +67,11 @@ epsilon_nfa_class_init (EpsilonNfaClass *klass)
   object_class->get_property = epsilon_nfa_get_property;
 
   obj_properties[PROP_FINAL_STATE] =
-      g_param_spec_object (PROP_EPSILON_NFA_FINAL_STATE,
-                           "Final state",
-                           "Epsilon NFA's sole final state.",
-                           STATE_MACHINES_TYPE_STATE,
-                           G_PARAM_READABLE);
+    g_param_spec_object (PROP_EPSILON_NFA_FINAL_STATE,
+                         "Final state",
+                         "Epsilon NFA's sole final state.",
+                         STATE_MACHINES_TYPE_STATE,
+                         G_PARAM_READABLE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -155,9 +155,9 @@ epsilon_nfa_compute_epsilon_closures (FsmConvertible *self)
             {
               gchar expected_character = (gchar) GPOINTER_TO_INT (g_slist_nth_data (alphabet, j));
               Transition *epsilon_closed_transition =
-                  epsilon_nfa_build_epsilon_closed_transition (state,
-                                                               expected_character,
-                                                               input_output_combinations);
+                epsilon_nfa_build_epsilon_closed_transition (state,
+                                                             expected_character,
+                                                             input_output_combinations);
 
               if (epsilon_closed_transition != NULL)
                 {

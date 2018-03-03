@@ -13,13 +13,13 @@ struct _AcceptorRunnableInterface
 {
     GTypeInterface parent_iface;
 
-    void (*run) (AcceptorRunnable *self,
-                 const gchar      *input);
-    gboolean (*can_accept) (AcceptorRunnable  *self);
+    void     (*run)        (AcceptorRunnable *self,
+                            const gchar      *input);
+    gboolean (*can_accept) (AcceptorRunnable *self);
 };
 
-void acceptor_runnable_run (AcceptorRunnable *self,
-                            const gchar      *input);
+void     acceptor_runnable_run        (AcceptorRunnable *self,
+                                       const gchar      *input);
 
 gboolean acceptor_runnable_can_accept (AcceptorRunnable *self);
 

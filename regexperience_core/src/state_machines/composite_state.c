@@ -12,8 +12,6 @@ typedef struct
     CompositeStateResolveTypeFlagsMode  resolve_type_flags_mode;
 } CompositeStatePrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (CompositeState, composite_state, STATE_MACHINES_TYPE_STATE)
-
 enum
 {
     PROP_COMPOSED_FROM_STATES = 1,
@@ -23,20 +21,22 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static gboolean composite_state_is_composed_from (State           *self,
-                                                  const GPtrArray *states);
+static gboolean composite_state_is_composed_from (State                 *self,
+                                                  const GPtrArray       *states);
 
 static gboolean composite_state_can_be_marked_as (CompositeStatePrivate *priv,
                                                   StateTypeFlags         state_type_flags);
 
-static void composite_state_constructed (GObject *object);
+static void     composite_state_constructed      (GObject               *object);
 
-static void composite_state_set_property (GObject      *object,
-                                          guint         property_id,
-                                          const GValue *value,
-                                          GParamSpec   *pspec);
+static void     composite_state_set_property     (GObject               *object,
+                                                  guint                  property_id,
+                                                  const GValue          *value,
+                                                  GParamSpec            *pspec);
 
-static void composite_state_dispose (GObject *object);
+static void     composite_state_dispose          (GObject               *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (CompositeState, composite_state, STATE_MACHINES_TYPE_STATE)
 
 static void
 composite_state_class_init (CompositeStateClass *klass)
@@ -51,20 +51,20 @@ composite_state_class_init (CompositeStateClass *klass)
   object_class->dispose = composite_state_dispose;
 
   obj_properties[PROP_COMPOSED_FROM_STATES] =
-      g_param_spec_boxed (PROP_COMPOSITE_STATE_COMPOSED_FROM_STATES,
-                          "Composed from states",
-                          "States which serve as a basis for constructing the composite state.",
-                          G_TYPE_PTR_ARRAY,
-                          G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
+    g_param_spec_boxed (PROP_COMPOSITE_STATE_COMPOSED_FROM_STATES,
+                        "Composed from states",
+                        "States which serve as a basis for constructing the composite state.",
+                        G_TYPE_PTR_ARRAY,
+                        G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
 
   obj_properties[PROP_RESOLVE_TYPE_FLAGS_MODE] =
-      g_param_spec_uint (PROP_COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE,
-                         "Resolve type flags mode",
-                         "Flags describing how the composite state's own type flags should be resolved.",
-                         0,
-                         G_MAXUINT32,
-                         COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_ALL,
-                         G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
+    g_param_spec_uint (PROP_COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE,
+                       "Resolve type flags mode",
+                       "Flags describing how the composite state's own type flags should be resolved.",
+                       0,
+                       G_MAXUINT32,
+                       COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_ALL,
+                       G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

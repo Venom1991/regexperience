@@ -9,8 +9,6 @@ typedef struct
     EqualityConditionType condition_type;
 } TransitionPrivate;
 
-G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (Transition, transition, G_TYPE_OBJECT)
-
 enum
 {
     PROP_EXPECTED_CHARACTER = 1,
@@ -23,15 +21,17 @@ static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
 static GEqualFunc transition_discern_equality_function (EqualityConditionType condition_type);
 
-static void transition_get_property (GObject    *object,
-                                     guint       property_id,
-                                     GValue     *value,
-                                     GParamSpec *pspec);
+static void       transition_get_property              (GObject      *object,
+                                                        guint         property_id,
+                                                        GValue       *value,
+                                                        GParamSpec   *pspec);
 
-static void transition_set_property (GObject      *object,
-                                     guint         property_id,
-                                     const GValue *value,
-                                     GParamSpec   *pspec);
+static void       transition_set_property              (GObject      *object,
+                                                        guint         property_id,
+                                                        const GValue *value,
+                                                        GParamSpec   *pspec);
+
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (Transition, transition, G_TYPE_OBJECT)
 
 static void
 transition_class_init (TransitionClass *klass)
@@ -42,30 +42,30 @@ transition_class_init (TransitionClass *klass)
   object_class->set_property = transition_set_property;
 
   obj_properties[PROP_EXPECTED_CHARACTER] =
-      g_param_spec_char (PROP_TRANSITION_EXPECTED_CHARACTER,
-                         "Expected character",
-                         "Expected character used to check if the equality condition is met.",
-                         0,
-                         G_MAXINT8,
-                         EPSILON,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_char (PROP_TRANSITION_EXPECTED_CHARACTER,
+                       "Expected character",
+                       "Expected character used to check if the equality condition is met.",
+                       0,
+                       G_MAXINT8,
+                       EPSILON,
+                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   obj_properties[PROP_REQUIRES_INPUT] =
-      g_param_spec_boolean (PROP_TRANSITION_REQUIRES_INPUT,
-                            "Requires input",
-                            "Describes whether or not an actual input is required in order for"
-                                "the transition to occur.",
-                            TRUE,
-                            G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_boolean (PROP_TRANSITION_REQUIRES_INPUT,
+                          "Requires input",
+                          "Describes whether or not an actual input is required in order for"
+                              "the transition to occur.",
+                          TRUE,
+                          G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   obj_properties[PROP_CONDITION] =
-      g_param_spec_uint (PROP_TRANSITION_EQUALITY_CONDITION_TYPE,
-                         "Equality condition type",
-                         "Type of equality condition that needs to be satisfied in order for the transition to occur.",
-                         EQUALITY_CONDITION_TYPE_UNDEFINED,
-                         EQUALITY_CONDITION_TYPE_NOT_EQUAL,
-                         EQUALITY_CONDITION_TYPE_EQUAL,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_uint (PROP_TRANSITION_EQUALITY_CONDITION_TYPE,
+                       "Equality condition type",
+                       "Type of equality condition that needs to be satisfied in order for the transition to occur.",
+                       EQUALITY_CONDITION_TYPE_UNDEFINED,
+                       EQUALITY_CONDITION_TYPE_NOT_EQUAL,
+                       EQUALITY_CONDITION_TYPE_EQUAL,
+                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

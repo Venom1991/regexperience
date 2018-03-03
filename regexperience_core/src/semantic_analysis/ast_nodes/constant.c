@@ -15,8 +15,6 @@ typedef struct
     guint position;
 } ConstantPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (Constant, constant, AST_NODES_TYPE_AST_NODE)
-
 enum
 {
     PROP_VALUE = 1,
@@ -26,17 +24,19 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static FsmConvertible *constant_build_fsm (AstNode *self);
+static FsmConvertible *constant_build_acceptor (AstNode      *self);
 
-static void constant_get_property (GObject    *object,
-                                   guint       property_id,
-                                   GValue     *value,
-                                   GParamSpec *pspec);
+static void            constant_get_property   (GObject      *object,
+                                                guint         property_id,
+                                                GValue       *value,
+                                                GParamSpec   *pspec);
 
-static void constant_set_property (GObject      *object,
-                                   guint         property_id,
-                                   const GValue *value,
-                                   GParamSpec   *pspec);
+static void            constant_set_property   (GObject      *object,
+                                                guint         property_id,
+                                                const GValue *value,
+                                                GParamSpec   *pspec);
+
+G_DEFINE_TYPE_WITH_PRIVATE (Constant, constant, AST_NODES_TYPE_AST_NODE)
 
 static void
 constant_class_init (ConstantClass *klass)
@@ -44,28 +44,28 @@ constant_class_init (ConstantClass *klass)
   AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  ast_node_class->build_fsm = constant_build_fsm;
+  ast_node_class->build_acceptor = constant_build_acceptor;
 
   object_class->get_property = constant_get_property;
   object_class->set_property = constant_set_property;
 
   obj_properties[PROP_VALUE] =
-      g_param_spec_char (PROP_CONSTANT_VALUE,
-                         "Value",
-                         "Value of the constant which can be either a letter, a digit, a special character, etc.",
-                         0,
-                         G_MAXINT8,
-                         0,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_char (PROP_CONSTANT_VALUE,
+                       "Value",
+                       "Value of the constant which can be either a letter, a digit, a special character, etc.",
+                       0,
+                       G_MAXINT8,
+                       0,
+                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   obj_properties[PROP_POSITION] =
-      g_param_spec_uint (PROP_CONSTANT_POSITION,
-                         "Position",
-                         "Position of the constant relative to the beginning of the input.",
-                         0,
-                         G_MAXUINT32,
-                         0,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_uint (PROP_CONSTANT_POSITION,
+                       "Position",
+                       "Position of the constant relative to the beginning of the input.",
+                       0,
+                       G_MAXUINT32,
+                       0,
+                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -79,7 +79,7 @@ constant_init (Constant *self)
 }
 
 static FsmConvertible *
-constant_build_fsm (AstNode *self)
+constant_build_acceptor (AstNode *self)
 {
   g_return_val_if_fail (AST_NODES_IS_CONSTANT (self), NULL);
 
@@ -90,9 +90,10 @@ constant_build_fsm (AstNode *self)
   State *start = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_START);
   State *final = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_FINAL);
   g_autoptr (GPtrArray) start_transitions = g_ptr_array_new_with_free_func (g_object_unref);
-  Transition *start_to_final_on_value = create_deterministic_transition (expected_character, final);
+  Transition *start_on_value = create_deterministic_transition (expected_character,
+                                                                final);
 
-  g_ptr_array_add (start_transitions, start_to_final_on_value);
+  g_ptr_array_add (start_transitions, start_on_value);
   g_object_set (start,
                 PROP_STATE_TRANSITIONS, start_transitions,
                 NULL);

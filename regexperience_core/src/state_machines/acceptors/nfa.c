@@ -10,30 +10,30 @@ struct _Nfa
     Fsm parent_instance;
 };
 
-static void nfa_fsm_convertible_interface_init (FsmConvertibleInterface *iface);
+static void            nfa_fsm_convertible_interface_init   (FsmConvertibleInterface *iface);
+
+static FsmConvertible *nfa_compute_epsilon_closures         (FsmConvertible          *self);
+
+static FsmModifiable  *nfa_construct_subset                 (FsmConvertible          *self);
+
+static void            nfa_define_dfa_states_from_scalar    (State                   *input_state,
+                                                             GSList                  *alphabet,
+                                                             GPtrArray               *dfa_states);
+
+static void            nfa_define_dfa_states_from_composite (State                   *input_state,
+                                                             GPtrArray               *composed_from_states,
+                                                             GSList                  *alphabet,
+                                                             GPtrArray               *dfa_states);
+
+static void            nfa_define_transitions_for_dfa_state (GPtrArray               *output_states,
+                                                             GSList                  *alphabet,
+                                                             gchar                    expected_character,
+                                                             GPtrArray               *dfa_states,
+                                                             GPtrArray               *dfa_transitions);
 
 G_DEFINE_TYPE_WITH_CODE (Nfa, nfa, STATE_MACHINES_TYPE_FSM,
                          G_IMPLEMENT_INTERFACE (STATE_MACHINES_TYPE_FSM_CONVERTIBLE,
                                                 nfa_fsm_convertible_interface_init))
-
-static FsmConvertible *nfa_compute_epsilon_closures (FsmConvertible *self);
-
-static FsmModifiable *nfa_construct_subset (FsmConvertible *self);
-
-static void nfa_define_dfa_states_from_scalar (State     *input_state,
-                                               GSList    *alphabet,
-                                               GPtrArray *dfa_states);
-
-static void nfa_define_dfa_states_from_composite (State                 *input_state,
-                                                  GPtrArray             *composed_from_states,
-                                                  GSList                *alphabet,
-                                                  GPtrArray             *dfa_states);
-
-static void nfa_define_transitions_for_dfa_state (GPtrArray             *output_states,
-                                                  GSList                *alphabet,
-                                                  gchar                  expected_character,
-                                                  GPtrArray             *dfa_states,
-                                                  GPtrArray             *dfa_transitions);
 
 static void
 nfa_class_init (NfaClass *klass)
@@ -130,8 +130,8 @@ nfa_define_dfa_states_from_composite (State                 *input_state,
        * found in states which were used to construct the composite state.
        */
       g_autoptr (GPtrArray) composed_from_states_output_states =
-          fsm_fetch_output_states_from_multiple (composed_from_states,
-                                                 expected_character);
+        fsm_fetch_output_states_from_multiple (composed_from_states,
+                                               expected_character);
 
       nfa_define_transitions_for_dfa_state (composed_from_states_output_states,
                                             alphabet,

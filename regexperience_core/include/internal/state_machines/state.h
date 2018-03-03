@@ -14,7 +14,8 @@ struct _StateClass
 {
     GObjectClass parent_instance;
 
-    gboolean (*is_composed_from) (State *self, const GPtrArray *states);
+    gboolean (*is_composed_from) (State           *self,
+                                  const GPtrArray *states);
 
     gpointer padding[8];
 };
@@ -22,12 +23,12 @@ struct _StateClass
 gboolean state_is_composed_from (State           *self,
                                  const GPtrArray *states);
 
-gboolean state_is_dead (State *self);
+gboolean state_is_dead          (State           *self);
 
 #define PROP_STATE_TYPE_FLAGS  "type-flags"
 #define PROP_STATE_TRANSITIONS "transitions"
 
-typedef enum _StateTypeFlags
+typedef enum
 {
     STATE_TYPE_UNDEFINED = 0x0000,
     STATE_TYPE_DEFAULT = 1 << 0,

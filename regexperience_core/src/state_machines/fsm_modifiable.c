@@ -36,4 +36,3 @@ state_machine_modifiable_complement (FsmModifiable *self)
 
   iface->complement (self);
 }
-

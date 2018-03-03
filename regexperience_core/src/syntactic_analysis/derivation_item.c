@@ -13,8 +13,6 @@ typedef struct
     Rule       *right_hand_side;
 } DerivationItemPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (DerivationItem, derivation_item, G_TYPE_OBJECT)
-
 enum
 {
     PROP_LEFT_HAND_SIDE = 1,
@@ -24,17 +22,19 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static void derivation_item_get_property (GObject    *object,
-                                          guint       property_id,
-                                          GValue     *value,
-                                          GParamSpec *pspec);
+static void derivation_item_get_property (GObject      *object,
+                                          guint         property_id,
+                                          GValue       *value,
+                                          GParamSpec   *pspec);
 
 static void derivation_item_set_property (GObject      *object,
                                           guint         property_id,
                                           const GValue *value,
                                           GParamSpec   *pspec);
 
-static void derivation_item_dispose (GObject *object);
+static void derivation_item_dispose      (GObject      *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (DerivationItem, derivation_item, G_TYPE_OBJECT)
 
 static void
 derivation_item_class_init (DerivationItemClass *klass)
@@ -46,18 +46,18 @@ derivation_item_class_init (DerivationItemClass *klass)
   object_class->dispose = derivation_item_dispose;
 
   obj_properties[PROP_LEFT_HAND_SIDE] =
-      g_param_spec_object (PROP_DERIVATION_ITEM_LEFT_HAND_SIDE,
-                           "Left-hand side",
-                           "Production representing the left-hand side of the derivation item.",
-                           SYNTACTIC_ANALYSIS_TYPE_PRODUCTION,
-                           G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_object (PROP_DERIVATION_ITEM_LEFT_HAND_SIDE,
+                         "Left-hand side",
+                         "Production representing the left-hand side of the derivation item.",
+                         SYNTACTIC_ANALYSIS_TYPE_PRODUCTION,
+                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   obj_properties[PROP_RIGHT_HAND_SIDE] =
-      g_param_spec_object (PROP_DERIVATION_ITEM_RIGHT_HAND_SIDE,
-                           "Right-hand side",
-                           "Rule representing the right-hand side of the derivation item.",
-                           SYNTACTIC_ANALYSIS_TYPE_RULE,
-                           G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_object (PROP_DERIVATION_ITEM_RIGHT_HAND_SIDE,
+                         "Right-hand side",
+                         "Rule representing the right-hand side of the derivation item.",
+                         SYNTACTIC_ANALYSIS_TYPE_RULE,
+                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

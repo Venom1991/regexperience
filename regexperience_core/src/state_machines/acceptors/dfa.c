@@ -17,9 +17,43 @@ typedef struct
     gboolean  is_input_exhausted;
 } DfaPrivate;
 
-static void dfa_fsm_modifiable_interface_init (FsmModifiableInterface *iface);
+static void       dfa_fsm_modifiable_interface_init                   (FsmModifiableInterface    *iface);
 
-static void dfa_acceptor_runnable_interface_init (AcceptorRunnableInterface *iface);
+static void       dfa_acceptor_runnable_interface_init                (AcceptorRunnableInterface *iface);
+
+static void       dfa_minimize                                        (FsmModifiable             *self);
+
+static void       dfa_complement                                      (FsmModifiable             *self);
+
+static void       dfa_run                                             (AcceptorRunnable          *self,
+                                                                       const gchar               *input);
+
+static gboolean   dfa_can_accept                                      (AcceptorRunnable          *self);
+
+static void       dfa_prepare_for_run                                 (Dfa                       *self);
+
+static gboolean   dfa_transition_to_next_state                        (Dfa                       *self,
+                                                                       gchar                      input_character);
+
+static void       dfa_remove_unreachable_states_if_needed             (Dfa                       *self);
+
+static GArray    *dfa_fetch_unreachable_states_from                   (GPtrArray                 *all_states);
+
+static void       dfa_compose_equivalent_states_if_needed             (Dfa                       *self);
+
+static GPtrArray *dfa_fetch_equivalence_classes_from                  (GPtrArray                 *input_equivalence_classes,
+                                                                       GSList                    *alphabet);
+
+static gboolean   dfa_can_states_transition_to_same_equivalence_class (State                     *first_state,
+                                                                       State                     *second_state,
+                                                                       gchar                      expected_character,
+                                                                       GPtrArray                 *equivalence_classes);
+
+static GPtrArray *dfa_fetch_matched_equivalence_class_from            (GPtrArray                 *input_equivalence_class,
+                                                                       GPtrArray                 *all_equivalence_classes,
+                                                                       gchar                      expected_character);
+
+static void       dfa_dispose (GObject *object);
 
 G_DEFINE_TYPE_WITH_CODE (Dfa, dfa, STATE_MACHINES_TYPE_FSM,
                          G_ADD_PRIVATE (Dfa)
@@ -27,38 +61,6 @@ G_DEFINE_TYPE_WITH_CODE (Dfa, dfa, STATE_MACHINES_TYPE_FSM,
                                                 dfa_fsm_modifiable_interface_init)
                          G_IMPLEMENT_INTERFACE (ACCEPTORS_TYPE_ACCEPTOR_RUNNABLE,
                                                 dfa_acceptor_runnable_interface_init))
-
-static void dfa_minimize (FsmModifiable *self);
-
-static void dfa_complement (FsmModifiable *self);
-
-static void dfa_run (AcceptorRunnable *self, const gchar *input);
-
-static gboolean dfa_can_accept (AcceptorRunnable *self);
-
-static void dfa_prepare_for_run (Dfa *self);
-
-static gboolean dfa_transition_to_next_state (Dfa *self, gchar input_character);
-
-static void dfa_remove_unreachable_states_if_needed (Dfa *self);
-
-static GArray *dfa_fetch_unreachable_states_from (GPtrArray *all_states);
-
-static void dfa_compose_equivalent_states_if_needed (Dfa *self);
-
-static GPtrArray *dfa_fetch_equivalence_classes_from (GPtrArray *input_equivalence_classes,
-                                                      GSList    *alphabet);
-
-static gboolean dfa_can_states_transition_to_same_equivalence_class (State     *first_state,
-                                                                     State     *second_state,
-                                                                     gchar      expected_character,
-                                                                     GPtrArray *equivalence_classes);
-
-static GPtrArray *dfa_fetch_matched_equivalence_class_from (GPtrArray *input_equivalence_class,
-                                                            GPtrArray *all_equivalence_classes,
-                                                            gchar      expected_character);
-
-static void dfa_dispose (GObject *object);
 
 static void
 dfa_class_init (DfaClass *klass)
@@ -158,7 +160,8 @@ dfa_complement (FsmModifiable *self)
 }
 
 static void
-dfa_run (AcceptorRunnable *self, const gchar *input)
+dfa_run (AcceptorRunnable *self,
+         const gchar      *input)
 {
   g_return_if_fail (ACCEPTORS_IS_DFA (self));
   g_return_if_fail (input != NULL);
@@ -224,7 +227,8 @@ dfa_prepare_for_run (Dfa *self)
 }
 
 static gboolean
-dfa_transition_to_next_state (Dfa *self, gchar input_character)
+dfa_transition_to_next_state (Dfa   *self,
+                              gchar  input_character)
 {
   DfaPrivate *priv = dfa_get_instance_private (self);
 
@@ -439,9 +443,10 @@ dfa_compose_equivalent_states_if_needed (Dfa *self)
                 {
                   gchar expected_character = (gchar) GPOINTER_TO_INT (g_slist_nth_data (alphabet, j));
                   State *output_state = NULL;
-                  GPtrArray *matched_equivalence_class = dfa_fetch_matched_equivalence_class_from (equivalence_class,
-                                                                                                   final_equivalence_classes,
-                                                                                                   expected_character);
+                  GPtrArray *matched_equivalence_class =
+                    dfa_fetch_matched_equivalence_class_from (equivalence_class,
+                                                              final_equivalence_classes,
+                                                              expected_character);
 
                   g_return_if_fail (matched_equivalence_class != NULL);
 

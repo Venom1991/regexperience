@@ -13,7 +13,7 @@ G_DECLARE_FINAL_TYPE (Token, token, SYNTACTIC_ANALYSIS, TOKEN, GObject)
 #define PROP_TOKEN_CATEGORY "category"
 #define PROP_TOKEN_LEXEME   "lexeme"
 
-typedef enum _TokenCategory
+typedef enum
 {
     TOKEN_CATEGORY_UNDEFINED,
     TOKEN_CATEGORY_ORDINARY_CHARACTER,

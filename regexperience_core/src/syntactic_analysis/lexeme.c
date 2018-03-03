@@ -12,8 +12,6 @@ typedef struct
     guint end_position;
 } LexemePrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (Lexeme, lexeme, G_TYPE_OBJECT)
-
 enum
 {
     PROP_CONTENT = 1,
@@ -24,17 +22,19 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static void lexeme_get_property (GObject    *object,
-                                 guint       property_id,
-                                 GValue     *value,
-                                 GParamSpec *pspec);
+static void lexeme_get_property (GObject      *object,
+                                 guint         property_id,
+                                 GValue       *value,
+                                 GParamSpec   *pspec);
 
 static void lexeme_set_property (GObject      *object,
                                  guint         property_id,
                                  const GValue *value,
                                  GParamSpec   *pspec);
 
-static void lexeme_finalize (GObject *object);
+static void lexeme_finalize     (GObject      *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (Lexeme, lexeme, G_TYPE_OBJECT)
 
 static void
 lexeme_class_init (LexemeClass *klass)
@@ -46,29 +46,29 @@ lexeme_class_init (LexemeClass *klass)
   object_class->finalize = lexeme_finalize;
 
   obj_properties[PROP_CONTENT] =
-      g_param_spec_boxed (PROP_LEXEME_CONTENT,
-                          "Content",
-                          "Textual content of the lexeme.",
-                          G_TYPE_GSTRING,
-                          G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_boxed (PROP_LEXEME_CONTENT,
+                        "Content",
+                        "Textual content of the lexeme.",
+                        G_TYPE_GSTRING,
+                        G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   obj_properties[PROP_START_POSITION] =
-      g_param_spec_uint (PROP_LEXEME_START_POSITION,
-                         "Start Position",
-                         "Start of the position in which the lexeme appears in the input.",
-                         0,
-                         G_MAXUINT32,
-                         0,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_uint (PROP_LEXEME_START_POSITION,
+                       "Start Position",
+                       "Start of the position in which the lexeme appears in the input.",
+                       0,
+                       G_MAXUINT32,
+                       0,
+                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   obj_properties[PROP_END_POSITION] =
-      g_param_spec_uint (PROP_LEXEME_END_POSITION,
-                         "End Position",
-                         "End of the position in which the lexeme appears in the input.",
-                         0,
-                         G_MAXUINT32,
-                         0,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_uint (PROP_LEXEME_END_POSITION,
+                       "End Position",
+                       "End of the position in which the lexeme appears in the input.",
+                       0,
+                       G_MAXUINT32,
+                       0,
+                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -87,7 +87,7 @@ lexeme_get_property (GObject    *object,
                      GValue     *value,
                      GParamSpec *pspec)
 {
-  LexemePrivate *priv = lexeme_get_instance_private(SYNTACTIC_ANALYSIS_LEXEME (object));
+  LexemePrivate *priv = lexeme_get_instance_private (SYNTACTIC_ANALYSIS_LEXEME (object));
 
   switch (property_id)
     {
@@ -115,7 +115,7 @@ lexeme_set_property (GObject      *object,
                      const GValue *value,
                      GParamSpec   *pspec)
 {
-  LexemePrivate *priv = lexeme_get_instance_private(SYNTACTIC_ANALYSIS_LEXEME (object));
+  LexemePrivate *priv = lexeme_get_instance_private (SYNTACTIC_ANALYSIS_LEXEME (object));
 
   switch (property_id)
     {

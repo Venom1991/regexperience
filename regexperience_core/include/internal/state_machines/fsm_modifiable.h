@@ -13,11 +13,11 @@ struct _FsmModifiableInterface
 {
     GTypeInterface parent_iface;
 
-    void (*minimize) (FsmModifiable  *self);
+    void (*minimize)   (FsmModifiable  *self);
     void (*complement) (FsmModifiable  *self);
 };
 
-void state_machine_modifiable_minimize (FsmModifiable *self);
+void state_machine_modifiable_minimize   (FsmModifiable *self);
 
 void state_machine_modifiable_complement (FsmModifiable *self);
 

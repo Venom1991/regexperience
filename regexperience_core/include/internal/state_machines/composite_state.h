@@ -15,7 +15,7 @@ G_DECLARE_FINAL_TYPE (CompositeState, composite_state, STATE_MACHINES, COMPOSITE
 #define PROP_COMPOSITE_STATE_COMPOSED_FROM_STATES    "composed-from-states"
 #define PROP_COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE "resolve-type-flags-mode"
 
-typedef enum _CompositeStateResolveTypeFlagsMode
+typedef enum
 {
     COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_START = 1 << 0,
     COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_FINAL = 1 << 1,

@@ -3,10 +3,10 @@
 
 #include "internal/semantic_analysis/ast_nodes/ast_node.h"
 
-AstNode *create_constant (GNode *cst_context);
+AstNode *create_constant        (GNode        *cst_context);
 
-AstNode *create_unary_operator (OperatorType  operator_type,
-                                AstNode      *operand);
+AstNode *create_unary_operator  (OperatorType  operator_type,
+                                 AstNode      *operand);
 
 AstNode *create_binary_operator (OperatorType  operator_type,
                                  AstNode      *left_operand,

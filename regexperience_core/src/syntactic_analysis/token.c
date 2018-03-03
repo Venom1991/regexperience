@@ -12,8 +12,6 @@ typedef struct
     Lexeme *lexeme;
 } TokenPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (Token, token, G_TYPE_OBJECT)
-
 enum
 {
     PROP_CATEGORY = 1,
@@ -23,17 +21,19 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static void token_get_property (GObject    *object,
-                                guint       property_id,
-                                GValue     *value,
-                                GParamSpec *pspec);
+static void token_get_property (GObject       *object,
+                                guint          property_id,
+                                GValue        *value,
+                                GParamSpec    *pspec);
 
-static void token_set_property (GObject      *object,
-                                guint         property_id,
-                                const GValue *value,
-                                GParamSpec   *pspec);
+static void token_set_property (GObject       *object,
+                                guint          property_id,
+                                const GValue  *value,
+                                GParamSpec    *pspec);
 
-static void token_dispose (GObject *object);
+static void token_dispose      (GObject       *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (Token, token, G_TYPE_OBJECT)
 
 static void
 token_class_init (TokenClass *klass)
@@ -45,20 +45,20 @@ token_class_init (TokenClass *klass)
   object_class->dispose = token_dispose;
 
   obj_properties[PROP_CATEGORY] =
-      g_param_spec_uint (PROP_TOKEN_CATEGORY,
-                         "Category",
-                         "Category of the token.",
-                         TOKEN_CATEGORY_UNDEFINED,
-                         TOKEN_CATEGORY_N_CATEGORIES - 1,
-                         TOKEN_CATEGORY_UNDEFINED,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_uint (PROP_TOKEN_CATEGORY,
+                       "Category",
+                       "Category of the token.",
+                       TOKEN_CATEGORY_UNDEFINED,
+                       TOKEN_CATEGORY_N_CATEGORIES - 1,
+                       TOKEN_CATEGORY_UNDEFINED,
+                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   obj_properties[PROP_LEXEME] =
-      g_param_spec_object (PROP_TOKEN_LEXEME,
-                           "Lexeme",
-                           "Lexeme associated with the token.",
-                           SYNTACTIC_ANALYSIS_TYPE_LEXEME,
-                           G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_object (PROP_TOKEN_LEXEME,
+                         "Lexeme",
+                         "Lexeme associated with the token.",
+                         SYNTACTIC_ANALYSIS_TYPE_LEXEME,
+                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

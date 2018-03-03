@@ -19,66 +19,66 @@ typedef struct
     Grammar    *grammar;
 } ParserPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (Parser, parser, G_TYPE_OBJECT)
-
 G_DEFINE_QUARK (syntactic-analysis-parser-error-quark, syntactic_analysis_parser_error)
-#define SYNTACTIC_ANALYSIS_PARSER_ERROR (syntactic_analysis_parser_error_quark())
+#define SYNTACTIC_ANALYSIS_PARSER_ERROR (syntactic_analysis_parser_error_quark ())
 
-typedef enum _FillQueuesMode
+typedef enum
 {
     FILL_QUEUES_MODE_INITIALIZATION,
     FILL_QUEUES_MODE_EXPANSION
 } FillQueuesMode;
 
-static void parser_prepare_for_parsing (Parser *self);
+static void      parser_prepare_for_parsing        (Parser         *self);
 
-static void parser_fill_queues (GPtrArray      *analysis_queues,
-                                GQueue         *analysis_queue_for_copy,
-                                GPtrArray      *prediction_queues,
-                                GQueue         *prediction_queue_for_copy,
-                                Production     *production,
-                                FillQueuesMode  mode);
+static void      parser_fill_queues                (GPtrArray      *analysis_queues,
+                                                    GQueue         *analysis_queue_for_copy,
+                                                    GPtrArray      *prediction_queues,
+                                                    GQueue         *prediction_queue_for_copy,
+                                                    Production     *production,
+                                                    FillQueuesMode  mode);
 
-static void parser_remove_queues (GPtrArray *analysis_queues,
-                                  GArray    *analyses_for_removal,
-                                  GPtrArray *prediction_queues,
-                                  GArray    *predictions_for_removal);
+static void      parser_remove_queues              (GPtrArray       *analysis_queues,
+                                                    GArray          *analyses_for_removal,
+                                                    GPtrArray       *prediction_queues,
+                                                    GArray          *predictions_for_removal);
 
-static void parser_predict (GPtrArray  *analysis_queues,
-                            GPtrArray  *prediction_queues);
+static void      parser_predict                    (GPtrArray       *analysis_queues,
+                                                    GPtrArray       *prediction_queues);
 
-static gboolean parser_can_make_prediction (GPtrArray  *prediction_queues,
-                                            GArray    **indexes_for_expansion);
+static gboolean  parser_can_make_prediction        (GPtrArray       *prediction_queues,
+                                                    GArray         **indexes_for_expansion);
 
-static void parser_discard (GPtrArray *analysis_queues,
-                            GPtrArray *prediction_queues,
-                            Token     *token);
+static void      parser_discard                    (GPtrArray       *analysis_queues,
+                                                    GPtrArray       *prediction_queues,
+                                                    Token           *token);
 
-static gboolean parser_can_accept (GPtrArray *analysis_queues,
-                                   GPtrArray *prediction_queues,
-                                   Token     *token);
+static gboolean  parser_can_accept                 (GPtrArray       *analysis_queues,
+                                                    GPtrArray       *prediction_queues,
+                                                    Token           *token);
 
-static void parser_match (GPtrArray *analysis_queues,
-                          GPtrArray *prediction_queues,
-                          Token     *token);
+static void      parser_match                      (GPtrArray       *analysis_queues,
+                                                    GPtrArray       *prediction_queues,
+                                                    Token           *token);
 
-static GNode *parser_transform_analysis (GPtrArray *analysis_queues);
+static GNode    *parser_transform_analysis         (GPtrArray       *analysis_queues);
 
-static void parser_insert_children (GNode  *root,
-                                    GQueue *remaining_analysis_queue);
+static void      parser_insert_children            (GNode           *root,
+                                                    GQueue          *remaining_analysis_queue);
 
-static void parser_report_error_if_needed (Token      *current_token,
-                                           guint       token_position,
-                                           GPtrArray  *all_tokens,
-                                           guint       prediction_queues_count,
-                                           GError    **error);
+static void      parser_report_error_if_needed     (Token           *current_token,
+                                                    guint            token_position,
+                                                    GPtrArray       *all_tokens,
+                                                    guint            prediction_queues_count,
+                                                    GError         **error);
 
-static gboolean parser_token_exists_in_all_tokens (GPtrArray      *all_tokens,
-                                                   TokenCategory   category,
-                                                   guint           starting_position,
-                                                   Token         **found_token);
+static gboolean  parser_token_exists_in_all_tokens (GPtrArray       *all_tokens,
+                                                    TokenCategory    category,
+                                                    guint            starting_position,
+                                                    Token          **found_token);
 
-static void parser_dispose (GObject *object);
+static void      parser_dispose                    (GObject *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (Parser, parser, G_TYPE_OBJECT)
 
 static void
 parser_class_init (ParserClass *klass)
@@ -305,8 +305,8 @@ parser_predict (GPtrArray  *analysis_queues,
   if (!parser_can_make_prediction (prediction_queues, &indexes_for_expansion))
     return;
 
-  g_autoptr (GPtrArray) expansion_analysis_queues = g_ptr_array_new();
-  g_autoptr (GPtrArray) expansion_prediction_queues = g_ptr_array_new();
+  g_autoptr (GPtrArray) expansion_analysis_queues = g_ptr_array_new ();
+  g_autoptr (GPtrArray) expansion_prediction_queues = g_ptr_array_new ();
   g_autoptr (GArray) analyses_for_removal = g_array_new (FALSE, FALSE, sizeof (gpointer));
   g_autoptr (GArray) predictions_for_removal = g_array_new (FALSE, FALSE, sizeof (gpointer));
 

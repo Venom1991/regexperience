@@ -15,7 +15,7 @@ G_DECLARE_FINAL_TYPE (Quantification, quantification, AST_NODES, QUANTIFICATION,
 #define PROP_QUANTIFICATION_LOWER_BOUND "lower-bound"
 #define PROP_QUANTIFICATION_UPPER_BOUND "upper-bound"
 
-typedef enum _QuantificationBoundType
+typedef enum
 {
     QUANTIFICATION_BOUND_TYPE_UNDEFINED,
     QUANTIFICATION_BOUND_TYPE_ZERO,

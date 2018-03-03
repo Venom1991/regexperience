@@ -52,11 +52,11 @@ terminal_class_init (TerminalClass *klass)
   object_class->finalize = terminal_finalize;
 
   obj_properties[PROP_VALUE] =
-      g_param_spec_string (PROP_SYMBOL_VALUE,
-                           "Value",
-                           "Textual content of the terminal symbol, can be a delimited string.",
-                           NULL,
-                           G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
+    g_param_spec_string (PROP_SYMBOL_VALUE,
+                         "Value",
+                         "Textual content of the terminal symbol, can be a delimited string.",
+                         NULL,
+                         G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -138,7 +138,7 @@ terminal_set_property (GObject      *object,
     {
     case PROP_VALUE:
       if (priv->concatenated_value != NULL)
-        g_free(priv->concatenated_value);
+        g_free (priv->concatenated_value);
 
       priv->concatenated_value = g_value_dup_string (value);
       break;
@@ -158,7 +158,7 @@ terminal_finalize (GObject *object)
     g_free (priv->concatenated_value);
 
   if (priv->split_values != NULL)
-    g_clear_pointer (&priv->split_values, g_ptr_array_unref);
+    g_ptr_array_unref (priv->split_values);
 
   G_OBJECT_CLASS (terminal_parent_class)->finalize (object);
 }

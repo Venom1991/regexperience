@@ -1,7 +1,6 @@
-#include <internal/state_machines/transitions/mealy_transition.h>
 #include "internal/state_machines/transitions/transition_factory.h"
-#include "internal/state_machines/transitions/deterministic_transition.h"
 #include "internal/state_machines/transitions/nondeterministic_transition.h"
+#include <internal/state_machines/transitions/mealy_transition.h>
 
 Transition *
 create_nondeterministic_transition (gchar      expected_character,

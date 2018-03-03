@@ -6,8 +6,6 @@ typedef struct
     GWeakRef output_state;
 } DeterministicTransitionPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (DeterministicTransition, deterministic_transition, TRANSITIONS_TYPE_TRANSITION)
-
 enum
 {
     PROP_OUTPUT_STATE = 1,
@@ -16,17 +14,19 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static void deterministic_transition_get_property (GObject    *object,
-                                                   guint       property_id,
-                                                   GValue     *value,
-                                                   GParamSpec *pspec);
+static void deterministic_transition_get_property (GObject      *object,
+                                                   guint         property_id,
+                                                   GValue       *value,
+                                                   GParamSpec   *pspec);
 
 static void deterministic_transition_set_property (GObject      *object,
                                                    guint         property_id,
                                                    const GValue *value,
                                                    GParamSpec   *pspec);
 
-static void deterministic_transition_dispose (GObject *object);
+static void deterministic_transition_dispose      (GObject      *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (DeterministicTransition, deterministic_transition, TRANSITIONS_TYPE_TRANSITION)
 
 static void
 deterministic_transition_class_init (DeterministicTransitionClass *klass)
@@ -38,11 +38,11 @@ deterministic_transition_class_init (DeterministicTransitionClass *klass)
   object_class->dispose = deterministic_transition_dispose;
 
   obj_properties[PROP_OUTPUT_STATE] =
-      g_param_spec_object (PROP_DETERMINISTIC_TRANSITION_OUTPUT_STATE,
-                           "Output state",
-                           "Output state in which a DFA could transition itself.",
-                           STATE_MACHINES_TYPE_STATE,
-                           G_PARAM_READWRITE);
+    g_param_spec_object (PROP_DETERMINISTIC_TRANSITION_OUTPUT_STATE,
+                         "Output state",
+                         "Output state in which a DFA could transition itself.",
+                         STATE_MACHINES_TYPE_STATE,
+                         G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -65,7 +65,7 @@ deterministic_transition_get_property (GObject    *object,
                                        GParamSpec *pspec)
 {
   DeterministicTransitionPrivate *priv =
-      deterministic_transition_get_instance_private (TRANSITIONS_DETERMINISTIC_TRANSITION (object));
+    deterministic_transition_get_instance_private (TRANSITIONS_DETERMINISTIC_TRANSITION (object));
 
   switch (property_id)
     {
@@ -90,7 +90,7 @@ deterministic_transition_set_property (GObject      *object,
                                        GParamSpec   *pspec)
 {
   DeterministicTransitionPrivate *priv =
-      deterministic_transition_get_instance_private (TRANSITIONS_DETERMINISTIC_TRANSITION (object));
+    deterministic_transition_get_instance_private (TRANSITIONS_DETERMINISTIC_TRANSITION (object));
 
   switch (property_id)
     {
@@ -112,7 +112,7 @@ static void
 deterministic_transition_dispose (GObject *object)
 {
   DeterministicTransitionPrivate *priv =
-      deterministic_transition_get_instance_private (TRANSITIONS_DETERMINISTIC_TRANSITION (object));
+    deterministic_transition_get_instance_private (TRANSITIONS_DETERMINISTIC_TRANSITION (object));
 
   g_weak_ref_clear (&priv->output_state);
 

@@ -16,12 +16,12 @@ struct _FsmConvertibleInterface
     GTypeInterface parent_iface;
 
     FsmConvertible * (*compute_epsilon_closures) (FsmConvertible  *self);
-    FsmModifiable * (*construct_subset) (FsmConvertible  *self);
+    FsmModifiable  * (*construct_subset)         (FsmConvertible  *self);
 };
 
 FsmConvertible *fsm_convertible_compute_epsilon_closures (FsmConvertible *self);
 
-FsmModifiable *fsm_convertible_construct_subset (FsmConvertible *self);
+FsmModifiable  *fsm_convertible_construct_subset         (FsmConvertible *self);
 
 G_END_DECLS
 

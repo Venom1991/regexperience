@@ -13,15 +13,13 @@ typedef struct
     guint     count;
 } NondeterministicTransitionPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (NondeterministicTransition, nondeterministic_transition, TRANSITIONS_TYPE_TRANSITION)
-
 enum
 {
     PROP_OUTPUT_STATES = 1,
     N_PROPERTIES
 };
 
-typedef enum _ManipulateOutputStatesMode
+typedef enum
 {
     MANIPULATE_OUTPUT_STATES_MODE_INITIALIZATION,
     MANIPULATE_OUTPUT_STATES_MODE_CLEARING
@@ -29,28 +27,30 @@ typedef enum _ManipulateOutputStatesMode
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static void nondeterministic_transition_prepare_output_states (NondeterministicTransitionPrivate *priv,
-                                                               guint                              new_count);
+static void       nondeterministic_transition_prepare_output_states          (NondeterministicTransitionPrivate *priv,
+                                                                              guint                              new_count);
 
-static GPtrArray *nondeterministic_transition_output_states_to_g_ptr_array (NondeterministicTransitionPrivate *priv);
+static GPtrArray *nondeterministic_transition_output_states_to_g_ptr_array   (NondeterministicTransitionPrivate *priv);
 
-static void nondeterministic_transition_output_states_from_g_ptr_array (NondeterministicTransitionPrivate *priv,
-                                                                        GPtrArray                         *ptr_array);
+static void       nondeterministic_transition_output_states_from_g_ptr_array (NondeterministicTransitionPrivate *priv,
+                                                                              GPtrArray                         *ptr_array);
 
-static void nondeterministic_transition_manipulate_output_states (NondeterministicTransitionPrivate *priv,
-                                                                  ManipulateOutputStatesMode         mode);
+static void       nondeterministic_transition_manipulate_output_states       (NondeterministicTransitionPrivate *priv,
+                                                                              ManipulateOutputStatesMode         mode);
 
-static void nondeterministic_transition_get_property (GObject    *object,
-                                                      guint       property_id,
-                                                      GValue     *value,
-                                                      GParamSpec *pspec);
+static void       nondeterministic_transition_get_property                   (GObject                           *object,
+                                                                              guint                              property_id,
+                                                                              GValue                            *value,
+                                                                              GParamSpec                        *pspec);
 
-static void nondeterministic_transition_set_property (GObject      *object,
-                                                      guint         property_id,
-                                                      const GValue *value,
-                                                      GParamSpec   *pspec);
+static void       nondeterministic_transition_set_property                   (GObject                           *object,
+                                                                              guint                              property_id,
+                                                                              const GValue                      *value,
+                                                                              GParamSpec                        *pspec);
 
-static void nondeterministic_transition_dispose (GObject *object);
+static void       nondeterministic_transition_dispose                        (GObject                           *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (NondeterministicTransition, nondeterministic_transition, TRANSITIONS_TYPE_TRANSITION)
 
 static void
 nondeterministic_transition_class_init (NondeterministicTransitionClass *klass)
@@ -62,11 +62,11 @@ nondeterministic_transition_class_init (NondeterministicTransitionClass *klass)
   object_class->dispose = nondeterministic_transition_dispose;
 
   obj_properties[PROP_OUTPUT_STATES] =
-      g_param_spec_boxed (PROP_NONDETERMINISTIC_TRANSITION_OUTPUT_STATES,
-                          "Output states",
-                          "Output states (one or more) in which an NFA or an epsilon NFA could transition itself.",
-                          G_TYPE_PTR_ARRAY,
-                          G_PARAM_READWRITE);
+    g_param_spec_boxed (PROP_NONDETERMINISTIC_TRANSITION_OUTPUT_STATES,
+                        "Output states",
+                        "Output states (one or more) in which an NFA or an epsilon NFA could transition itself.",
+                        G_TYPE_PTR_ARRAY,
+                        G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -179,7 +179,7 @@ nondeterministic_transition_get_property (GObject    *object,
                                           GParamSpec *pspec)
 {
   NondeterministicTransitionPrivate *priv =
-      nondeterministic_transition_get_instance_private (TRANSITIONS_NONDETERMINISTIC_TRANSITION (object));
+    nondeterministic_transition_get_instance_private (TRANSITIONS_NONDETERMINISTIC_TRANSITION (object));
 
   switch (property_id)
     {
@@ -200,7 +200,7 @@ nondeterministic_transition_set_property (GObject      *object,
                                           GParamSpec   *pspec)
 {
   NondeterministicTransitionPrivate *priv =
-      nondeterministic_transition_get_instance_private (TRANSITIONS_NONDETERMINISTIC_TRANSITION (object));
+    nondeterministic_transition_get_instance_private (TRANSITIONS_NONDETERMINISTIC_TRANSITION (object));
 
   switch (property_id)
     {
@@ -218,7 +218,7 @@ static void
 nondeterministic_transition_dispose (GObject *object)
 {
   NondeterministicTransitionPrivate *priv =
-      nondeterministic_transition_get_instance_private (TRANSITIONS_NONDETERMINISTIC_TRANSITION (object));
+    nondeterministic_transition_get_instance_private (TRANSITIONS_NONDETERMINISTIC_TRANSITION (object));
 
   if (priv->output_states != NULL)
     {

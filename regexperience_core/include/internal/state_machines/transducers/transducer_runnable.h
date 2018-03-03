@@ -13,15 +13,16 @@ struct _TransducerRunnableInterface
 {
     GTypeInterface parent_iface;
 
-    void (*reset) (TransducerRunnable *self);
+    void     (*reset) (TransducerRunnable *self);
 
-    gpointer (*run) (TransducerRunnable *self,
-                     gchar               input);
+    gpointer (*run)   (TransducerRunnable *self,
+                       gchar               input);
 };
 
-void transducer_runnable_reset (TransducerRunnable *self);
+void     transducer_runnable_reset (TransducerRunnable *self);
 
-gpointer transducer_runnable_run (TransducerRunnable *self, gchar input);
+gpointer transducer_runnable_run   (TransducerRunnable *self,
+                                    gchar               input);
 
 G_END_DECLS
 

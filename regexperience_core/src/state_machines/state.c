@@ -9,8 +9,6 @@ typedef struct
     GPtrArray      *transitions;
 } StatePrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (State, state, G_TYPE_OBJECT)
-
 enum
 {
     PROP_TYPE_FLAGS = 1,
@@ -23,17 +21,19 @@ static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 static gboolean state_default_is_composed_from (State           *self,
                                                 const GPtrArray *states);
 
-static void state_get_property (GObject    *object,
-                                guint       property_id,
-                                GValue     *value,
-                                GParamSpec *pspec);
+static void     state_get_property             (GObject         *object,
+                                                guint            property_id,
+                                                GValue          *value,
+                                                GParamSpec      *pspec);
 
-static void state_set_property (GObject      *object,
-                                guint         property_id,
-                                const GValue *value,
-                                GParamSpec   *pspec);
+static void     state_set_property             (GObject         *object,
+                                                guint            property_id,
+                                                const GValue    *value,
+                                                GParamSpec      *pspec);
 
-static void state_dispose (GObject *object);
+static void     state_dispose                  (GObject         *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (State, state, G_TYPE_OBJECT)
 
 static void
 state_class_init (StateClass *klass)
@@ -47,20 +47,20 @@ state_class_init (StateClass *klass)
   object_class->dispose = state_dispose;
 
   obj_properties[PROP_TYPE_FLAGS] =
-      g_param_spec_uint (PROP_STATE_TYPE_FLAGS,
-                         "Type flags",
-                         "Flags describing the purpose of the state as part of a state machine as a whole.",
-                         0,
-                         G_MAXUINT32,
-                         STATE_TYPE_UNDEFINED,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_uint (PROP_STATE_TYPE_FLAGS,
+                       "Type flags",
+                       "Flags describing the purpose of the state as part of a state machine as a whole.",
+                       0,
+                       G_MAXUINT32,
+                       STATE_TYPE_UNDEFINED,
+                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   obj_properties[PROP_TRANSITIONS] =
-      g_param_spec_boxed (PROP_STATE_TRANSITIONS,
-                          "Transitions",
-                          "Transitions that are possible once a state machine reaches the state.",
-                          G_TYPE_PTR_ARRAY,
-                          G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_boxed (PROP_STATE_TRANSITIONS,
+                        "Transitions",
+                        "Transitions that are possible once a state machine reaches the state.",
+                        G_TYPE_PTR_ARRAY,
+                        G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

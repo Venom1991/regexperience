@@ -11,9 +11,8 @@ typedef struct
     GPtrArray *rules;
 } ProductionPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (Production, production, G_TYPE_OBJECT)
-
-enum {
+enum
+{
     PROP_CAPTION = 1,
     PROP_RULES,
     N_PROPERTIES
@@ -21,19 +20,21 @@ enum {
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static void production_get_property (GObject *object,
-                                     guint property_id,
-                                     GValue *value,
-                                     GParamSpec *pspec);
+static void production_get_property (GObject      *object,
+                                     guint         property_id,
+                                     GValue       *value,
+                                     GParamSpec   *pspec);
 
-static void production_set_property (GObject *object,
-                                     guint property_id,
+static void production_set_property (GObject      *object,
+                                     guint         property_id,
                                      const GValue *value,
-                                     GParamSpec *pspec);
+                                     GParamSpec   *pspec);
 
-static void production_dispose (GObject *object);
+static void production_dispose      (GObject      *object);
 
-static void production_finalize (GObject *object);
+static void production_finalize     (GObject      *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (Production, production, G_TYPE_OBJECT)
 
 static void
 production_class_init (ProductionClass *klass)
@@ -46,19 +47,19 @@ production_class_init (ProductionClass *klass)
   object_class->finalize = production_finalize;
 
   obj_properties[PROP_CAPTION] =
-      g_param_spec_string (PROP_PRODUCTION_CAPTION,
-                           "Caption",
-                           "Name of the production.",
-                           NULL,
-                           G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_string (PROP_PRODUCTION_CAPTION,
+                         "Caption",
+                         "Name of the production.",
+                         NULL,
+                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   obj_properties[PROP_RULES] =
-      g_param_spec_boxed (PROP_PRODUCTION_RULES,
-                          "Rules",
-                          "Array of rules that offer possible ways of rewriting the production"
-                              "where it appears on the right-hand-side as a non-terminal symbol.",
-                          G_TYPE_PTR_ARRAY,
-                          G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_boxed (PROP_PRODUCTION_RULES,
+                        "Rules",
+                        "Array of rules that offer possible ways of rewriting the production"
+                            "where it appears on the right-hand-side as a non-terminal symbol.",
+                        G_TYPE_PTR_ARRAY,
+                        G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

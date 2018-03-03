@@ -13,17 +13,19 @@ struct _SymbolClass
 {
     GObjectClass parent_class;
 
-    void (*extract_value) (Symbol *self, GValue *value);
-    gboolean (*is_match) (Symbol *self, const gchar *value);
+    void     (*extract_value) (Symbol      *self,
+                               GValue      *value);
+    gboolean (*is_match)      (Symbol      *self,
+                               const gchar *value);
 
     gpointer padding[8];
 };
 
-void symbol_extract_value (Symbol *self,
-                           GValue *value);
+void     symbol_extract_value (Symbol      *self,
+                               GValue      *value);
 
-gboolean symbol_is_match (Symbol      *self,
-                          const gchar *value);
+gboolean symbol_is_match      (Symbol      *self,
+                               const gchar *value);
 
 #define PROP_SYMBOL_VALUE "value"
 

@@ -4,7 +4,6 @@
 #include "internal/semantic_analysis/analyzer.h"
 #include "internal/state_machines/acceptors/acceptor_runnable.h"
 #include "internal/common/helpers.h"
-#include "core/errors.h"
 
 struct _Regexperience
 {
@@ -22,12 +21,12 @@ typedef struct
     AcceptorRunnable *acceptor;
 } RegexperiencePrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (Regexperience, regexperience, G_TYPE_OBJECT)
-
 G_DEFINE_QUARK (core-regexperience-error-quark, core_regexperience_error)
-#define CORE_REGEXPERIENCE_ERROR (core_regexperience_error_quark())
+#define CORE_REGEXPERIENCE_ERROR (core_regexperience_error_quark ())
 
 static void regexperience_dispose (GObject *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (Regexperience, regexperience, G_TYPE_OBJECT)
 
 static void
 regexperience_class_init (RegexperienceClass *klass)
@@ -101,7 +100,7 @@ void regexperience_compile (Regexperience  *self,
   if (priv->acceptor != NULL)
     g_object_unref (priv->acceptor);
 
-  g_autoptr (FsmConvertible) epsilon_nfa = ast_node_build_fsm (abstract_syntax_tree);
+  g_autoptr (FsmConvertible) epsilon_nfa = ast_node_build_acceptor (abstract_syntax_tree);
   g_autoptr (FsmConvertible) nfa = fsm_convertible_compute_epsilon_closures (epsilon_nfa);
   FsmModifiable *dfa = fsm_convertible_construct_subset (nfa);
 
