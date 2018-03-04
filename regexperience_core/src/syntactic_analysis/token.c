@@ -8,8 +8,8 @@ struct _Token
 
 typedef struct
 {
-    TokenCategory category;
-    Lexeme *lexeme;
+    TokenCategory  category;
+    Lexeme        *lexeme;
 } TokenPrivate;
 
 enum

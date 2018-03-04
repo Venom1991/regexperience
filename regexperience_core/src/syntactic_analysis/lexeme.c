@@ -8,8 +8,8 @@ struct _Lexeme
 typedef struct
 {
     GString *content;
-    guint start_position;
-    guint end_position;
+    guint    start_position;
+    guint    end_position;
 } LexemePrivate;
 
 enum

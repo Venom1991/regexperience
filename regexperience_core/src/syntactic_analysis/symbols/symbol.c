@@ -1,9 +1,9 @@
 #include "internal/syntactic_analysis/symbols/symbol.h"
 
-G_DEFINE_ABSTRACT_TYPE (Symbol, symbol, G_TYPE_OBJECT)
-
 static gboolean symbol_default_is_match (Symbol      *self,
                                          const gchar *value);
+
+G_DEFINE_ABSTRACT_TYPE (Symbol, symbol, G_TYPE_OBJECT)
 
 static void
 symbol_class_init (SymbolClass *klass)

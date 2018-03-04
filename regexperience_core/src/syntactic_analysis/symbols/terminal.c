@@ -9,11 +9,9 @@ struct _Terminal
 
 typedef struct
 {
-    gchar *concatenated_value;
+    gchar     *concatenated_value;
     GPtrArray *split_values;
 } TerminalPrivate;
-
-G_DEFINE_TYPE_WITH_PRIVATE (Terminal, terminal, SYMBOLS_TYPE_SYMBOL)
 
 enum
 {
@@ -23,20 +21,22 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static void terminal_extract_value (Symbol *self,
-                                    GValue *value);
+static void     terminal_extract_value (Symbol       *self,
+                                        GValue       *value);
 
-static gboolean terminal_is_match (Symbol      *self,
-                                   const gchar *value);
+static gboolean terminal_is_match      (Symbol       *self,
+                                        const gchar  *value);
 
-static void terminal_constructed (GObject *object);
+static void     terminal_constructed   (GObject      *object);
 
-static void terminal_set_property (GObject      *object,
-                                   guint         property_id,
-                                   const GValue *value,
-                                   GParamSpec   *pspec);
+static void     terminal_set_property  (GObject      *object,
+                                        guint         property_id,
+                                        const GValue *value,
+                                        GParamSpec   *pspec);
 
-static void terminal_finalize (GObject *object);
+static void     terminal_finalize      (GObject      *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (Terminal, terminal, SYMBOLS_TYPE_SYMBOL)
 
 static void
 terminal_class_init (TerminalClass *klass)

@@ -53,7 +53,7 @@ static GPtrArray *dfa_fetch_matched_equivalence_class_from            (GPtrArray
                                                                        GPtrArray                 *all_equivalence_classes,
                                                                        gchar                      expected_character);
 
-static void       dfa_dispose (GObject *object);
+static void       dfa_dispose                                         (GObject                   *object);
 
 G_DEFINE_TYPE_WITH_CODE (Dfa, dfa, STATE_MACHINES_TYPE_FSM,
                          G_ADD_PRIVATE (Dfa)

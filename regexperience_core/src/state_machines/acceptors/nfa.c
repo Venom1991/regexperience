@@ -114,10 +114,10 @@ nfa_define_dfa_states_from_scalar (State     *input_state,
 }
 
 static void
-nfa_define_dfa_states_from_composite (State                 *input_state,
-                                      GPtrArray             *composed_from_states,
-                                      GSList                *alphabet,
-                                      GPtrArray             *dfa_states)
+nfa_define_dfa_states_from_composite (State     *input_state,
+                                      GPtrArray *composed_from_states,
+                                      GSList    *alphabet,
+                                      GPtrArray *dfa_states)
 {
   guint alphabet_length = g_slist_length (alphabet);
   g_autoptr (GPtrArray) dfa_transitions = g_ptr_array_new_with_free_func (g_object_unref);
@@ -146,11 +146,11 @@ nfa_define_dfa_states_from_composite (State                 *input_state,
 }
 
 static void
-nfa_define_transitions_for_dfa_state (GPtrArray             *output_states,
-                                      GSList                *alphabet,
-                                      gchar                  expected_character,
-                                      GPtrArray             *dfa_states,
-                                      GPtrArray             *dfa_transitions)
+nfa_define_transitions_for_dfa_state (GPtrArray *output_states,
+                                      GSList    *alphabet,
+                                      gchar      expected_character,
+                                      GPtrArray *dfa_states,
+                                      GPtrArray *dfa_transitions)
 {
   if (g_ptr_array_has_items (output_states))
     {

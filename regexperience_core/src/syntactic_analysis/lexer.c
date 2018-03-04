@@ -25,9 +25,6 @@ typedef struct
     TokenCategory  token_category;
 } MealyMapping;
 
-G_DEFINE_QUARK (syntactic-analysis-lexer-error-quark, syntactic_analysis_lexer_error)
-#define SYNTACTIC_ANALYSIS_LEXER_ERROR (syntactic_analysis_lexer_error_quark ())
-
 static Token            *lexer_create_token            (TokenCategory  category,
                                                         gchar         *content,
                                                         guint         *character_position);
@@ -41,6 +38,9 @@ static void              lexer_report_error_if_needed  (const gchar   *regular_e
                                                         GError       **error);
 
 static void              lexer_dispose                 (GObject       *object);
+
+G_DEFINE_QUARK (syntactic-analysis-lexer-error-quark, syntactic_analysis_lexer_error)
+#define SYNTACTIC_ANALYSIS_LEXER_ERROR (syntactic_analysis_lexer_error_quark ())
 
 G_DEFINE_TYPE_WITH_PRIVATE (Lexer, lexer, G_TYPE_OBJECT)
 

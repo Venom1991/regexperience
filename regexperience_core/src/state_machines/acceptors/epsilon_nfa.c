@@ -250,11 +250,11 @@ epsilon_nfa_build_epsilon_closed_transition (State      *state,
 }
 
 static void
-epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  *input_states,
-                                                     GPtrArray                 **epsilon_closed_transition_output_states,
-                                                     gchar                       explicit_character,
-                                                     GHashTable                 *input_output_combinations,
-                                                     InitializeOutputStatesMode  find_output_states_mode)
+epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                   *input_states,
+                                                     GPtrArray                  **epsilon_closed_transition_output_states,
+                                                     gchar                        explicit_character,
+                                                     GHashTable                  *input_output_combinations,
+                                                     InitializeOutputStatesMode   find_output_states_mode)
 {
   g_return_if_fail (find_output_states_mode != INITIALIZE_OUTPUT_STATES_MODE_UNDEFINED);
 

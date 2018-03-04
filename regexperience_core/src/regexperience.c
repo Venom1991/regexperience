@@ -13,18 +13,18 @@ struct _Regexperience
 typedef struct
 {
     /* Compilation */
-    Lexer    *lexer;
-    Parser   *parser;
-    Analyzer *analyzer;
+    Lexer            *lexer;
+    Parser           *parser;
+    Analyzer         *analyzer;
 
     /* Matching */
     AcceptorRunnable *acceptor;
 } RegexperiencePrivate;
 
+static void regexperience_dispose (GObject *object);
+
 G_DEFINE_QUARK (core-regexperience-error-quark, core_regexperience_error)
 #define CORE_REGEXPERIENCE_ERROR (core_regexperience_error_quark ())
-
-static void regexperience_dispose (GObject *object);
 
 G_DEFINE_TYPE_WITH_PRIVATE (Regexperience, regexperience, G_TYPE_OBJECT)
 

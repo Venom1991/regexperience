@@ -11,8 +11,6 @@ typedef struct
     GWeakRef value;
 } NonTerminalPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (NonTerminal, non_terminal, SYMBOLS_TYPE_SYMBOL)
-
 enum
 {
     PROP_VALUE = 1,
@@ -21,15 +19,17 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static void non_terminal_extract_value (Symbol *self,
-                                        GValue *value);
+static void non_terminal_extract_value (Symbol       *self,
+                                        GValue       *value);
 
-static void non_terminal_set_property (GObject      *object,
-                                       guint         property_id,
-                                       const GValue *value,
-                                       GParamSpec   *pspec);
+static void non_terminal_set_property  (GObject      *object,
+                                        guint         property_id,
+                                        const GValue *value,
+                                        GParamSpec   *pspec);
 
-static void non_terminal_dispose (GObject *object);
+static void non_terminal_dispose       (GObject      *object);
+
+G_DEFINE_TYPE_WITH_PRIVATE (NonTerminal, non_terminal, SYMBOLS_TYPE_SYMBOL)
 
 static void
 non_terminal_class_init (NonTerminalClass *klass)

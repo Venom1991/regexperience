@@ -11,13 +11,13 @@ struct _Range
     BinaryOperator parent_instance;
 };
 
-G_DEFINE_QUARK (semantic-analysis-range-error-quark, semantic_analysis_range_error)
-#define SEMANTIC_ANALYSIS_RANGE_ERROR (semantic_analysis_range_error_quark ())
-
 static FsmConvertible *range_build_acceptor (AstNode  *self);
 
 static gboolean        range_is_valid       (AstNode  *self,
                                              GError  **error);
+
+G_DEFINE_QUARK (semantic-analysis-range-error-quark, semantic_analysis_range_error)
+#define SEMANTIC_ANALYSIS_RANGE_ERROR (semantic_analysis_range_error_quark ())
 
 G_DEFINE_TYPE (Range, range, AST_NODES_TYPE_BINARY_OPERATOR)
 

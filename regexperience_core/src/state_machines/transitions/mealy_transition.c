@@ -10,8 +10,6 @@ typedef struct
     gpointer output_data;
 } MealyTransitionPrivate;
 
-
-
 enum
 {
     PROP_OUTPUT_DATA = 1,

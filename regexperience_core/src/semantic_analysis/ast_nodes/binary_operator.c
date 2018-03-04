@@ -6,8 +6,6 @@ typedef struct
     AstNode *right_operand;
 } BinaryOperatorPrivate;
 
-
-
 enum
 {
     PROP_LEFT_OPERAND = 1,

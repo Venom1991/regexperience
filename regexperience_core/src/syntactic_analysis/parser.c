@@ -19,23 +19,20 @@ typedef struct
     Grammar    *grammar;
 } ParserPrivate;
 
-G_DEFINE_QUARK (syntactic-analysis-parser-error-quark, syntactic_analysis_parser_error)
-#define SYNTACTIC_ANALYSIS_PARSER_ERROR (syntactic_analysis_parser_error_quark ())
-
 typedef enum
 {
     FILL_QUEUES_MODE_INITIALIZATION,
     FILL_QUEUES_MODE_EXPANSION
 } FillQueuesMode;
 
-static void      parser_prepare_for_parsing        (Parser         *self);
+static void      parser_prepare_for_parsing        (Parser          *self);
 
-static void      parser_fill_queues                (GPtrArray      *analysis_queues,
-                                                    GQueue         *analysis_queue_for_copy,
-                                                    GPtrArray      *prediction_queues,
-                                                    GQueue         *prediction_queue_for_copy,
-                                                    Production     *production,
-                                                    FillQueuesMode  mode);
+static void      parser_fill_queues                (GPtrArray       *analysis_queues,
+                                                    GQueue          *analysis_queue_for_copy,
+                                                    GPtrArray       *prediction_queues,
+                                                    GQueue          *prediction_queue_for_copy,
+                                                    Production      *production,
+                                                    FillQueuesMode   mode);
 
 static void      parser_remove_queues              (GPtrArray       *analysis_queues,
                                                     GArray          *analyses_for_removal,
@@ -76,7 +73,10 @@ static gboolean  parser_token_exists_in_all_tokens (GPtrArray       *all_tokens,
                                                     guint            starting_position,
                                                     Token          **found_token);
 
-static void      parser_dispose                    (GObject *object);
+static void      parser_dispose                    (GObject         *object);
+
+G_DEFINE_QUARK (syntactic-analysis-parser-error-quark, syntactic_analysis_parser_error)
+#define SYNTACTIC_ANALYSIS_PARSER_ERROR (syntactic_analysis_parser_error_quark ())
 
 G_DEFINE_TYPE_WITH_PRIVATE (Parser, parser, G_TYPE_OBJECT)
 
