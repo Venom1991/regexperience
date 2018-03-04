@@ -119,9 +119,9 @@ g_ptr_array_add_range (GPtrArray *destination,
 }
 
 void
-g_ptr_array_add_range_distinct (GPtrArray    *destination,
-                                GPtrArray    *source,
-                                GEqualFunc    equal_func)
+g_ptr_array_add_range_distinct (GPtrArray  *destination,
+                                GPtrArray  *source,
+                                GEqualFunc  equal_func)
 {
   g_return_if_fail (destination != NULL);
   g_return_if_fail (source != NULL);
@@ -161,9 +161,9 @@ g_ptr_array_add_multiple (GPtrArray *destination,
 }
 
 void
-g_ptr_array_add_if_not_exists (GPtrArray    *ptr_array,
-                               gpointer      data,
-                               GEqualFunc    equal_func)
+g_ptr_array_add_if_not_exists (GPtrArray  *ptr_array,
+                               gpointer    data,
+                               GEqualFunc  equal_func)
 {
   g_return_if_fail (ptr_array != NULL);
   g_return_if_fail (equal_func != NULL);
