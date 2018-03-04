@@ -15,20 +15,20 @@ gboolean
 g_char_equal (gconstpointer a,
               gconstpointer b)
 {
-  const gchar a_ptr = (const gchar) a;
-  const gchar b_ptr = (const gchar) b;
+  const gchar a_char = (const gchar) a;
+  const gchar b_char = (const gchar) b;
 
-  return a_ptr == b_ptr;
+  return a_char == b_char;
 }
 
 gboolean
 g_char_not_equal (gconstpointer a,
                   gconstpointer b)
 {
-  const gchar a_ptr = (const gchar ) a;
-  const gchar b_ptr = (const gchar ) b;
+  const gchar a_char = (const gchar) a;
+  const gchar b_char = (const gchar) b;
 
-  return a_ptr != b_ptr;
+  return a_char != b_char;
 }
 
 gboolean
