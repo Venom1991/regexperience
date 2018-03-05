@@ -176,7 +176,7 @@ nfa_define_transitions_for_dfa_state (GPtrArray *output_states,
           /* Constructing a new composite state or getting an existing one which was constructed
            * using the exact same output states.
            */
-          gboolean already_existed;
+          gboolean already_existed = FALSE;
           State *composite_state = fsm_get_or_create_composite_state (dfa_states,
                                                                       output_states,
                                                                       COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_FINAL,

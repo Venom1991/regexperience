@@ -511,9 +511,9 @@ dfa_fetch_equivalence_classes_from (GPtrArray *input_equivalence_classes,
                     {
                       gchar expected_character = (gchar) GPOINTER_TO_INT (g_slist_nth_data (alphabet, k));
 
-                      /* Moving the next state into an additional equivalence class and also marking it for for removal
-                       * from the input equivalence class in case it cannot transition to a member of same equivalence
-                       * class as the current state.
+                      /* Moving the next state into an additional equivalence class and also marking it for removal
+                       * from the input equivalence class in case it cannot transition to a member of the same
+                       * equivalence class as the current state.
                        */
                       if (!dfa_can_states_transition_to_same_equivalence_class (current_state,
                                                                                 next_state,

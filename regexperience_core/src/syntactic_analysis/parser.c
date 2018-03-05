@@ -217,13 +217,10 @@ parser_fill_queues (GPtrArray      *analysis_queues,
                     Production     *production,
                     FillQueuesMode  mode)
 {
-  g_return_if_fail
-  (
-      (mode == FILL_QUEUES_MODE_INITIALIZATION &&
-       (analysis_queue_for_copy == NULL && prediction_queue_for_copy == NULL)) ||
-      (mode == FILL_QUEUES_MODE_EXPANSION &&
-       (analysis_queue_for_copy != NULL && prediction_queue_for_copy != NULL))
-  );
+  g_return_if_fail (mode == FILL_QUEUES_MODE_INITIALIZATION &&
+                    (analysis_queue_for_copy == NULL && prediction_queue_for_copy == NULL));
+  g_return_if_fail (mode == FILL_QUEUES_MODE_EXPANSION &&
+                    (analysis_queue_for_copy != NULL && prediction_queue_for_copy != NULL));
 
   g_autoptr (GPtrArray) rules = NULL;
 

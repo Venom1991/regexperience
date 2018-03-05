@@ -118,7 +118,7 @@ grammar_define_productions (GHashTable *productions)
    * Also, some of the right hand sides (such as letters or digits) are
    * represented using delimited strings instead of multiple
    * single-character strings. This approach significantly reduces
-   * the number of symbols without changing the behavior.
+   * the number of terminal symbols without changing the behavior.
    */
   gchar ***right_hand_sides[] =
   {
