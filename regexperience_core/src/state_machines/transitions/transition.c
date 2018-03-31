@@ -19,17 +19,17 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static GEqualFunc transition_discern_equality_function (EqualityConditionType condition_type);
+static GEqualFunc transition_discern_equality_function (EqualityConditionType  condition_type);
 
-static void       transition_get_property              (GObject      *object,
-                                                        guint         property_id,
-                                                        GValue       *value,
-                                                        GParamSpec   *pspec);
+static void       transition_get_property              (GObject               *object,
+                                                        guint                  property_id,
+                                                        GValue                *value,
+                                                        GParamSpec            *pspec);
 
-static void       transition_set_property              (GObject      *object,
-                                                        guint         property_id,
-                                                        const GValue *value,
-                                                        GParamSpec   *pspec);
+static void       transition_set_property              (GObject               *object,
+                                                        guint                  property_id,
+                                                        const GValue          *value,
+                                                        GParamSpec            *pspec);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (Transition, transition, G_TYPE_OBJECT)
 
@@ -88,7 +88,6 @@ transition_is_possible (Transition *self,
     return FALSE;
 
   TransitionPrivate *priv = transition_get_instance_private (self);
-
   gchar expected_character = priv->expected_character;
   GEqualFunc equality_function = transition_discern_equality_function (priv->condition_type);
 

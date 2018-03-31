@@ -3,12 +3,12 @@
 #include "internal/common/helpers.h"
 
 State *create_composite_state (GPtrArray                          *composed_from_states,
-                               CompositeStateResolveTypeFlagsMode  resolve_type_flags_mode)
+                               CompositeStateResolveTypeFlags  resolve_type_flags_mode)
 {
   g_return_val_if_fail (g_ptr_array_has_items (composed_from_states), NULL);
 
   State *composite_state = composite_state_new (PROP_COMPOSITE_STATE_COMPOSED_FROM_STATES, composed_from_states,
-                                                PROP_COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE, resolve_type_flags_mode);
+                                                PROP_COMPOSITE_STATE_RESOLVE_TYPE_FLAGS, resolve_type_flags_mode);
 
   return composite_state;
 }

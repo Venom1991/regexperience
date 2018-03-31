@@ -84,7 +84,6 @@ constant_build_acceptor (AstNode *self)
   g_return_val_if_fail (AST_NODES_IS_CONSTANT (self), NULL);
 
   ConstantPrivate *priv = constant_get_instance_private (AST_NODES_CONSTANT (self));
-
   gchar expected_character = priv->value;
   g_autoptr (GPtrArray) all_states = g_ptr_array_new_with_free_func (g_object_unref);
   State *start = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_START);

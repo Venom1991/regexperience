@@ -55,7 +55,7 @@ quantification_class_init (QuantificationClass *klass)
   obj_properties[PROP_UPPER_BOUND] =
     g_param_spec_uint (PROP_QUANTIFICATION_UPPER_BOUND,
                        "Upper bound",
-                       "Upper of the quantification operator.",
+                       "Upper bound of the quantification operator.",
                        QUANTIFICATION_BOUND_TYPE_UNDEFINED,
                        QUANTIFICATION_BOUND_TYPE_INFINITY,
                        QUANTIFICATION_BOUND_TYPE_UNDEFINED,
@@ -78,7 +78,6 @@ quantification_build_acceptor (AstNode *self)
   g_return_val_if_fail (AST_NODES_IS_QUANTIFICATION (self), NULL);
 
   QuantificationPrivate *priv = quantification_get_instance_private (AST_NODES_QUANTIFICATION (self));
-
   QuantificationBoundType lower_bound = priv->lower_bound;
   QuantificationBoundType upper_bound = priv->upper_bound;
 

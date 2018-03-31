@@ -92,7 +92,6 @@ terminal_is_match (Symbol      *self,
   g_return_val_if_fail (value != NULL, FALSE);
 
   TerminalPrivate *priv = terminal_get_instance_private (SYMBOLS_TERMINAL (self));
-
   GPtrArray *split_values = priv->split_values;
   GCompareFunc terminal_compare_func = g_compare_strings;
   gpointer split_value = g_ptr_array_bsearch (split_values,
@@ -106,7 +105,6 @@ static void
 terminal_constructed (GObject *object)
 {
   TerminalPrivate *priv = terminal_get_instance_private (SYMBOLS_TERMINAL (object));
-
   gchar *concatenated_value = priv->concatenated_value;
   GPtrArray *split_values = priv->split_values;
 

@@ -7,15 +7,15 @@
                                     |  <basic-expression>
 <concatenation>                    ::= <basic-expression> <concatenation>
                                     |  <basic-expression>
-<basic-expression>                 ::= <star-quantifier>
-                                    |  <plus-quantifier>
-                                    |  <question-mark-quantifier>
+<basic-expression>                 ::= <star-quantification>
+                                    |  <plus-quantification>
+                                    |  <question-mark-quantification>
                                     |  <elementary-expression>
-<star-quantifier>                  ::= <elementary-expression> "*"
-<plus-quantifier>                  ::= <elementary-expression> "+"
-<question-mark-quantifier>         ::= <elementary-expression> "?"
+<star-quantification>              ::= <elementary-expression> "*"
+<plus-quantification>              ::= <elementary-expression> "+"
+<question-mark-quantification>     ::= <elementary-expression> "?"
 <elementary-expression>            ::= <group>
-                                   ::= <bracket-expression>
+                                    |  <bracket-expression>
                                     |  <upper-case-letter>
                                     |  <lower-case-letter>
                                     |  <digit>

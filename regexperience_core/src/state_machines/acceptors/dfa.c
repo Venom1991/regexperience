@@ -231,7 +231,6 @@ dfa_transition_to_next_state (Dfa   *self,
                               gchar  input_character)
 {
   DfaPrivate *priv = dfa_get_instance_private (self);
-
   State *current_state = priv->current_state;
   g_autoptr (GPtrArray) transitions = NULL;
 
@@ -434,7 +433,7 @@ dfa_compose_equivalent_states_if_needed (Dfa *self)
                 {
                   input_state = fsm_get_or_create_composite_state (all_states,
                                                                    equivalence_class,
-                                                                   COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_ALL,
+                                                                   COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_ALL,
                                                                    NULL);
                 }
 
@@ -455,7 +454,7 @@ dfa_compose_equivalent_states_if_needed (Dfa *self)
                   else
                     output_state = fsm_get_or_create_composite_state (all_states,
                                                                       matched_equivalence_class,
-                                                                      COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_ALL,
+                                                                      COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_ALL,
                                                                       NULL);
 
                   Transition *transition = create_deterministic_transition (expected_character,

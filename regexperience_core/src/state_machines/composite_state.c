@@ -8,14 +8,14 @@ struct _CompositeState
 
 typedef struct
 {
-    GPtrArray                          *composed_from_states;
-    CompositeStateResolveTypeFlagsMode  resolve_type_flags_mode;
+    GPtrArray                      *composed_from_states;
+    CompositeStateResolveTypeFlags  resolve_type_flags;
 } CompositeStatePrivate;
 
 enum
 {
     PROP_COMPOSED_FROM_STATES = 1,
-    PROP_RESOLVE_TYPE_FLAGS_MODE,
+    PROP_RESOLVE_TYPE_FLAGS,
     N_PROPERTIES
 };
 
@@ -57,13 +57,13 @@ composite_state_class_init (CompositeStateClass *klass)
                         G_TYPE_PTR_ARRAY,
                         G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
 
-  obj_properties[PROP_RESOLVE_TYPE_FLAGS_MODE] =
-    g_param_spec_uint (PROP_COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE,
-                       "Resolve type flags mode",
+  obj_properties[PROP_RESOLVE_TYPE_FLAGS] =
+    g_param_spec_uint (PROP_COMPOSITE_STATE_RESOLVE_TYPE_FLAGS,
+                       "Resolve type flags",
                        "Flags describing how the composite state's own type flags should be resolved.",
                        0,
                        G_MAXUINT32,
-                       COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_ALL,
+                       COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_ALL,
                        G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
 
   g_object_class_install_properties (object_class,
@@ -83,7 +83,6 @@ static gboolean composite_state_is_composed_from (State           *self,
   g_return_val_if_fail (STATE_MACHINES_IS_COMPOSITE_STATE (self), FALSE);
 
   CompositeStatePrivate *priv = composite_state_get_instance_private (STATE_MACHINES_COMPOSITE_STATE (self));
-
   GPtrArray *composed_from_states = priv->composed_from_states;
   GCompareFunc state_equal_func = g_direct_equal;
 
@@ -96,19 +95,18 @@ static void
 composite_state_constructed (GObject *object)
 {
   CompositeStatePrivate *priv = composite_state_get_instance_private (STATE_MACHINES_COMPOSITE_STATE (object));
-
   GPtrArray *composed_from_states = priv->composed_from_states;
-  CompositeStateResolveTypeFlagsMode resolve_type_flags_mode = priv->resolve_type_flags_mode;
+  CompositeStateResolveTypeFlags resolve_type_flags_mode = priv->resolve_type_flags;
 
   StateTypeFlags composite_state_type_flags = STATE_TYPE_UNDEFINED;
 
   g_return_if_fail (g_ptr_array_has_items (composed_from_states));
 
-  if ((resolve_type_flags_mode & COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_START) &&
+  if ((resolve_type_flags_mode & COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_START) &&
       composite_state_can_be_marked_as (priv, STATE_TYPE_START))
       composite_state_type_flags |= STATE_TYPE_START;
 
-  if ((resolve_type_flags_mode & COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_FINAL) &&
+  if ((resolve_type_flags_mode & COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_FINAL) &&
       composite_state_can_be_marked_as (priv, STATE_TYPE_FINAL))
       composite_state_type_flags |= STATE_TYPE_FINAL;
 
@@ -161,8 +159,8 @@ composite_state_set_property (GObject      *object,
       priv->composed_from_states = g_value_dup_boxed (value);
       break;
 
-    case PROP_RESOLVE_TYPE_FLAGS_MODE:
-      priv->resolve_type_flags_mode = (CompositeStateResolveTypeFlagsMode) g_value_get_uint (value);
+    case PROP_RESOLVE_TYPE_FLAGS:
+      priv->resolve_type_flags = (CompositeStateResolveTypeFlags) g_value_get_uint (value);
       break;
 
     default:

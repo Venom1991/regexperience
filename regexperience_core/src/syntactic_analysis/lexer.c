@@ -56,7 +56,6 @@ static void
 lexer_init (Lexer *self)
 {
   LexerPrivate *priv = lexer_get_instance_private (self);
-
   /* Initializing the Mealy transducer which is used to
    * determine the category of each token.
    */
@@ -74,7 +73,6 @@ lexer_tokenize (Lexer        *self,
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
   LexerPrivate *priv = lexer_get_instance_private (self);
-
   TransducerRunnable *transducer = priv->transducer;
   GPtrArray *tokens = g_ptr_array_new_with_free_func (g_object_unref);
   guint character_position = 1;

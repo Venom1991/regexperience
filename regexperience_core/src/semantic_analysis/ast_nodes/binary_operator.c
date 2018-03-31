@@ -76,7 +76,6 @@ gboolean binary_operator_is_valid (AstNode  *self,
   g_return_val_if_fail (AST_NODES_IS_BINARY_OPERATOR (self), FALSE);
 
   BinaryOperatorPrivate *priv = binary_operator_get_instance_private (AST_NODES_BINARY_OPERATOR (self));
-
   AstNode *left_operand = priv->left_operand;
   AstNode *right_operand = priv->right_operand;
 

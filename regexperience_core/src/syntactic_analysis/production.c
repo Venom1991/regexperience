@@ -7,7 +7,7 @@ struct _Production
 
 typedef struct
 {
-    gchar *caption;
+    gchar     *caption;
     GPtrArray *rules;
 } ProductionPrivate;
 
@@ -73,9 +73,9 @@ production_init (Production *self)
 }
 
 static void
-production_get_property (GObject *object,
-                         guint property_id,
-                         GValue *value,
+production_get_property (GObject    *object,
+                         guint       property_id,
+                         GValue     *value,
                          GParamSpec *pspec)
 {
   ProductionPrivate *priv = production_get_instance_private (SYNTACTIC_ANALYSIS_PRODUCTION (object));
@@ -97,10 +97,10 @@ production_get_property (GObject *object,
 }
 
 static void
-production_set_property (GObject *object,
-                         guint property_id,
+production_set_property (GObject      *object,
+                         guint         property_id,
                          const GValue *value,
-                         GParamSpec *pspec)
+                         GParamSpec   *pspec)
 {
   ProductionPrivate *priv = production_get_instance_private (SYNTACTIC_ANALYSIS_PRODUCTION (object));
 

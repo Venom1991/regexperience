@@ -72,7 +72,7 @@ non_terminal_extract_value (Symbol *self,
   NonTerminalPrivate *priv = non_terminal_get_instance_private (SYMBOLS_NON_TERMINAL (self));
   Production *production = g_weak_ref_get (&priv->value);
 
-  g_value_init (value, G_TYPE_OBJECT);
+  g_value_init (value, SYNTACTIC_ANALYSIS_TYPE_PRODUCTION);
   g_value_take_object (value, production);
 }
 

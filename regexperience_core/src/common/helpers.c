@@ -15,8 +15,8 @@ gboolean
 g_char_equal (gconstpointer a,
               gconstpointer b)
 {
-  const gchar a_char = (const gchar) a;
-  const gchar b_char = (const gchar) b;
+  const gchar a_char = (const gchar) GPOINTER_TO_INT (a);
+  const gchar b_char = (const gchar) GPOINTER_TO_INT (b);
 
   return a_char == b_char;
 }
@@ -25,8 +25,8 @@ gboolean
 g_char_not_equal (gconstpointer a,
                   gconstpointer b)
 {
-  const gchar a_char = (const gchar) a;
-  const gchar b_char = (const gchar) b;
+  const gchar a_char = (const gchar) GPOINTER_TO_INT (a);
+  const gchar b_char = (const gchar) GPOINTER_TO_INT (b);
 
   return a_char != b_char;
 }

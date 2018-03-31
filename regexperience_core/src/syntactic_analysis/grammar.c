@@ -1,3 +1,4 @@
+#include <glib/gprintf.h>
 #include "internal/syntactic_analysis/grammar.h"
 #include "internal/syntactic_analysis/production.h"
 #include "internal/syntactic_analysis/rule.h"
@@ -302,10 +303,10 @@ grammar_define_productions (GHashTable *productions)
   /* Initializing the productions beforehand so that they can be used as non-terminals. */
   for (guint i = 0; i < left_hand_sides_size; ++i)
     {
-      gchar *left_hand_side = g_strdup (left_hand_sides[i]);
-      Production *production = production_new (PROP_PRODUCTION_CAPTION, left_hand_side);
+      gchar *current_left_hand_side = g_strdup (left_hand_sides[i]);
+      Production *production = production_new (PROP_PRODUCTION_CAPTION, current_left_hand_side);
 
-      g_hash_table_insert (productions, left_hand_side, production);
+      g_hash_table_insert (productions, current_left_hand_side, production);
     }
 
   /* Defining the right-hand-sides for previously initialized productions. */

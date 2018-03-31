@@ -148,10 +148,10 @@ fsm_fetch_output_states_from_multiple (GPtrArray *input_states,
 }
 
 State *
-fsm_get_or_create_composite_state (GPtrArray                          *all_states,
-                                   GPtrArray                          *composed_from_states,
-                                   CompositeStateResolveTypeFlagsMode  resolve_type_flags_mode,
-                                   gboolean                           *already_existed)
+fsm_get_or_create_composite_state (GPtrArray                      *all_states,
+                                   GPtrArray                      *composed_from_states,
+                                   CompositeStateResolveTypeFlags  resolve_type_flags_mode,
+                                   gboolean                       *already_existed)
 {
   State *composite_state = NULL;
 

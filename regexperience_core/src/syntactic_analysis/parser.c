@@ -92,7 +92,6 @@ static void
 parser_init (Parser *self)
 {
   ParserPrivate *priv = parser_get_instance_private (SYNTACTIC_ANALYSIS_PARSER (self));
-
   GPtrArray *analysis_queues = g_ptr_array_new_with_free_func ((GDestroyNotify) g_queue_free_g_objects);
   GPtrArray *prediction_queues = g_ptr_array_new_with_free_func ((GDestroyNotify) g_queue_free);
   Grammar *grammar = grammar_new ();
@@ -111,10 +110,9 @@ parser_build_concrete_syntax_tree (Parser     *self,
   g_return_val_if_fail (g_ptr_array_has_items (tokens), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
-  ParserPrivate *priv = parser_get_instance_private (self);
-
   parser_prepare_for_parsing (self);
 
+  ParserPrivate *priv = parser_get_instance_private (self);
   GPtrArray *analysis_queues = priv->analysis_queues;
   GPtrArray *prediction_queues = priv->prediction_queues;
   GNode *concrete_syntax_tree = NULL;
@@ -183,7 +181,6 @@ static void
 parser_prepare_for_parsing (Parser *self)
 {
   ParserPrivate *priv = parser_get_instance_private (SYNTACTIC_ANALYSIS_PARSER (self));
-
   GPtrArray *analysis_queues = priv->analysis_queues;
   GPtrArray *prediction_queues = priv->prediction_queues;
   Grammar *grammar = priv->grammar;

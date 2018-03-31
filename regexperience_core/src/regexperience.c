@@ -53,7 +53,6 @@ void regexperience_compile (Regexperience  *self,
   g_return_if_fail (error == NULL || *error == NULL);
 
   RegexperiencePrivate *priv = regexperience_get_instance_private (self);
-
   Lexer *lexer = priv->lexer;
   Parser *parser = priv->parser;
   Analyzer *analyzer = priv->analyzer;
@@ -116,7 +115,6 @@ gboolean regexperience_match (Regexperience  *self,
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   RegexperiencePrivate *priv = regexperience_get_instance_private (self);
-
   AcceptorRunnable *acceptor = priv->acceptor;
   CoreRegexperienceError error_code = CORE_REGEXPERIENCE_ERROR_UNDEFINED;
   const gchar *error_message = NULL;

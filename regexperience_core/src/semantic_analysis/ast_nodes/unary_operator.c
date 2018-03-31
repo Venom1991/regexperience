@@ -67,7 +67,6 @@ gboolean unary_operator_is_valid (AstNode  *self,
   g_return_val_if_fail (AST_NODES_IS_UNARY_OPERATOR (self), FALSE);
 
   UnaryOperatorPrivate *priv = unary_operator_get_instance_private (AST_NODES_UNARY_OPERATOR (self));
-
   AstNode *operand = priv->operand;
 
   return ast_node_is_valid (operand, error);

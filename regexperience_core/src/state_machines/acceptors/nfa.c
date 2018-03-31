@@ -179,7 +179,7 @@ nfa_define_transitions_for_dfa_state (GPtrArray *output_states,
           gboolean already_existed = FALSE;
           State *composite_state = fsm_get_or_create_composite_state (dfa_states,
                                                                       output_states,
-                                                                      COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_MODE_FINAL,
+                                                                      COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_FINAL,
                                                                       &already_existed);
 
           Transition *dfa_transition = create_deterministic_transition (expected_character,
