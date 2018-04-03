@@ -125,7 +125,8 @@ fsm_fetch_output_states_from_multiple (GPtrArray *input_states,
 
                       g_ptr_array_add_if_not_exists (output_states,
                                                      deterministic_transition_output_state,
-                                                     state_equal_func);
+                                                     state_equal_func,
+                                                     NULL);
                     }
                   else if (TRANSITIONS_IS_NONDETERMINISTIC_TRANSITION (transition))
                     {
@@ -137,7 +138,8 @@ fsm_fetch_output_states_from_multiple (GPtrArray *input_states,
 
                       g_ptr_array_add_range_distinct (output_states,
                                                       nondeterministic_transition_output_states,
-                                                      state_equal_func);
+                                                      state_equal_func,
+                                                      NULL);
                     }
                 }
             }

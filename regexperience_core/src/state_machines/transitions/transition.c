@@ -1,6 +1,5 @@
 #include "internal/state_machines/transitions/transition.h"
 #include "internal/common/helpers.h"
-#include "internal/common/macros.h"
 
 typedef struct
 {

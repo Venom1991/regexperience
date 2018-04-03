@@ -1,5 +1,4 @@
 #include "internal/syntactic_analysis/symbols/terminal.h"
-#include "internal/common/macros.h"
 #include "internal/common/helpers.h"
 
 struct _Terminal
@@ -21,20 +20,24 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static void     terminal_extract_value (Symbol       *self,
-                                        GValue       *value);
+static void     terminal_extract_value (Symbol          *self,
+                                        GValue          *value);
 
-static gboolean terminal_is_match      (Symbol       *self,
-                                        const gchar  *value);
+static gboolean terminal_is_match      (Symbol          *self,
+                                        gconstpointer    value,
+                                        SymbolValueType  value_type);
 
-static void     terminal_constructed   (GObject      *object);
+static gboolean terminal_is_equal      (Symbol          *self,
+                                        Symbol          *other);
 
-static void     terminal_set_property  (GObject      *object,
-                                        guint         property_id,
-                                        const GValue *value,
-                                        GParamSpec   *pspec);
+static void     terminal_constructed   (GObject         *object);
 
-static void     terminal_finalize      (GObject      *object);
+static void     terminal_set_property  (GObject         *object,
+                                        guint            property_id,
+                                        const GValue    *value,
+                                        GParamSpec      *pspec);
+
+static void     terminal_finalize      (GObject         *object);
 
 G_DEFINE_TYPE_WITH_PRIVATE (Terminal, terminal, SYMBOLS_TYPE_SYMBOL)
 
@@ -46,6 +49,7 @@ terminal_class_init (TerminalClass *klass)
 
   symbol_class->extract_value = terminal_extract_value;
   symbol_class->is_match = terminal_is_match;
+  symbol_class->is_equal = terminal_is_equal;
 
   object_class->constructed = terminal_constructed;
   object_class->set_property = terminal_set_property;
@@ -85,20 +89,50 @@ terminal_extract_value (Symbol *self,
 }
 
 static gboolean
-terminal_is_match (Symbol      *self,
-                   const gchar *value)
+terminal_is_match (Symbol          *self,
+                   gconstpointer    value,
+                   SymbolValueType  value_type)
 {
   g_return_val_if_fail (SYMBOLS_IS_TERMINAL (self), FALSE);
   g_return_val_if_fail (value != NULL, FALSE);
 
-  TerminalPrivate *priv = terminal_get_instance_private (SYMBOLS_TERMINAL (self));
-  GPtrArray *split_values = priv->split_values;
-  GCompareFunc terminal_compare_func = g_compare_strings;
-  gpointer split_value = g_ptr_array_bsearch (split_values,
-                                              terminal_compare_func,
-                                              &value);
+  if (value_type == SYMBOL_VALUE_TYPE_POINTER_TO_GCHAR)
+    {
+      TerminalPrivate *priv = terminal_get_instance_private (SYMBOLS_TERMINAL (self));
+      const gchar *value_as_string = (const gchar *) value;
+      GPtrArray *self_split_values = priv->split_values;
+      GCompareFunc terminal_compare_func = g_compare_strings;
+      gpointer split_value = g_ptr_array_bsearch (self_split_values,
+                                                  terminal_compare_func,
+                                                  &value_as_string);
 
-  return split_value != NULL;
+      return split_value != NULL;
+    }
+
+  return FALSE;
+}
+
+static gboolean
+terminal_is_equal (Symbol *self,
+                   Symbol *other)
+{
+  g_return_val_if_fail (SYMBOLS_IS_TERMINAL (self), FALSE);
+
+  if (SYMBOLS_IS_TERMINAL (other))
+    {
+      TerminalPrivate *priv = terminal_get_instance_private (SYMBOLS_TERMINAL (self));
+      const gchar *self_concatenated_value = priv->concatenated_value;
+      g_autofree const gchar *other_concatenated_value = NULL;
+      GValue value = G_VALUE_INIT;
+
+      symbol_extract_value (other, &value);
+
+      other_concatenated_value = g_value_get_string (&value);
+
+      return g_strcmp0 (self_concatenated_value, other_concatenated_value) == 0;
+    }
+
+  return FALSE;
 }
 
 static void

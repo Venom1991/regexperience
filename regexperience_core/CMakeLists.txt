@@ -5,7 +5,6 @@ set(SOURCE_FILES
         include/core/errors.h
         include/core/regexperience.h
         include/internal/common/helpers.h
-        include/internal/common/macros.h
         include/internal/semantic_analysis/analyzer.h
         include/internal/semantic_analysis/ast_node_factory.h
         include/internal/semantic_analysis/ast_nodes/alternation.h

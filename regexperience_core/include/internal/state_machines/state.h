@@ -10,6 +10,14 @@ G_BEGIN_DECLS
 
 G_DECLARE_DERIVABLE_TYPE (State, state, STATE_MACHINES, STATE, GObject)
 
+typedef enum
+{
+    STATE_TYPE_UNDEFINED = 0x0000,
+    STATE_TYPE_DEFAULT = 1 << 0,
+    STATE_TYPE_START = 1 << 1,
+    STATE_TYPE_FINAL = 1 << 2
+} StateTypeFlags;
+
 struct _StateClass
 {
     GObjectClass parent_instance;
@@ -27,14 +35,6 @@ gboolean state_is_dead          (State           *self);
 
 #define PROP_STATE_TYPE_FLAGS  "type-flags"
 #define PROP_STATE_TRANSITIONS "transitions"
-
-typedef enum
-{
-    STATE_TYPE_UNDEFINED = 0x0000,
-    STATE_TYPE_DEFAULT = 1 << 0,
-    STATE_TYPE_START = 1 << 1,
-    STATE_TYPE_FINAL = 1 << 2
-} StateTypeFlags;
 
 G_END_DECLS
 

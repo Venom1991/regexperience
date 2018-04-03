@@ -6,7 +6,6 @@
 #include "internal/state_machines/transitions/nondeterministic_transition.h"
 #include "internal/state_machines/transitions/transition_factory.h"
 #include "internal/common/helpers.h"
-#include "internal/common/macros.h"
 
 struct _EpsilonNfa
 {
@@ -339,7 +338,8 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
 
                                 g_ptr_array_add_range_distinct (current_iteration_output_states,
                                                                 transition_output_states,
-                                                                state_equal_func);
+                                                                state_equal_func,
+                                                                NULL);
 
                                 /* Recursively finding all the states that are reachable from the input state
                                  * using epsilon transitions only.
@@ -354,7 +354,8 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                                   {
                                     g_ptr_array_add_range_distinct (current_iteration_output_states,
                                                                     transitive_epsilon_closed_output_states,
-                                                                    state_equal_func);
+                                                                    state_equal_func,
+                                                                    NULL);
 
                                     /* Each state that can reach a final state using only epsilon transitions must
                                      * be marked as final itself.
@@ -367,7 +368,8 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                             {
                                 g_ptr_array_add_range_distinct (current_iteration_output_states,
                                                                 transition_output_states,
-                                                                state_equal_func);
+                                                                state_equal_func,
+                                                                NULL);
                             }
                         }
                     }
@@ -382,7 +384,8 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
           if (g_ptr_array_has_items (current_iteration_output_states))
             g_ptr_array_add_range_distinct (current_closure_step_output_states,
                                             current_iteration_output_states,
-                                            state_equal_func);
+                                            state_equal_func,
+                                            NULL);
         }
     }
 
@@ -395,7 +398,8 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
 
           g_ptr_array_add_range_distinct (*epsilon_closed_transition_output_states,
                                           current_closure_step_output_states,
-                                          state_equal_func);
+                                          state_equal_func,
+                                          NULL);
         }
 
       return;

@@ -3,6 +3,9 @@
 
 #include <glib.h>
 
+#define DELIMITER    "-|-"
+#define END_OF_INPUT "EOI"
+
 typedef gpointer (*GRefFunc) (gpointer data);
 
 gboolean  g_char_any                        (gconstpointer  a,
@@ -34,14 +37,16 @@ void      g_ptr_array_add_range             (GPtrArray     *destination,
 
 void      g_ptr_array_add_range_distinct    (GPtrArray     *destination,
                                              GPtrArray     *source,
-                                             GEqualFunc     equal_func);
+                                             GEqualFunc     equal_func,
+                                             GRefFunc       ref_func);
 
 void      g_ptr_array_add_multiple          (GPtrArray     *destination,
                                              ...);
 
 void      g_ptr_array_add_if_not_exists     (GPtrArray     *ptr_array,
                                              gpointer       data,
-                                             GEqualFunc     equal_func);
+                                             GEqualFunc     equal_func,
+                                             GRefFunc       ref_func);
 
 gboolean  g_ptr_array_has_items             (GPtrArray     *ptr_array);
 

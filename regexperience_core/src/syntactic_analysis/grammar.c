@@ -1,11 +1,13 @@
-#include <glib/gprintf.h>
 #include "internal/syntactic_analysis/grammar.h"
 #include "internal/syntactic_analysis/production.h"
 #include "internal/syntactic_analysis/rule.h"
+#include "internal/syntactic_analysis/derivation_item.h"
 #include "internal/syntactic_analysis/symbols/symbol.h"
 #include "internal/syntactic_analysis/symbols/non_terminal.h"
 #include "internal/syntactic_analysis/symbols/terminal.h"
-#include "internal/common/macros.h"
+#include "internal/common/helpers.h"
+
+#include <glib/gprintf.h>
 
 struct _Grammar
 {
@@ -26,24 +28,27 @@ enum
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 static Grammar *singleton = NULL;
 
-static void       grammar_define_productions (GHashTable              *productions);
+static void       grammar_define_productions            (GHashTable              *productions);
 
-static GPtrArray *grammar_define_rules       (gchar                 ***right_hand_sides,
-                                              GHashTable              *productions);
+static GPtrArray *grammar_define_rules                  (gchar                 ***right_hand_sides,
+                                                         GHashTable              *productions);
 
-static GPtrArray *grammar_define_symbols     (gchar                  **symbol_array,
-                                              GHashTable              *productions);
+static GPtrArray *grammar_define_symbols                (gchar                  **symbol_array,
+                                                         GHashTable              *productions);
 
-static GObject   *grammar_constructor        (GType                    type,
-                                              guint                    n_construct_properties,
-                                              GObjectConstructParam   *construct_properties);
+static void       grammar_mark_non_terminal_occurrences (Production              *left_hand_side,
+                                                         GPtrArray               *rules);
 
-static void       grammar_get_property       (GObject                 *object,
-                                              guint                    property_id,
-                                              GValue                  *value,
-                                              GParamSpec              *pspec);
+static GObject   *grammar_constructor                   (GType                    type,
+                                                         guint                    n_construct_properties,
+                                                         GObjectConstructParam   *construct_properties);
 
-static void       grammar_dispose            (GObject                 *object);
+static void       grammar_get_property                  (GObject                 *object,
+                                                         guint                    property_id,
+                                                         GValue                  *value,
+                                                         GParamSpec              *pspec);
+
+static void       grammar_dispose                       (GObject                 *object);
 
 G_DEFINE_TYPE_WITH_PRIVATE (Grammar, grammar, G_TYPE_OBJECT)
 
@@ -90,26 +95,36 @@ grammar_define_productions (GHashTable *productions)
   {
     START,
     EXPRESSION,
+    EXPRESSION_PRIME,
     ALTERNATION,
+    ALTERNATION_PRIME,
     SIMPLE_EXPRESSION,
+    SIMPLE_EXPRESSION_PRIME,
     CONCATENATION,
+    CONCATENATION_PRIME,
     BASIC_EXPRESSION,
+    BASIC_EXPRESSION_PRIME,
     STAR_QUANTIFICATION,
     PLUS_QUANTIFICATION,
     QUESTION_MARK_QUANTIFICATION,
     ELEMENTARY_EXPRESSION,
+    ELEMENTARY_EXPRESSION_PRIME,
     GROUP,
     BRACKET_EXPRESSION,
+    BRACKET_EXPRESSION_ITEMS,
+    BRACKET_EXPRESSION_ITEMS_PRIME,
+    BRACKET_EXPRESSION_ITEM,
+    BRACKET_EXPRESSION_ITEM_PRIME,
+    UPPER_CASE_LETTER_RANGE,
+    LOWER_CASE_LETTER_RANGE,
+    DIGIT_RANGE,
     UPPER_CASE_LETTER,
     LOWER_CASE_LETTER,
     DIGIT,
     SPECIAL_CHARACTER,
     REGULAR_METACHARACTER,
     BRACKET_EXPRESSION_METACHARACTER,
-    METACHARACTER_ESCAPE,
-    BRACKET_EXPRESSION_ITEMS,
-    BRACKET_EXPRESSION_ITEM,
-    RANGE
+    METACHARACTER_ESCAPE
   };
 
   /* The first element of each of the innermost nested arrays contains
@@ -126,76 +141,112 @@ grammar_define_productions (GHashTable *productions)
     (gchar**[])
     {
       (gchar*[]) { START },
-      (gchar*[]) { EXPRESSION, EOI, NULL },
+      (gchar*[]) { EXPRESSION, END_OF_INPUT, NULL },
       NULL
     },
     (gchar**[])
     {
       (gchar*[]) { EXPRESSION },
-      (gchar*[]) { SIMPLE_EXPRESSION, ALTERNATION, NULL },
-      (gchar*[]) { SIMPLE_EXPRESSION, NULL              },
+      (gchar*[]) { SIMPLE_EXPRESSION, EXPRESSION_PRIME, NULL },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { EXPRESSION_PRIME },
+      (gchar*[]) { ALTERNATION, NULL },
+      (gchar*[]) { EPSILON, NULL     },
       NULL
     },
     (gchar**[])
     {
       (gchar*[]) { ALTERNATION },
-      (gchar*[]) { "|", SIMPLE_EXPRESSION, ALTERNATION, NULL },
-      (gchar*[]) { "|", SIMPLE_EXPRESSION, NULL              },
+      (gchar*[]) { "|", SIMPLE_EXPRESSION, ALTERNATION_PRIME, NULL },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { ALTERNATION_PRIME },
+      (gchar*[]) { ALTERNATION, NULL },
+      (gchar*[]) { EPSILON, NULL     },
       NULL
     },
     (gchar**[])
     {
       (gchar*[]) { SIMPLE_EXPRESSION },
-      (gchar*[]) { BASIC_EXPRESSION, CONCATENATION, NULL },
-      (gchar*[]) { BASIC_EXPRESSION, NULL                },
+      (gchar*[]) { BASIC_EXPRESSION, SIMPLE_EXPRESSION_PRIME, NULL },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { SIMPLE_EXPRESSION_PRIME },
+      (gchar*[]) { CONCATENATION, NULL     },
+      (gchar*[]) { EPSILON, NULL           },
       NULL
     },
     (gchar**[])
     {
       (gchar*[]) { CONCATENATION },
-      (gchar*[]) { BASIC_EXPRESSION, CONCATENATION, NULL },
-      (gchar*[]) { BASIC_EXPRESSION, NULL                },
+      (gchar*[]) { BASIC_EXPRESSION, CONCATENATION_PRIME, NULL },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { CONCATENATION_PRIME },
+      (gchar*[]) { CONCATENATION, NULL },
+      (gchar*[]) { EPSILON, NULL       },
       NULL
     },
     (gchar**[])
     {
       (gchar*[]) { BASIC_EXPRESSION },
+      (gchar*[]) { ELEMENTARY_EXPRESSION, BASIC_EXPRESSION_PRIME, NULL  },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { BASIC_EXPRESSION_PRIME },
       (gchar*[]) { STAR_QUANTIFICATION, NULL          },
       (gchar*[]) { PLUS_QUANTIFICATION, NULL          },
       (gchar*[]) { QUESTION_MARK_QUANTIFICATION, NULL },
-      (gchar*[]) { ELEMENTARY_EXPRESSION, NULL        },
+      (gchar*[]) { EPSILON, NULL                      },
       NULL
     },
     (gchar**[])
     {
       (gchar*[]) { STAR_QUANTIFICATION },
-      (gchar*[]) { ELEMENTARY_EXPRESSION, "*", NULL },
+      (gchar*[]) { "*", NULL },
       NULL
     },
     (gchar**[])
     {
       (gchar*[]) { PLUS_QUANTIFICATION },
-      (gchar*[]) { ELEMENTARY_EXPRESSION, "+", NULL },
+      (gchar*[]) { "+", NULL },
       NULL
     },
     (gchar**[])
     {
       (gchar*[]) { QUESTION_MARK_QUANTIFICATION },
-      (gchar*[]) { ELEMENTARY_EXPRESSION, "?", NULL },
+      (gchar*[]) { "?", NULL },
       NULL
     },
     (gchar**[])
     {
       (gchar*[]) { ELEMENTARY_EXPRESSION },
-      (gchar*[]) { GROUP, NULL                            },
-      (gchar*[]) { BRACKET_EXPRESSION, NULL               },
-      (gchar*[]) { UPPER_CASE_LETTER, NULL                },
-      (gchar*[]) { LOWER_CASE_LETTER, NULL                },
-      (gchar*[]) { DIGIT, NULL                            },
-      (gchar*[]) { SPECIAL_CHARACTER, NULL                },
-      (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER, NULL },
-      (gchar*[]) { "\\", REGULAR_METACHARACTER, NULL      },
-      (gchar*[]) { "\\", METACHARACTER_ESCAPE, NULL       },
+      (gchar*[]) { GROUP, NULL                             },
+      (gchar*[]) { BRACKET_EXPRESSION, NULL                },
+      (gchar*[]) { UPPER_CASE_LETTER, NULL                 },
+      (gchar*[]) { LOWER_CASE_LETTER, NULL                 },
+      (gchar*[]) { DIGIT, NULL                             },
+      (gchar*[]) { SPECIAL_CHARACTER, NULL                 },
+      (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER, NULL  },
+      (gchar*[]) { "\\", ELEMENTARY_EXPRESSION_PRIME, NULL },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { ELEMENTARY_EXPRESSION_PRIME },
+      (gchar*[]) { REGULAR_METACHARACTER, NULL },
+      (gchar*[]) { METACHARACTER_ESCAPE, NULL  },
       NULL
     },
     (gchar**[])
@@ -208,6 +259,58 @@ grammar_define_productions (GHashTable *productions)
     {
       (gchar*[]) { BRACKET_EXPRESSION },
       (gchar*[]) {"[", BRACKET_EXPRESSION_ITEMS, "]", NULL },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { BRACKET_EXPRESSION_ITEMS },
+      (gchar*[]) { BRACKET_EXPRESSION_ITEM, BRACKET_EXPRESSION_ITEMS_PRIME, NULL },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { BRACKET_EXPRESSION_ITEMS_PRIME },
+      (gchar*[]) { BRACKET_EXPRESSION_ITEMS, NULL },
+      (gchar*[]) { EPSILON, NULL                  },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { BRACKET_EXPRESSION_ITEM },
+      (gchar*[]) { UPPER_CASE_LETTER, UPPER_CASE_LETTER_RANGE, NULL },
+      (gchar*[]) { LOWER_CASE_LETTER, LOWER_CASE_LETTER_RANGE, NULL },
+      (gchar*[]) { DIGIT, DIGIT_RANGE, NULL                         },
+      (gchar*[]) { SPECIAL_CHARACTER, NULL                          },
+      (gchar*[]) { REGULAR_METACHARACTER, NULL                      },
+      (gchar*[]) { "\\", BRACKET_EXPRESSION_ITEM_PRIME, NULL        },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { BRACKET_EXPRESSION_ITEM_PRIME },
+      (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER, NULL },
+      (gchar*[]) { METACHARACTER_ESCAPE, NULL             },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { UPPER_CASE_LETTER_RANGE },
+      (gchar*[]) { "-", UPPER_CASE_LETTER, NULL },
+      (gchar*[]) { EPSILON, NULL                },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { LOWER_CASE_LETTER_RANGE },
+      (gchar*[]) { "-", LOWER_CASE_LETTER, NULL },
+      (gchar*[]) { EPSILON, NULL                },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { DIGIT_RANGE },
+      (gchar*[]) { "-", DIGIT, NULL },
+      (gchar*[]) { EPSILON, NULL    },
       NULL
     },
     (gchar**[])
@@ -264,34 +367,6 @@ grammar_define_productions (GHashTable *productions)
       (gchar *[]) { METACHARACTER_ESCAPE },
       (gchar *[]) { "\\", NULL },
       NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { BRACKET_EXPRESSION_ITEMS },
-      (gchar*[]) { BRACKET_EXPRESSION_ITEM, NULL                           },
-      (gchar*[]) { BRACKET_EXPRESSION_ITEM, BRACKET_EXPRESSION_ITEMS, NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { BRACKET_EXPRESSION_ITEM },
-      (gchar*[]) { RANGE, NULL                                  },
-      (gchar*[]) { UPPER_CASE_LETTER, NULL                      },
-      (gchar*[]) { LOWER_CASE_LETTER, NULL                      },
-      (gchar*[]) { DIGIT, NULL                                  },
-      (gchar*[]) { SPECIAL_CHARACTER, NULL                      },
-      (gchar*[]) { REGULAR_METACHARACTER, NULL                  },
-      (gchar*[]) { "\\", BRACKET_EXPRESSION_METACHARACTER, NULL },
-      (gchar*[]) { "\\", METACHARACTER_ESCAPE, NULL             },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { RANGE },
-      (gchar*[]) { UPPER_CASE_LETTER, "-", UPPER_CASE_LETTER, NULL },
-      (gchar*[]) { LOWER_CASE_LETTER, "-", LOWER_CASE_LETTER, NULL },
-      (gchar*[]) { DIGIT, "-", DIGIT, NULL                         },
-      NULL
     }
   };
 
@@ -319,6 +394,8 @@ grammar_define_productions (GHashTable *productions)
       g_autoptr (GPtrArray) rules = grammar_define_rules (++current_right_hand_sides,
                                                           productions);
 
+      grammar_mark_non_terminal_occurrences (production,
+                                             rules);
       g_object_set (production,
                     PROP_PRODUCTION_RULES, rules,
                     NULL);
@@ -375,13 +452,53 @@ grammar_define_symbols (gchar      **symbol_array,
   return symbols;
 }
 
+static void
+grammar_mark_non_terminal_occurrences (Production *left_hand_side,
+                                       GPtrArray  *rules)
+{
+  for (guint i = 0; i < rules->len; ++i)
+    {
+      Rule *right_hand_side = g_ptr_array_index (rules, i);
+      g_autoptr (GPtrArray) symbols = NULL;
+      DerivationItem *derivation_item = NULL;
+
+      g_object_get (right_hand_side,
+                    PROP_RULE_SYMBOLS, &symbols,
+                    NULL);
+
+      for (guint j = 0; j < symbols->len; ++j)
+        {
+          Symbol *symbol = g_ptr_array_index (symbols, j);
+
+          if (SYMBOLS_IS_NON_TERMINAL (symbol))
+            {
+              if (derivation_item == NULL)
+                derivation_item = derivation_item_new (PROP_DERIVATION_ITEM_LEFT_HAND_SIDE, left_hand_side,
+                                                       PROP_DERIVATION_ITEM_RIGHT_HAND_SIDE, right_hand_side);
+
+              g_autoptr (GPtrArray) occurrences = g_ptr_array_new ();
+              GValue value = G_VALUE_INIT;
+              g_autoptr (Production) production = NULL;
+
+              symbol_extract_value (symbol, &value);
+              production = g_value_get_object (&value);
+
+              g_ptr_array_add (occurrences, derivation_item);
+              g_object_set (production,
+                            PROP_PRODUCTION_OCCURRENCES, occurrences,
+                            NULL);
+            }
+        }
+    }
+}
+
 static GObject *
 grammar_constructor (GType                  type,
                      guint                  n_construct_properties,
                      GObjectConstructParam *construct_properties)
 {
   if (singleton != NULL)
-    return g_object_ref (singleton);
+    return G_OBJECT (g_object_ref (singleton));
 
   GObjectClass *object_class = G_OBJECT_CLASS (grammar_parent_class);
 

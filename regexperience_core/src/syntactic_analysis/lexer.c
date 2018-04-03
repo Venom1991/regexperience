@@ -5,7 +5,6 @@
 #include "internal/state_machines/transducers/mealy.h"
 #include "internal/state_machines/transitions/transition_factory.h"
 #include "internal/common/helpers.h"
-#include "internal/common/macros.h"
 #include "core/errors.h"
 
 struct _Lexer
@@ -108,7 +107,7 @@ lexer_tokenize (Lexer        *self,
 
   /* Appending the end of input marker. */
   Token *end_of_input_marker = lexer_create_token (TOKEN_CATEGORY_END_OF_INPUT_MARKER,
-                                                   EOI,
+                                                   END_OF_INPUT,
                                                    &character_position);
 
   g_ptr_array_add (tokens, end_of_input_marker);

@@ -19,15 +19,19 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static void non_terminal_extract_value (Symbol       *self,
-                                        GValue       *value);
+static void     non_terminal_extract_value (Symbol          *self,
+                                            GValue          *value);
 
-static void non_terminal_set_property  (GObject      *object,
-                                        guint         property_id,
-                                        const GValue *value,
-                                        GParamSpec   *pspec);
+static gboolean non_terminal_is_match      (Symbol          *self,
+                                            gconstpointer    value,
+                                            SymbolValueType  value_type);
 
-static void non_terminal_dispose       (GObject      *object);
+static void     non_terminal_set_property  (GObject         *object,
+                                            guint            property_id,
+                                            const GValue    *value,
+                                            GParamSpec      *pspec);
+
+static void     non_terminal_dispose       (GObject         *object);
 
 G_DEFINE_TYPE_WITH_PRIVATE (NonTerminal, non_terminal, SYMBOLS_TYPE_SYMBOL)
 
@@ -38,6 +42,7 @@ non_terminal_class_init (NonTerminalClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   symbol_class->extract_value = non_terminal_extract_value;
+  symbol_class->is_match = non_terminal_is_match;
 
   object_class->set_property = non_terminal_set_property;
   object_class->dispose = non_terminal_dispose;
@@ -74,6 +79,26 @@ non_terminal_extract_value (Symbol *self,
 
   g_value_init (value, SYNTACTIC_ANALYSIS_TYPE_PRODUCTION);
   g_value_take_object (value, production);
+}
+
+static gboolean
+non_terminal_is_match (Symbol          *self,
+                       gconstpointer    value,
+                       SymbolValueType  value_type)
+{
+  g_return_val_if_fail (SYMBOLS_IS_NON_TERMINAL (self), FALSE);
+  g_return_val_if_fail (value != NULL, FALSE);
+
+  if (value_type == SYMBOL_VALUE_TYPE_POINTER_TO_PRODUCTION)
+    {
+      NonTerminalPrivate *priv = non_terminal_get_instance_private (SYMBOLS_NON_TERMINAL (self));
+      const Production *value_as_production = (const Production *) value;
+      g_autoptr (Production) self_value = g_weak_ref_get (&priv->value);
+
+      return g_direct_equal (self_value, value_as_production);
+    }
+
+  return FALSE;
 }
 
 static void

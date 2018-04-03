@@ -22,7 +22,7 @@ gint main (gint argc, gchar *argv[])
     input = argv[2];
 
   g_autoptr (Regexperience) regexperience = regexperience_new ();
-  g_autoptr (GError) error = NULL;
+/*  g_autoptr (GError) error = NULL;
 
   regexperience_compile (regexperience, regular_expression, &error);
 
@@ -42,7 +42,7 @@ gint main (gint argc, gchar *argv[])
       exit (EXIT_FAILURE);
     }
 
-  g_printf ("Input matched - %s\n", match ? "yes" : "no");
+  g_printf ("Input matched - %s\n", match ? "yes" : "no");*/
 
   exit (EXIT_SUCCESS);
 }

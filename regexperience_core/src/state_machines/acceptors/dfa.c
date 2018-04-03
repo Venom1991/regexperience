@@ -335,7 +335,8 @@ dfa_fetch_unreachable_states_from (GPtrArray *all_states)
 
               g_ptr_array_add_if_not_exists (transition_output_states,
                                              transition_output_state,
-                                             state_equal_func);
+                                             state_equal_func,
+                                             NULL);
             }
         }
 
@@ -615,7 +616,8 @@ dfa_can_states_transition_to_same_equivalence_class (State     *first_state,
                 {
                   g_ptr_array_add_if_not_exists (output_states_equivalence_classes,
                                                  equivalence_class,
-                                                 equivalence_class_equal_func);
+                                                 equivalence_class_equal_func,
+                                                 NULL);
 
                   break;
                 }

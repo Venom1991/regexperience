@@ -177,7 +177,7 @@ analyzer_define_operator_types (GHashTable *operator_types)
                        BRACKET_EXPRESSION_ITEMS,
                        GINT_TO_POINTER (OPERATOR_TYPE_ALTERNATION));
   g_hash_table_insert (operator_types,
-                       RANGE,
+                       UPPER_CASE_LETTER_RANGE,
                        GINT_TO_POINTER (OPERATOR_TYPE_RANGE));
 }
 
@@ -251,7 +251,7 @@ analyzer_is_binary_operator (GNode  *cst_root,
                          SIMPLE_EXPRESSION,
                          CONCATENATION,
                          BRACKET_EXPRESSION_ITEMS,
-                         RANGE,
+                         UPPER_CASE_LETTER_RANGE,
                          NULL))
     {
       g_autoptr (GPtrArray) cst_children =

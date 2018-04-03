@@ -10,9 +10,6 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (Token, token, SYNTACTIC_ANALYSIS, TOKEN, GObject)
 
-#define PROP_TOKEN_CATEGORY "category"
-#define PROP_TOKEN_LEXEME   "lexeme"
-
 typedef enum
 {
     TOKEN_CATEGORY_UNDEFINED,
@@ -30,6 +27,9 @@ typedef enum
     TOKEN_CATEGORY_RANGE_OPERATOR,
     TOKEN_CATEGORY_N_CATEGORIES
 } TokenCategory;
+
+#define PROP_TOKEN_CATEGORY "category"
+#define PROP_TOKEN_LEXEME   "lexeme"
 
 G_END_DECLS
 

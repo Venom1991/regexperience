@@ -10,8 +10,13 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (Production, production, SYNTACTIC_ANALYSIS, PRODUCTION, GObject)
 
-#define PROP_PRODUCTION_CAPTION "caption"
-#define PROP_PRODUCTION_RULES   "rules"
+GPtrArray *production_compute_first_set  (Production *self);
+
+GPtrArray *production_compute_follow_set (Production *self);
+
+#define PROP_PRODUCTION_CAPTION     "caption"
+#define PROP_PRODUCTION_RULES       "rules"
+#define PROP_PRODUCTION_OCCURRENCES "occurrences"
 
 G_END_DECLS
 

@@ -9,6 +9,14 @@ G_BEGIN_DECLS
 
 G_DECLARE_DERIVABLE_TYPE (Transition, transition, TRANSITIONS, TRANSITION, GObject)
 
+typedef enum
+{
+    EQUALITY_CONDITION_TYPE_UNDEFINED,
+    EQUALITY_CONDITION_TYPE_ANY,
+    EQUALITY_CONDITION_TYPE_EQUAL,
+    EQUALITY_CONDITION_TYPE_NOT_EQUAL
+} EqualityConditionType;
+
 struct _TransitionClass
 {
     GObjectClass parent_class;
@@ -23,13 +31,7 @@ gboolean transition_is_epsilon  (Transition *self);
 #define PROP_TRANSITION_REQUIRES_INPUT          "requires-input"
 #define PROP_TRANSITION_EQUALITY_CONDITION_TYPE "equality-condition-type"
 
-typedef enum
-{
-    EQUALITY_CONDITION_TYPE_UNDEFINED,
-    EQUALITY_CONDITION_TYPE_ANY,
-    EQUALITY_CONDITION_TYPE_EQUAL,
-    EQUALITY_CONDITION_TYPE_NOT_EQUAL
-} EqualityConditionType;
+#define EPSILON                                 '\0'
 
 G_END_DECLS
 

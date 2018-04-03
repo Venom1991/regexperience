@@ -392,6 +392,7 @@ parser_discard (GPtrArray *analysis_queues,
   g_autoptr (GArray) predictions_for_removal = g_array_new (FALSE, FALSE, sizeof (gpointer));
   g_autoptr (Lexeme) lexeme = NULL;
   g_autoptr (GString) lexeme_content = NULL;
+  gchar *value = NULL;
 
   g_object_get (token,
                 PROP_TOKEN_LEXEME, &lexeme,
@@ -399,6 +400,8 @@ parser_discard (GPtrArray *analysis_queues,
   g_object_get (lexeme,
                 PROP_LEXEME_CONTENT, &lexeme_content,
                 NULL);
+
+  value = lexeme_content->str;
 
   for (guint i = 0; i < queues_count; ++i)
     {
@@ -408,7 +411,7 @@ parser_discard (GPtrArray *analysis_queues,
 
       g_assert (SYMBOLS_IS_TERMINAL (prediction_head));
 
-      if (!symbol_is_match (prediction_head, lexeme_content->str))
+      if (!symbol_is_match (prediction_head, value, symbol_value_type (value)))
         {
           g_array_append_val (analyses_for_removal, analysis_queue);
           g_array_append_val (predictions_for_removal, prediction_queue);
@@ -450,6 +453,7 @@ parser_can_accept (GPtrArray *analysis_queues,
             {
               g_autoptr (Lexeme) lexeme = NULL;
               g_autoptr (GString) lexeme_content = NULL;
+              gchar *value = NULL;
 
               g_object_get (token,
                             PROP_TOKEN_LEXEME, &lexeme,
@@ -458,7 +462,9 @@ parser_can_accept (GPtrArray *analysis_queues,
                             PROP_LEXEME_CONTENT, &lexeme_content,
                             NULL);
 
-              if (symbol_is_match (prediction_head, lexeme_content->str))
+              value = lexeme_content->str;
+
+              if (symbol_is_match (prediction_head, value, symbol_value_type (value)))
                 {
                   g_queue_push_tail (remaining_analysis_queue, g_object_ref (token));
 

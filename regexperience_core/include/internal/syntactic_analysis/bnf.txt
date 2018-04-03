@@ -1,19 +1,24 @@
 <start>                            ::= <expression> "EOI"
-<expression>                       ::= <simple-expression> <alternation>
-                                    |  <simple-expression>
-<alternation>                      ::= "|" <simple-expression> <alternation>
-                                    |  "|" <simple-expression>
-<simple-expression>                ::= <basic-expression> <concatenation>
-                                    |  <basic-expression>
-<concatenation>                    ::= <basic-expression> <concatenation>
-                                    |  <basic-expression>
-<basic-expression>                 ::= <star-quantification>
+<expression>                       ::= <simple-expression> <expression-prime>
+<expression-prime>                 ::= <alternation>
+                                    |  ε
+<alternation>                      ::= "|" <simple-expression> <alternation-prime>
+<alternation-prime>                ::= <alternation>
+                                    |  ε
+<simple-expression>                ::= <basic-expression> <simple-expression-prime>
+<simple-expression-prime>          ::= <concatenation>
+                                    |  ε
+<concatenation>                    ::= <basic-expression> <concatenation-prime>
+<concatenation-prime>              ::= <concatenation>
+                                    |  ε
+<basic-expression>                 ::= <elementary-expression> <basic-expression-prime>
+<basic-expression-prime>           ::= <star-quantification>
                                     |  <plus-quantification>
                                     |  <question-mark-quantification>
-                                    |  <elementary-expression>
-<star-quantification>              ::= <elementary-expression> "*"
-<plus-quantification>              ::= <elementary-expression> "+"
-<question-mark-quantification>     ::= <elementary-expression> "?"
+                                    |  ε
+<star-quantification>              ::= "*"
+<plus-quantification>              ::= "+"
+<question-mark-quantification>     ::= "?"
 <elementary-expression>            ::= <group>
                                     |  <bracket-expression>
                                     |  <upper-case-letter>
@@ -21,10 +26,28 @@
                                     |  <digit>
                                     |  <special-character>
                                     |  <bracket-expression-metacharacter>
-                                    |  "\" <regular-metacharacter>
-                                    |  "\" <metacharacter-escape>
+                                    |  "\" <elementary-expression-prime>
+<elementary-expression-prime>      ::= <regular-metacharacter>
+                                    |  <metacharacter-escape>
 <group>                            ::= "(" <expression> ")"
 <bracket-expression>               ::= "[" <bracket-expression-items> "]"
+<bracket-expression-items>         ::= <bracket-expression-item> <bracket-expression-items-prime>
+<bracket-expression-items-prime>   ::= <bracket-expression-items>
+                                    |  ε
+<bracket-expression-item>          ::= <upper-case-letter> <upper-case-letter-range>
+                                    |  <lower-case-letter> <lower-case-letter-range>
+                                    |  <digit> <digit-range>
+                                    |  <special-character>
+                                    |  <regular-metacharacter>
+                                    |  "\" <bracket-expression-item-prime>
+<bracket-expression-item-prime>    ::= <bracket-expression-metacharacter>
+                                    |  <metacharacter-escape>
+<upper-case-letter-range>          ::= "-" <upper-case-letter>
+                                    |  ε
+<lower-case-letter-range>          ::= "-" <lower-case-letter>
+                                    |  ε
+<digit-range>                      ::= "-" <digit>
+                                    |  ε
 <upper-case-letter>                ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M"
                                     |  "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 <lower-case-letter>                ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m"
@@ -35,16 +58,3 @@
 <regular-metacharacter>            ::= "[" | "(" | ")" | "*" | "+" | "?" | "|"
 <bracket-expression-metacharacter> ::= "-" | "]"
 <metacharacter-escape>             ::= "\"
-<bracket-expression-items>         ::= <bracket-expression-item>
-                                    |  <bracket-expression-item> <bracket-expression-items>
-<bracket-expression-item>          ::= <range>
-                                    |  <upper-case-letter>
-                                    |  <lower-case-letter>
-                                    |  <digit>
-                                    |  <special-character>
-                                    |  <regular-metacharacter>
-                                    |  "\" <bracket-expression-metacharacter>
-                                    |  "\" <metacharacter-escape>
-<range>                            ::= <upper-case-letter> "-" <upper-case-letter>
-                                    |  <lower-case-letter> "-" <lower-case-letter>
-                                    |  <digit> "-" <digit>
