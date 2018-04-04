@@ -30,11 +30,9 @@ void
 symbol_extract_value (Symbol *self,
                       GValue *value)
 {
-  SymbolClass *klass;
-
   g_return_if_fail (SYMBOLS_IS_SYMBOL (self));
 
-  klass = SYMBOLS_SYMBOL_GET_CLASS (self);
+  SymbolClass *klass = SYMBOLS_SYMBOL_GET_CLASS (self);
 
   g_return_if_fail (klass->extract_value != NULL);
 
@@ -42,9 +40,20 @@ symbol_extract_value (Symbol *self,
 }
 
 gboolean
-symbol_is_match (Symbol          *self,
-                 gconstpointer    value,
-                 SymbolValueType  value_type)
+symbol_is_equal (Symbol *self,
+                 Symbol *other)
+{
+  g_return_val_if_fail (SYMBOLS_IS_SYMBOL (self), FALSE);
+
+  SymbolClass *klass = SYMBOLS_SYMBOL_GET_CLASS (self);
+
+  g_assert (klass->is_equal != NULL);
+
+  return klass->is_equal (self, other);
+}
+
+gboolean symbol_is_string_match (Symbol *self,
+                                 gchar  *value)
 {
   SymbolClass *klass;
 
@@ -54,20 +63,21 @@ symbol_is_match (Symbol          *self,
 
   g_return_val_if_fail (klass->is_match != NULL, FALSE);
 
-  return klass->is_match (self, value, value_type);
+  return klass->is_match (self,
+                          (gconstpointer) value,
+                          SYMBOL_VALUE_TYPE_POINTER_TO_GCHAR);
 }
 
-gboolean
-symbol_is_equal (Symbol *self,
-                 Symbol *other)
+gboolean symbol_is_production_match (Symbol     *self,
+                                     Production *value)
 {
-  SymbolClass *klass;
-
   g_return_val_if_fail (SYMBOLS_IS_SYMBOL (self), FALSE);
 
-  klass = SYMBOLS_SYMBOL_GET_CLASS (self);
+  SymbolClass *klass = SYMBOLS_SYMBOL_GET_CLASS (self);
 
-  g_assert (klass->is_equal != NULL);
+  g_return_val_if_fail (klass->is_match != NULL, FALSE);
 
-  return klass->is_equal (self, other);
+  return klass->is_match (self,
+                          (gconstpointer) value,
+                          SYMBOL_VALUE_TYPE_POINTER_TO_PRODUCTION);
 }

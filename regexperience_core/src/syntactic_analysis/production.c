@@ -202,7 +202,7 @@ production_compute_follow_set (Production *self)
                 {
                   Symbol *symbol = g_ptr_array_index (symbols, j);
 
-                  if (symbol_is_match (symbol, self, symbol_value_type (self)))
+                  if (symbol_is_match (symbol, self))
                     {
                       guint k = j + 1;
                       gboolean should_add_left_hand_side_follow_set = FALSE;
@@ -283,8 +283,7 @@ production_fetch_non_terminal_first_set (Symbol   *non_terminal,
     {
       Symbol *symbol = g_ptr_array_index (non_terminal_first_set, i);
       gboolean is_epsilon = symbol_is_match (symbol,
-                                             EPSILON,
-                                             symbol_value_type (EPSILON));
+                                             EPSILON);
 
       if (is_epsilon)
         {

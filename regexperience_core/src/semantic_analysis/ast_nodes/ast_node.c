@@ -28,11 +28,9 @@ ast_node_default_is_valid (AstNode  *self,
 FsmConvertible *
 ast_node_build_acceptor (AstNode *self)
 {
-  AstNodeClass *klass;
-
   g_return_val_if_fail (AST_NODES_IS_AST_NODE (self), NULL);
 
-  klass = AST_NODES_AST_NODE_GET_CLASS (self);
+  AstNodeClass *klass = AST_NODES_AST_NODE_GET_CLASS (self);
 
   g_return_val_if_fail (klass->build_acceptor != NULL, NULL);
 
@@ -43,11 +41,9 @@ gboolean
 ast_node_is_valid (AstNode  *self,
                    GError  **error)
 {
-  AstNodeClass *klass;
-
   g_return_val_if_fail (AST_NODES_IS_AST_NODE (self), FALSE);
 
-  klass = AST_NODES_AST_NODE_GET_CLASS (self);
+  AstNodeClass *klass = AST_NODES_AST_NODE_GET_CLASS (self);
 
   g_assert (klass->is_valid != NULL);
 

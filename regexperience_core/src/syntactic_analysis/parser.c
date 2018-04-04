@@ -411,7 +411,7 @@ parser_discard (GPtrArray *analysis_queues,
 
       g_assert (SYMBOLS_IS_TERMINAL (prediction_head));
 
-      if (!symbol_is_match (prediction_head, value, symbol_value_type (value)))
+      if (!symbol_is_match (prediction_head, value))
         {
           g_array_append_val (analyses_for_removal, analysis_queue);
           g_array_append_val (predictions_for_removal, prediction_queue);
@@ -464,7 +464,7 @@ parser_can_accept (GPtrArray *analysis_queues,
 
               value = lexeme_content->str;
 
-              if (symbol_is_match (prediction_head, value, symbol_value_type (value)))
+              if (symbol_is_match (prediction_head, value))
                 {
                   g_queue_push_tail (remaining_analysis_queue, g_object_ref (token));
 
