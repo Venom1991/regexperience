@@ -9,7 +9,7 @@
 
 struct _Production
 {
-    GObject    parent_instance;
+    GObject parent_instance;
 };
 
 typedef struct
@@ -25,7 +25,6 @@ enum
 {
     PROP_CAPTION = 1,
     PROP_RULES,
-    PROP_OCCURRENCES,
     N_PROPERTIES
 };
 
@@ -75,14 +74,6 @@ production_class_init (ProductionClass *klass)
                         G_TYPE_PTR_ARRAY,
                         G_PARAM_READWRITE);
 
-  obj_properties[PROP_OCCURRENCES] =
-      g_param_spec_boxed (PROP_PRODUCTION_OCCURRENCES,
-                          "Occurrences",
-                          "Array of derivation items that point to the right-hand side occurrences"
-                              "of the production.",
-                          G_TYPE_PTR_ARRAY,
-                          G_PARAM_WRITABLE);
-
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
                                      obj_properties);
@@ -94,17 +85,33 @@ production_init (Production *self)
   /* NOP */
 }
 
+void
+production_mark_occurrence (Production     *self,
+                            DerivationItem *occurrence)
+{
+  g_return_if_fail (SYNTACTIC_ANALYSIS_IS_PRODUCTION (self));
+  g_return_if_fail (occurrence != NULL);
+
+  ProductionPrivate *priv = production_get_instance_private (self);
+  GPtrArray **occurrences = &priv->occurrences;
+
+  if (*occurrences == NULL)
+      *occurrences = g_ptr_array_new_with_free_func (g_object_unref);
+
+  g_ptr_array_add (*occurrences, occurrence);
+}
+
 GPtrArray *
 production_compute_first_set (Production *self)
 {
   g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_PRODUCTION (self), NULL);
 
   ProductionPrivate *priv = production_get_instance_private (self);
-  GPtrArray **first_set = &priv->first_set;
+  GPtrArray **first_sets = &priv->first_set;
 
-  if (*first_set == NULL)
+  if (*first_sets == NULL)
     {
-      *first_set = g_ptr_array_new_with_free_func (g_object_unref);
+      *first_sets = g_ptr_array_new ();
 
       GPtrArray *rules = priv->rules;
       GEqualFunc symbol_equal_func = (GEqualFunc) symbol_is_equal;
@@ -113,6 +120,7 @@ production_compute_first_set (Production *self)
         {
           Rule *rule = g_ptr_array_index (rules, i);
           g_autoptr (GPtrArray) symbols = NULL;
+          g_autoptr (GPtrArray) rule_first_set = g_ptr_array_new_with_free_func (g_object_unref);
           guint epsilon_derivable_symbols_count = 0;
 
           g_object_get (rule,
@@ -128,7 +136,7 @@ production_compute_first_set (Production *self)
 
               if (SYMBOLS_IS_TERMINAL (symbol))
                 {
-                  g_ptr_array_add_if_not_exists (*first_set,
+                  g_ptr_array_add_if_not_exists (rule_first_set,
                                                  symbol,
                                                  symbol_equal_func,
                                                  g_object_ref);
@@ -139,7 +147,7 @@ production_compute_first_set (Production *self)
                       production_fetch_non_terminal_first_set (symbol,
                                                                &symbol_can_derive_epsilon);
 
-                  g_ptr_array_add_range_distinct (*first_set,
+                  g_ptr_array_add_range_distinct (rule_first_set,
                                                   non_terminal_first_set,
                                                   symbol_equal_func,
                                                   g_object_ref);
@@ -155,15 +163,22 @@ production_compute_first_set (Production *self)
             {
               g_autoptr (Terminal) epsilon = terminal_new (PROP_SYMBOL_VALUE, EPSILON);
 
-              g_ptr_array_add_if_not_exists (*first_set,
+              g_ptr_array_add_if_not_exists (rule_first_set,
                                              epsilon,
                                              symbol_equal_func,
                                              g_object_ref);
             }
+
+          g_object_set (rule,
+                        PROP_RULE_FIRST_SET, rule_first_set,
+                        NULL);
+          g_ptr_array_add_range (*first_sets,
+                                 rule_first_set,
+                                 NULL);
         }
     }
 
-  return *first_set;
+  return *first_sets;
 }
 
 GPtrArray *
@@ -344,19 +359,6 @@ production_set_property (GObject      *object,
         g_ptr_array_unref (priv->rules);
 
       priv->rules = g_value_dup_boxed (value);
-      break;
-
-    case PROP_OCCURRENCES:
-      {
-        GPtrArray *occurrences = g_value_get_boxed (value);
-
-        if (priv->occurrences == NULL)
-          priv->occurrences = g_ptr_array_new_with_free_func (g_object_unref);
-
-        g_ptr_array_add_range (priv->occurrences,
-                               occurrences,
-                               NULL);
-      }
       break;
 
     default:

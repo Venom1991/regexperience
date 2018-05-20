@@ -86,7 +86,7 @@ set(SOURCE_FILES
         src/syntactic_analysis/symbols/non_terminal.c
         src/syntactic_analysis/symbols/symbol.c
         src/syntactic_analysis/symbols/terminal.c
-        src/syntactic_analysis/token.c)
+        src/syntactic_analysis/token.c include/internal/syntactic_analysis/parsing_table_key.h src/syntactic_analysis/parsing_table_key.c)
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)

@@ -193,6 +193,30 @@ gboolean g_hash_table_has_items (GHashTable *hash_table)
   return hash_table != NULL && g_hash_table_size (hash_table) > 0;
 }
 
+GPtrArray *g_hash_table_values_to_ptr_array (GHashTable     *hash_table,
+                                             GDestroyNotify  free_func)
+{
+  g_return_val_if_fail (g_hash_table_has_items (hash_table), NULL);
+
+  GPtrArray *array = NULL;
+  GHashTableIter iter;
+  gpointer key = NULL;
+  gpointer value = NULL;
+  guint hash_table_size = g_hash_table_size (hash_table);
+
+  array = g_ptr_array_sized_new (hash_table_size);
+
+  if (free_func != NULL)
+    g_ptr_array_set_free_func (array, free_func);
+
+  g_hash_table_iter_init (&iter, hash_table);
+
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    g_ptr_array_add (array, value);
+
+  return array;
+}
+
 GQueue *
 g_queue_copy_g_objects (GQueue *queue)
 {

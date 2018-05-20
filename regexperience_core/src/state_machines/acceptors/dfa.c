@@ -142,7 +142,7 @@ dfa_complement (FsmModifiable *self)
             {
               complement_state_type_flags &= ~STATE_TYPE_FINAL;
 
-              /* No need to set the default flag for the start state as it is already a non-final state. */
+              /* No need to set the default flag for the start_production state as it is already a non-final state. */
               if (!(state_type_flags & STATE_TYPE_START))
                 complement_state_type_flags |= STATE_TYPE_DEFAULT;
             }
@@ -352,7 +352,7 @@ dfa_fetch_unreachable_states_from (GPtrArray *all_states)
                             PROP_STATE_TYPE_FLAGS, &current_state_type_flags,
                             NULL);
 
-              /* Disregarding the start state (even if it does not have any incoming transitions)
+              /* Disregarding the start_production state (even if it does not have any incoming transitions)
                * due to it being reachable as is.
                */
               if (!(current_state_type_flags & STATE_TYPE_START))

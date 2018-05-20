@@ -192,12 +192,12 @@ parser_prepare_for_parsing (Parser *self)
   const gchar *start_production_caption = START;
 
   g_object_get (grammar,
-                PROP_GRAMMAR_PRODUCTIONS, &productions,
+                PROP_GRAMMAR_ALL_PRODUCTIONS, &productions,
                 NULL);
 
   Production *start = g_hash_table_lookup (productions, start_production_caption);
 
-  /* Initializing the analysis and prediction queues using the start production. */
+  /* Initializing the analysis and prediction queues using the start_production production. */
   parser_fill_queues (analysis_queues,
                       NULL,
                       prediction_queues,
@@ -753,7 +753,8 @@ void parser_report_error_if_needed (Token      *current_token,
       g_set_error (error,
                    SYNTACTIC_ANALYSIS_PARSER_ERROR,
                    error_code,
-                   "%s (position - %d)", error_message, position);
+                   "%s (position - %d)",
+                   error_message, position);
     }
 }
 

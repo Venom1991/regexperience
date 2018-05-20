@@ -16,39 +16,45 @@ struct _Grammar
 
 typedef struct
 {
-    GHashTable *productions;
+    GPtrArray  *all_productions;
+    Production *start_production;
+    GHashTable *parsing_table;
 } GrammarPrivate;
 
 enum
 {
-    PROP_PRODUCTIONS = 1,
+    PROP_ALL_PRODUCTIONS = 1,
+    PROP_START_PRODUCTION,
+    PROP_PARSING_TABLE,
     N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 static Grammar *singleton = NULL;
 
-static void       grammar_define_productions            (GHashTable              *productions);
+static GPtrArray  *grammar_define_productions            (void);
 
-static GPtrArray *grammar_define_rules                  (gchar                 ***right_hand_sides,
-                                                         GHashTable              *productions);
+static GPtrArray  *grammar_define_rules                  (gchar                 ***right_hand_sides,
+                                                          GHashTable              *productions_table);
 
-static GPtrArray *grammar_define_symbols                (gchar                  **symbol_array,
-                                                         GHashTable              *productions);
+static GPtrArray  *grammar_define_symbols                (gchar                  **symbols_array,
+                                                          GHashTable              *productions_table);
 
-static void       grammar_mark_non_terminal_occurrences (Production              *left_hand_side,
-                                                         GPtrArray               *rules);
+static void        grammar_mark_non_terminal_occurrences (Production              *left_hand_side,
+                                                          GPtrArray               *rules);
 
-static GObject   *grammar_constructor                   (GType                    type,
-                                                         guint                    n_construct_properties,
-                                                         GObjectConstructParam   *construct_properties);
+static GHashTable *grammar_build_parsing_table           (GPtrArray               *productions);
 
-static void       grammar_get_property                  (GObject                 *object,
-                                                         guint                    property_id,
-                                                         GValue                  *value,
-                                                         GParamSpec              *pspec);
+static GObject    *grammar_constructor                   (GType                    type,
+                                                          guint                    n_construct_properties,
+                                                          GObjectConstructParam   *construct_properties);
 
-static void       grammar_dispose                       (GObject                 *object);
+static void        grammar_get_property                  (GObject                 *object,
+                                                          guint                    property_id,
+                                                          GValue                  *value,
+                                                          GParamSpec              *pspec);
+
+static void        grammar_dispose                       (GObject                 *object);
 
 G_DEFINE_TYPE_WITH_PRIVATE (Grammar, grammar, G_TYPE_OBJECT)
 
@@ -61,10 +67,24 @@ grammar_class_init (GrammarClass *klass)
   object_class->get_property = grammar_get_property;
   object_class->dispose = grammar_dispose;
 
-  obj_properties[PROP_PRODUCTIONS] =
-    g_param_spec_boxed (PROP_GRAMMAR_PRODUCTIONS,
-                        "Productions",
-                        "Hash table of productions used to formally describe the grammar.",
+  obj_properties[PROP_ALL_PRODUCTIONS] =
+    g_param_spec_boxed (PROP_GRAMMAR_ALL_PRODUCTIONS,
+                        "All productions",
+                        "Array of productions used to formally describe the grammar.",
+                        G_TYPE_PTR_ARRAY,
+                        G_PARAM_READABLE);
+
+  obj_properties[PROP_START_PRODUCTION] =
+    g_param_spec_object (PROP_GRAMMAR_START_PRODUCTION,
+                         "Start production",
+                         "Start production of the grammar.",
+                         SYNTACTIC_ANALYSIS_TYPE_PRODUCTION,
+                         G_PARAM_READABLE);
+
+  obj_properties[PROP_PARSING_TABLE] =
+    g_param_spec_boxed (PROP_GRAMMAR_PARSING_TABLE,
+                        "Parsing table",
+                        "LL(1) parsing table created using the grammar's productions.",
                         G_TYPE_HASH_TABLE,
                         G_PARAM_READABLE);
 
@@ -77,55 +97,22 @@ static void
 grammar_init (Grammar *self)
 {
   GrammarPrivate *priv = grammar_get_instance_private (SYNTACTIC_ANALYSIS_GRAMMAR (self));
+  GPtrArray *productions = grammar_define_productions ();
 
-  priv->productions = g_hash_table_new_full (g_str_hash,
-                                             g_str_equal,
-                                             g_free,
-                                             g_object_unref);
-
-  grammar_define_productions (priv->productions);
+  priv->all_productions = productions;
+  priv->start_production = g_object_ref (g_ptr_array_index (productions, 0));
+  priv->parsing_table = grammar_build_parsing_table (productions);
 
   singleton = self;
 }
 
-static void
-grammar_define_productions (GHashTable *productions)
+static GPtrArray *
+grammar_define_productions (void)
 {
-  gchar *left_hand_sides[] =
-  {
-    START,
-    EXPRESSION,
-    EXPRESSION_PRIME,
-    ALTERNATION,
-    ALTERNATION_PRIME,
-    SIMPLE_EXPRESSION,
-    SIMPLE_EXPRESSION_PRIME,
-    CONCATENATION,
-    CONCATENATION_PRIME,
-    BASIC_EXPRESSION,
-    BASIC_EXPRESSION_PRIME,
-    STAR_QUANTIFICATION,
-    PLUS_QUANTIFICATION,
-    QUESTION_MARK_QUANTIFICATION,
-    ELEMENTARY_EXPRESSION,
-    ELEMENTARY_EXPRESSION_PRIME,
-    GROUP,
-    BRACKET_EXPRESSION,
-    BRACKET_EXPRESSION_ITEMS,
-    BRACKET_EXPRESSION_ITEMS_PRIME,
-    BRACKET_EXPRESSION_ITEM,
-    BRACKET_EXPRESSION_ITEM_PRIME,
-    UPPER_CASE_LETTER_RANGE,
-    LOWER_CASE_LETTER_RANGE,
-    DIGIT_RANGE,
-    UPPER_CASE_LETTER,
-    LOWER_CASE_LETTER,
-    DIGIT,
-    SPECIAL_CHARACTER,
-    REGULAR_METACHARACTER,
-    BRACKET_EXPRESSION_METACHARACTER,
-    METACHARACTER_ESCAPE
-  };
+  g_autoptr (GHashTable) productions_table = g_hash_table_new_full (g_str_hash,
+                                                                    g_str_equal,
+                                                                    NULL,
+                                                                    NULL);
 
   /* The first element of each of the innermost nested arrays contains
    * the corresponding left-hand side's identifier which is used to
@@ -136,7 +123,7 @@ grammar_define_productions (GHashTable *productions)
    * single-character strings. This approach significantly reduces
    * the number of terminal symbols without changing the behavior.
    */
-  gchar ***right_hand_sides[] =
+  gchar ***grammar[] =
   {
     (gchar**[])
     {
@@ -370,29 +357,28 @@ grammar_define_productions (GHashTable *productions)
     }
   };
 
-  gsize left_hand_sides_size = G_N_ELEMENTS (left_hand_sides);
-  gsize right_hand_sides_size = G_N_ELEMENTS (right_hand_sides);
-
-  g_assert (left_hand_sides_size == right_hand_sides_size);
+  gsize grammar_size = G_N_ELEMENTS (grammar);
 
   /* Initializing the productions beforehand so that they can be used as non-terminals. */
-  for (guint i = 0; i < left_hand_sides_size; ++i)
+  for (guint i = 0; i < grammar_size; ++i)
     {
-      gchar *current_left_hand_side = g_strdup (left_hand_sides[i]);
-      Production *production = production_new (PROP_PRODUCTION_CAPTION, current_left_hand_side);
+      gchar ***grammar_item = grammar[i];
+      gchar *left_hand_side = grammar_item[0][0];
+      Production *production = production_new (PROP_PRODUCTION_CAPTION, left_hand_side);
 
-      g_hash_table_insert (productions, current_left_hand_side, production);
+      g_hash_table_insert (productions_table, left_hand_side, production);
     }
 
   /* Defining the right-hand-sides for previously initialized productions. */
-  for (guint i = 0; i < right_hand_sides_size; ++i)
+  for (guint i = 0; i < grammar_size; ++i)
     {
-      gchar ***current_right_hand_sides = right_hand_sides[i];
-      gchar *corresponding_left_hand_side = current_right_hand_sides[0][0];
-      Production *production = g_hash_table_lookup (productions,
-                                                    corresponding_left_hand_side);
-      g_autoptr (GPtrArray) rules = grammar_define_rules (++current_right_hand_sides,
-                                                          productions);
+      gchar ***grammar_item = grammar[i];
+      gchar *left_hand_side = grammar_item[0][0];
+      gchar ***right_hand_sides = grammar_item + 1;
+
+      Production *production = g_hash_table_lookup (productions_table, left_hand_side);
+      g_autoptr (GPtrArray) rules = grammar_define_rules (right_hand_sides,
+                                                          productions_table);
 
       grammar_mark_non_terminal_occurrences (production,
                                              rules);
@@ -400,42 +386,45 @@ grammar_define_productions (GHashTable *productions)
                     PROP_PRODUCTION_RULES, rules,
                     NULL);
     }
+
+  return g_hash_table_values_to_ptr_array (productions_table,
+                                           g_object_unref);
 }
 
 static GPtrArray *
 grammar_define_rules (gchar      ***right_hand_sides,
-                      GHashTable   *productions)
+                      GHashTable   *productions_table)
 {
   GPtrArray *rules = g_ptr_array_new_with_free_func (g_object_unref);
-  gchar **current_symbol_array = *right_hand_sides;
+  gchar **current_symbols_array = *right_hand_sides;
 
   do
     {
-      g_autoptr (GPtrArray) symbols = grammar_define_symbols (current_symbol_array,
-                                                              productions);
+      g_autoptr (GPtrArray) symbols = grammar_define_symbols (current_symbols_array,
+                                                              productions_table);
 
       Rule *rule = rule_new (PROP_RULE_SYMBOLS, symbols);
 
       g_ptr_array_add (rules, rule);
 
-      current_symbol_array = *(++right_hand_sides);
+      current_symbols_array = *(++right_hand_sides);
     }
-  while (current_symbol_array != NULL);
+  while (current_symbols_array != NULL);
 
   return rules;
 }
 
 static GPtrArray *
-grammar_define_symbols (gchar      **symbol_array,
-                        GHashTable  *productions)
+grammar_define_symbols (gchar      **symbols_array,
+                        GHashTable  *productions_table)
 {
   GPtrArray *symbols = g_ptr_array_new_with_free_func (g_object_unref);
-  gchar *current_symbol_value = *symbol_array;
+  gchar *current_symbol_value = *symbols_array;
 
   do
     {
       Symbol *symbol = NULL;
-      Production *production = g_hash_table_lookup (productions,
+      Production *production = g_hash_table_lookup (productions_table,
                                                     current_symbol_value);
 
       if (production == NULL)
@@ -445,7 +434,7 @@ grammar_define_symbols (gchar      **symbol_array,
 
       g_ptr_array_add (symbols, symbol);
 
-      current_symbol_value = *(++symbol_array);
+      current_symbol_value = *(++symbols_array);
     }
   while (current_symbol_value != NULL);
 
@@ -460,7 +449,7 @@ grammar_mark_non_terminal_occurrences (Production *left_hand_side,
     {
       Rule *right_hand_side = g_ptr_array_index (rules, i);
       g_autoptr (GPtrArray) symbols = NULL;
-      DerivationItem *derivation_item = NULL;
+      g_autoptr (DerivationItem) occurrence = NULL;
 
       g_object_get (right_hand_side,
                     PROP_RULE_SYMBOLS, &symbols,
@@ -472,24 +461,64 @@ grammar_mark_non_terminal_occurrences (Production *left_hand_side,
 
           if (SYMBOLS_IS_NON_TERMINAL (symbol))
             {
-              if (derivation_item == NULL)
-                derivation_item = derivation_item_new (PROP_DERIVATION_ITEM_LEFT_HAND_SIDE, left_hand_side,
-                                                       PROP_DERIVATION_ITEM_RIGHT_HAND_SIDE, right_hand_side);
+              if (occurrence == NULL)
+                occurrence = derivation_item_new (PROP_DERIVATION_ITEM_LEFT_HAND_SIDE, left_hand_side,
+                                                  PROP_DERIVATION_ITEM_RIGHT_HAND_SIDE, right_hand_side);
 
-              g_autoptr (GPtrArray) occurrences = g_ptr_array_new ();
               GValue value = G_VALUE_INIT;
               g_autoptr (Production) production = NULL;
 
               symbol_extract_value (symbol, &value);
               production = g_value_get_object (&value);
 
-              g_ptr_array_add (occurrences, derivation_item);
-              g_object_set (production,
-                            PROP_PRODUCTION_OCCURRENCES, occurrences,
-                            NULL);
+              production_mark_occurrence (production, occurrence);
             }
         }
     }
+}
+
+static GHashTable *
+grammar_build_parsing_table (GPtrArray *productions)
+{
+  GHashTable *parsing_table = g_hash_table_new_full (g_str_hash,
+                                                     g_str_equal,
+                                                     g_free,
+                                                     g_object_unref);
+
+  for (guint i = 0; i < productions->len; ++i)
+    {
+      Production *production = g_ptr_array_index (productions, i);
+      g_autoptr (GPtrArray) rules = NULL;
+
+      production_compute_first_set (production);
+
+      g_object_get (production,
+                    PROP_PRODUCTION_RULES, &rules,
+                    NULL);
+
+      for (guint j = 0; j < rules->len; ++j)
+        {
+          Rule *rule = g_ptr_array_index (rules, j);
+          g_autoptr (GPtrArray) first_set = NULL;
+          gboolean can_derive_epsilon = FALSE;
+
+          g_object_get (rule,
+                        PROP_RULE_FIRST_SET, &first_set,
+                        PROP_RULE_CAN_DERIVE_EPSILON, &can_derive_epsilon,
+                        NULL);
+
+          for (guint k = 0; k < first_set->len; ++k)
+            {
+              Symbol *symbol = g_ptr_array_index (first_set, k);
+
+              g_assert (SYMBOLS_IS_TERMINAL (symbol));
+
+
+            }
+        }
+    }
+
+  return parsing_table;
 }
 
 static GObject *
@@ -517,9 +546,6 @@ grammar_get_property (GObject    *object,
 
   switch (property_id)
     {
-    case PROP_PRODUCTIONS:
-      g_value_set_boxed (value, priv->productions);
-      break;
 
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -532,8 +558,14 @@ grammar_dispose (GObject *object)
 {
   GrammarPrivate *priv = grammar_get_instance_private (SYNTACTIC_ANALYSIS_GRAMMAR (object));
 
-  if (priv->productions != NULL)
-    g_clear_pointer (&priv->productions, g_hash_table_unref);
+  if (priv->all_productions != NULL)
+    g_clear_pointer (&priv->all_productions, g_ptr_array_unref);
+
+  if (priv->start_production != NULL)
+    g_clear_object (&priv->start_production);
+
+  if (priv->parsing_table != NULL)
+    g_clear_pointer (&priv->parsing_table, g_hash_table_unref);
 
   G_OBJECT_CLASS (grammar_parent_class)->dispose (object);
 }

@@ -22,6 +22,7 @@ gint main (gint argc, gchar *argv[])
     input = argv[2];
 
   g_autoptr (Regexperience) regexperience = regexperience_new ();
+
 /*  g_autoptr (GError) error = NULL;
 
   regexperience_compile (regexperience, regular_expression, &error);

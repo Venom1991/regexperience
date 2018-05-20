@@ -76,7 +76,7 @@ nfa_construct_subset (FsmConvertible *self)
                 PROP_FSM_INITIALIZABLE_START_STATE, &start_state,
                 NULL);
 
-  /* Beginning the conversion using the NFA's start state. */
+  /* Beginning the conversion using the NFA's start_production state. */
   nfa_define_dfa_states_from_scalar (start_state,
                                      alphabet,
                                      dfa_states);

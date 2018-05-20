@@ -10,7 +10,9 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (Rule, rule, SYNTACTIC_ANALYSIS, RULE, GObject)
 
-#define PROP_RULE_SYMBOLS "symbols"
+#define PROP_RULE_SYMBOLS            "symbols"
+#define PROP_RULE_FIRST_SET          "first-set"
+#define PROP_RULE_CAN_DERIVE_EPSILON "can-derive-epsilon"
 
 G_END_DECLS
 
