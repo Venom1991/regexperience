@@ -105,12 +105,12 @@ parser_build_concrete_syntax_tree (Parser     *self,
   Symbol *prediction_head = g_queue_pop_head (prediction_queue);
   gboolean parsing_table_entry_found = FALSE;
   GNode *concrete_syntax_tree = NULL;
-  GError *temporary_error = NULL;
 
   /* LL(1) parsing. */
   while (TRUE)
     {
       Token *token = g_ptr_array_index (tokens, token_position);
+      GError *temporary_error = NULL;
 
       if (SYMBOLS_IS_TERMINAL (prediction_head))
         {

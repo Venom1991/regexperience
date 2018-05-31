@@ -2,6 +2,7 @@
 #include "internal/semantic_analysis/ast_node_factory.h"
 #include "internal/syntactic_analysis/grammar.h"
 #include "internal/syntactic_analysis/production.h"
+#include "internal/syntactic_analysis/symbols/terminal.h"
 #include "internal/syntactic_analysis/symbols/non_terminal.h"
 #include "internal/lexical_analysis/token.h"
 
@@ -17,10 +18,11 @@ typedef struct
 
 typedef enum
 {
-    FETCH_CST_CHILDREN_NON_TERMINAL = 1 << 0,
-    FETCH_CST_CHILDREN_TOKEN = 1 << 1,
-    FETCH_CST_CHILDREN_ALL = 1 << 2,
-    FETCH_CST_CHILDREN_FIRST = 1 << 3
+    FETCH_CST_CHILDREN_TOKEN = 1 << 0,
+    FETCH_CST_CHILDREN_TERMINAL = 1 << 1,
+    FETCH_CST_CHILDREN_NON_TERMINAL = 1 << 2,
+    FETCH_CST_CHILDREN_ALL = 1 << 3,
+    FETCH_CST_CHILDREN_FIRST = 1 << 4
 } FetchCstChildrenFlags;
 
 static AstNode      *analyzer_transform_concrete_syntax_tree (GNode                  *cst_root,
@@ -45,7 +47,7 @@ static AstNode      *analyzer_continue                       (GNode             
                                                               GHashTable             *operator_types);
 
 static GPtrArray    *analyzer_fetch_cst_children             (GNode                  *cst_root,
-                                                              FetchCstChildrenFlags   fetchCstChildrenFlags);
+                                                              FetchCstChildrenFlags   fetch_cst_children_flags);
 
 static const gchar  *analyzer_fetch_node_caption             (GNode                  *cst_root);
 
@@ -330,7 +332,7 @@ analyzer_continue (GNode      *cst_root,
 
 static GPtrArray *
 analyzer_fetch_cst_children (GNode                 *cst_root,
-                             FetchCstChildrenFlags  fetchCstChildrenFlags)
+                             FetchCstChildrenFlags  fetch_cst_children_flags)
 {
   GPtrArray *children = g_ptr_array_new ();
   guint children_count = g_node_n_children (cst_root);
@@ -339,16 +341,18 @@ analyzer_fetch_cst_children (GNode                 *cst_root,
     {
       GNode *child = g_node_nth_child (cst_root, i);
 
-      if (((fetchCstChildrenFlags & FETCH_CST_CHILDREN_NON_TERMINAL) &&
-           SYMBOLS_IS_NON_TERMINAL (child->data)) ||
-          ((fetchCstChildrenFlags & FETCH_CST_CHILDREN_TOKEN) &&
-           LEXICAL_ANALYSIS_IS_TOKEN (child->data)))
+      if (((fetch_cst_children_flags & FETCH_CST_CHILDREN_TOKEN) &&
+           LEXICAL_ANALYSIS_IS_TOKEN (child->data)) ||
+          ((fetch_cst_children_flags & FETCH_CST_CHILDREN_TERMINAL) &&
+           SYMBOLS_IS_TERMINAL (child->data)) &&
+          ((fetch_cst_children_flags & FETCH_CST_CHILDREN_NON_TERMINAL) &&
+           SYMBOLS_IS_NON_TERMINAL (child->data)))
         {
           g_ptr_array_add (children, child);
 
-          if (fetchCstChildrenFlags & FETCH_CST_CHILDREN_ALL)
+          if (fetch_cst_children_flags & FETCH_CST_CHILDREN_ALL)
             continue;
-          else if (fetchCstChildrenFlags & FETCH_CST_CHILDREN_FIRST)
+          else if (fetch_cst_children_flags & FETCH_CST_CHILDREN_FIRST)
             break;
         }
     }
