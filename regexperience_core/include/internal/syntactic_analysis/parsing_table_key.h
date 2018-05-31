@@ -16,7 +16,7 @@ gboolean parsing_table_key_is_equal (gconstpointer a,
                                      gconstpointer b);
 
 #define PROP_PARSING_TABLE_KEY_PRODUCTION "production"
-#define PROP_PARSING_TABLE_KEY_SYMBOL     "symbol"
+#define PROP_PARSING_TABLE_KEY_TERMINAL     "symbol"
 
 G_END_DECLS
 

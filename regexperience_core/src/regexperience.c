@@ -1,5 +1,5 @@
 #include "core/regexperience.h"
-#include "internal/syntactic_analysis/lexer.h"
+#include "internal/lexical_analysis/lexer.h"
 #include "internal/syntactic_analysis/parser.h"
 #include "internal/semantic_analysis/analyzer.h"
 #include "internal/state_machines/acceptors/acceptor_runnable.h"
@@ -79,33 +79,33 @@ void regexperience_compile (Regexperience  *self,
 
       return;
     }
-
-  g_autoptr (AstNode) abstract_syntax_tree = analyzer_build_abstract_syntax_tree (analyzer,
-                                                                                  concrete_syntax_tree,
-                                                                                  &temporary_error);
-
-  /* Manually decreasing the reference count of every object found
-   * in the concrete syntax tree and finally destroying the GNode itself.
-   */
-  g_node_unref_g_objects (concrete_syntax_tree);
-
-  if (temporary_error != NULL)
-    {
-      g_propagate_error (error, temporary_error);
-
-      return;
-    }
-
-  if (priv->acceptor != NULL)
-    g_object_unref (priv->acceptor);
-
-  g_autoptr (FsmConvertible) epsilon_nfa = ast_node_build_acceptor (abstract_syntax_tree);
-  g_autoptr (FsmConvertible) nfa = fsm_convertible_compute_epsilon_closures (epsilon_nfa);
-  FsmModifiable *dfa = fsm_convertible_construct_subset (nfa);
-
-  state_machine_modifiable_minimize (dfa);
-
-  priv->acceptor = ACCEPTORS_ACCEPTOR_RUNNABLE (dfa);
+//
+//  g_autoptr (AstNode) abstract_syntax_tree = analyzer_build_abstract_syntax_tree (analyzer,
+//                                                                                  concrete_syntax_tree,
+//                                                                                  &temporary_error);
+//
+//  /* Manually decreasing the reference count of every object found
+//   * in the concrete syntax tree and finally destroying the GNode itself.
+//   */
+//  g_node_unref_g_objects (concrete_syntax_tree);
+//
+//  if (temporary_error != NULL)
+//    {
+//      g_propagate_error (error, temporary_error);
+//
+//      return;
+//    }
+//
+//  if (priv->acceptor != NULL)
+//    g_object_unref (priv->acceptor);
+//
+//  g_autoptr (FsmConvertible) epsilon_nfa = ast_node_build_acceptor (abstract_syntax_tree);
+//  g_autoptr (FsmConvertible) nfa = fsm_convertible_compute_epsilon_closures (epsilon_nfa);
+//  FsmModifiable *dfa = fsm_convertible_construct_subset (nfa);
+//
+//  state_machine_modifiable_minimize (dfa);
+//
+//  priv->acceptor = ACCEPTORS_ACCEPTOR_RUNNABLE (dfa);
 }
 
 gboolean regexperience_match (Regexperience  *self,

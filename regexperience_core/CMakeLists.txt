@@ -2,9 +2,11 @@ cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(regexperience_core VERSION 1.0 LANGUAGES C)
 
 set(SOURCE_FILES
-        include/core/errors.h
         include/core/regexperience.h
         include/internal/common/helpers.h
+        include/internal/lexical_analysis/lexeme.h
+        include/internal/lexical_analysis/lexer.h
+        include/internal/lexical_analysis/token.h
         include/internal/semantic_analysis/analyzer.h
         include/internal/semantic_analysis/ast_node_factory.h
         include/internal/semantic_analysis/ast_nodes/alternation.h
@@ -36,16 +38,17 @@ set(SOURCE_FILES
         include/internal/state_machines/transitions/transition_factory.h
         include/internal/syntactic_analysis/derivation_item.h
         include/internal/syntactic_analysis/grammar.h
-        include/internal/syntactic_analysis/lexeme.h
-        include/internal/syntactic_analysis/lexer.h
         include/internal/syntactic_analysis/parser.h
+        include/internal/syntactic_analysis/parsing_table_key.h
         include/internal/syntactic_analysis/production.h
         include/internal/syntactic_analysis/rule.h
         include/internal/syntactic_analysis/symbols/non_terminal.h
         include/internal/syntactic_analysis/symbols/symbol.h
         include/internal/syntactic_analysis/symbols/terminal.h
-        include/internal/syntactic_analysis/token.h
         src/common/helpers.c
+        src/lexical_analysis/lexeme.c
+        src/lexical_analysis/lexer.c
+        src/lexical_analysis/token.c
         src/regexperience.c
         src/semantic_analysis/analyzer.c
         src/semantic_analysis/ast_node_factory.c
@@ -78,15 +81,14 @@ set(SOURCE_FILES
         src/state_machines/transitions/transition_factory.c
         src/syntactic_analysis/derivation_item.c
         src/syntactic_analysis/grammar.c
-        src/syntactic_analysis/lexeme.c
-        src/syntactic_analysis/lexer.c
         src/syntactic_analysis/parser.c
+        src/syntactic_analysis/parsing_table_key.c
         src/syntactic_analysis/production.c
         src/syntactic_analysis/rule.c
         src/syntactic_analysis/symbols/non_terminal.c
         src/syntactic_analysis/symbols/symbol.c
         src/syntactic_analysis/symbols/terminal.c
-        src/syntactic_analysis/token.c include/internal/syntactic_analysis/parsing_table_key.h src/syntactic_analysis/parsing_table_key.c)
+        include/core/errors.h)
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)

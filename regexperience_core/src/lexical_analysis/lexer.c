@@ -1,5 +1,5 @@
-#include "internal/syntactic_analysis/lexer.h"
-#include "internal/syntactic_analysis/lexeme.h"
+#include "internal/lexical_analysis/lexer.h"
+#include "internal/lexical_analysis/lexeme.h"
 #include "internal/state_machines/fsm_initializable.h"
 #include "internal/state_machines/transducers/transducer_runnable.h"
 #include "internal/state_machines/transducers/mealy.h"
@@ -33,13 +33,13 @@ static FsmInitializable *lexer_build_transducer        (void);
 static GPtrArray        *lexer_create_transitions_from (MealyMapping  *mappings,
                                                         gsize          mappings_size);
 
-static void              lexer_report_error_if_needed  (const gchar   *regular_expression,
+static void              lexer_report_error            (const gchar   *regular_expression,
                                                         GError       **error);
 
 static void              lexer_dispose                 (GObject       *object);
 
-G_DEFINE_QUARK (syntactic-analysis-lexer-error-quark, syntactic_analysis_lexer_error)
-#define SYNTACTIC_ANALYSIS_LEXER_ERROR (syntactic_analysis_lexer_error_quark ())
+G_DEFINE_QUARK (lexical-analysis-lexer-error-quark, lexical_analysis_lexer_error)
+#define LEXICAL_ANALYSIS_LEXER_ERROR (lexical_analysis_lexer_error_quark ())
 
 G_DEFINE_TYPE_WITH_PRIVATE (Lexer, lexer, G_TYPE_OBJECT)
 
@@ -68,7 +68,7 @@ lexer_tokenize (Lexer        *self,
                 const gchar  *regular_expression,
                 GError      **error)
 {
-  g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_LEXER (self), NULL);
+  g_return_val_if_fail (LEXICAL_ANALYSIS_IS_LEXER (self), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
   LexerPrivate *priv = lexer_get_instance_private (self);
@@ -77,7 +77,7 @@ lexer_tokenize (Lexer        *self,
   guint character_position = 1;
   GError *temporary_error = NULL;
 
-  lexer_report_error_if_needed (regular_expression, &temporary_error);
+  lexer_report_error (regular_expression, &temporary_error);
 
   if (temporary_error != NULL)
     {
@@ -115,7 +115,7 @@ lexer_tokenize (Lexer        *self,
   return tokens;
 }
 
-static Token*
+static Token *
 lexer_create_token (TokenCategory  category,
                     gchar         *content,
                     guint         *character_position)
@@ -236,32 +236,32 @@ lexer_create_transitions_from (MealyMapping *mappings,
 }
 
 static void
-lexer_report_error_if_needed (const gchar  *regular_expression,
-                              GError      **error)
+lexer_report_error (const gchar *regular_expression,
+                    GError **error)
 {
-  SyntacticAnalysisLexerError error_code = SYNTACTIC_ANALYSIS_LEXER_ERROR_UNDEFINED;
+  LexicalAnalysisLexerError error_code = LEXICAL_ANALYSIS_LEXER_ERROR_UNDEFINED;
   const gchar *error_message = NULL;
 
   if (regular_expression == NULL)
     {
-      error_code = SYNTACTIC_ANALYSIS_LEXER_ERROR_INPUT_NULL;
+      error_code = LEXICAL_ANALYSIS_LEXER_ERROR_INPUT_NULL;
       error_message = "The regular expression must not be NULL";
     }
   else if (*regular_expression == '\0')
     {
-      error_code = SYNTACTIC_ANALYSIS_LEXER_ERROR_INPUT_EMPTY;
+      error_code = LEXICAL_ANALYSIS_LEXER_ERROR_INPUT_EMPTY;
       error_message = "The regular expression must not be an empty string";
     }
   else if (!g_str_is_ascii (regular_expression))
     {
-      error_code = SYNTACTIC_ANALYSIS_LEXER_ERROR_INPUT_NOT_ASCII;
+      error_code = LEXICAL_ANALYSIS_LEXER_ERROR_INPUT_NOT_ASCII;
       error_message = "The regular expression must be an ASCII string";
     }
 
   if (error_message != NULL)
     {
       g_set_error (error,
-                   SYNTACTIC_ANALYSIS_LEXER_ERROR,
+                   LEXICAL_ANALYSIS_LEXER_ERROR,
                    error_code,
                    error_message);
     }
@@ -269,7 +269,7 @@ lexer_report_error_if_needed (const gchar  *regular_expression,
 
 static void lexer_dispose (GObject *object)
 {
-  LexerPrivate *priv = lexer_get_instance_private (SYNTACTIC_ANALYSIS_LEXER (object));
+  LexerPrivate *priv = lexer_get_instance_private (LEXICAL_ANALYSIS_LEXER (object));
 
   if (priv->transducer != NULL)
     g_clear_object (&priv->transducer);

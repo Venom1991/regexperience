@@ -23,7 +23,7 @@ gint main (gint argc, gchar *argv[])
 
   g_autoptr (Regexperience) regexperience = regexperience_new ();
 
-/*  g_autoptr (GError) error = NULL;
+  g_autoptr (GError) error = NULL;
 
   regexperience_compile (regexperience, regular_expression, &error);
 
@@ -33,7 +33,7 @@ gint main (gint argc, gchar *argv[])
 
       exit (EXIT_FAILURE);
     }
-
+/*
   gboolean match = regexperience_match (regexperience, input, &error);
 
   if (error != NULL)

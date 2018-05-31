@@ -1,3 +1,4 @@
+#include <internal/syntactic_analysis/symbols/terminal.h>
 #include "internal/syntactic_analysis/parsing_table_key.h"
 #include "internal/syntactic_analysis/production.h"
 #include "internal/syntactic_analysis/symbols/symbol.h"
@@ -10,17 +11,20 @@ struct _ParsingTableKey
 typedef struct
 {
     Production *production;
-    Symbol     *symbol;
+    Symbol     *terminal;
+    guint       hash;
 } ParsingTableKeyPrivate;
 
 enum
 {
     PROP_PRODUCTION = 1,
-    PROP_SYMBOL,
+    PROP_TERMINAL,
     N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
+
+static void parsing_table_key_constructed  (GObject      *object);
 
 static void parsing_table_key_set_property (GObject      *object,
                                             guint         property_id,
@@ -36,22 +40,23 @@ parsing_table_key_class_init (ParsingTableKeyClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+  object_class->constructed = parsing_table_key_constructed;
   object_class->set_property = parsing_table_key_set_property;
   object_class->dispose = parsing_table_key_dispose;
 
   obj_properties[PROP_PRODUCTION] =
-      g_param_spec_object (PROP_PARSING_TABLE_KEY_PRODUCTION,
-                           "Production",
-                           "Production representing the first dimension of any given parsing table entry.",
-                           SYNTACTIC_ANALYSIS_TYPE_PRODUCTION,
-                           G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+    g_param_spec_object (PROP_PARSING_TABLE_KEY_PRODUCTION,
+                         "Production",
+                         "Production representing the first dimension of any given parsing table entry.",
+                         SYNTACTIC_ANALYSIS_TYPE_PRODUCTION,
+                         G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
 
-  obj_properties[PROP_SYMBOL] =
-      g_param_spec_object (PROP_PARSING_TABLE_KEY_SYMBOL,
-                           "Symbol",
-                           "Symbol representing the second dimension of any given parsing table entry.",
-                           SYMBOLS_TYPE_SYMBOL,
-                           G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+  obj_properties[PROP_TERMINAL] =
+    g_param_spec_object (PROP_PARSING_TABLE_KEY_TERMINAL,
+                         "Terminal",
+                         "Terminal symbol representing the second dimension of any given parsing table entry.",
+                         SYMBOLS_TYPE_SYMBOL,
+                         G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
@@ -69,9 +74,10 @@ parsing_table_key_hash (gconstpointer key)
 {
   g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_PARSING_TABLE_KEY (key), 0);
 
+  ParsingTableKey *parsing_table_key = SYNTACTIC_ANALYSIS_PARSING_TABLE_KEY ((gpointer) key);
+  ParsingTableKeyPrivate *priv = parsing_table_key_get_instance_private (parsing_table_key);
 
-
-  return 0;
+  return priv->hash;
 }
 
 gboolean
@@ -81,9 +87,48 @@ parsing_table_key_is_equal (gconstpointer a,
   g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_PARSING_TABLE_KEY (a), FALSE);
   g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_PARSING_TABLE_KEY (b), FALSE);
 
+  ParsingTableKeyPrivate *a_key_priv =
+    parsing_table_key_get_instance_private (SYNTACTIC_ANALYSIS_PARSING_TABLE_KEY ((gpointer) a));
+  ParsingTableKeyPrivate *b_key_priv =
+    parsing_table_key_get_instance_private (SYNTACTIC_ANALYSIS_PARSING_TABLE_KEY ((gpointer) b));
 
+  Production *a_production = a_key_priv->production;
+  Production *b_production = b_key_priv->production;
+  Symbol *a_terminal = a_key_priv->terminal;
+  Symbol *b_terminal = b_key_priv->terminal;
 
-  return FALSE;
+  return g_direct_equal (a_production, b_production)
+      && g_direct_equal (a_terminal, b_terminal);
+}
+
+static void
+parsing_table_key_constructed  (GObject *object)
+{
+  ParsingTableKeyPrivate *priv = parsing_table_key_get_instance_private (SYNTACTIC_ANALYSIS_PARSING_TABLE_KEY (object));
+  Production *production = priv->production;
+  Symbol *terminal = priv->terminal;
+  g_autofree gchar *production_caption = NULL;
+  GValue value = G_VALUE_INIT;
+  const g_autofree gchar *terminal_value = NULL;
+
+  g_object_get (production,
+                PROP_PRODUCTION_CAPTION, &production_caption,
+                NULL);
+
+  symbol_extract_value (terminal, &value);
+
+  terminal_value = g_value_get_string (&value);
+
+  guint hash = 0;
+  guint production_caption_hash = g_str_hash (production_caption);
+  guint terminal_value_hash = g_str_hash (terminal_value);
+
+  hash = (hash * 397) ^ production_caption_hash;
+  hash = (hash * 397) ^ terminal_value_hash;
+
+  priv->hash = hash;
+
+  G_OBJECT_CLASS (parsing_table_key_parent_class)->constructed (object);
 }
 
 static void
@@ -103,11 +148,11 @@ parsing_table_key_set_property (GObject      *object,
       priv->production = g_value_dup_object (value);
       break;
 
-    case PROP_SYMBOL:
-      if (priv->symbol != NULL)
-        g_object_unref (priv->symbol);
+    case PROP_TERMINAL:
+      if (priv->terminal != NULL)
+        g_object_unref (priv->terminal);
 
-      priv->symbol = g_value_dup_object (value);
+      priv->terminal = g_value_dup_object (value);
       break;
 
     default:
@@ -124,8 +169,8 @@ parsing_table_key_dispose (GObject *object)
   if (priv->production != NULL)
     g_clear_object (&priv->production);
 
-  if (priv->symbol != NULL)
-    g_clear_object (&priv->symbol);
+  if (priv->terminal != NULL)
+    g_clear_object (&priv->terminal);
 
   G_OBJECT_CLASS (parsing_table_key_parent_class)->dispose (object);
 }

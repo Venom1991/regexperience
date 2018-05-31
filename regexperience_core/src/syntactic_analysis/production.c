@@ -144,8 +144,8 @@ production_compute_first_set (Production *self)
               else if (SYMBOLS_IS_NON_TERMINAL (symbol))
                 {
                   g_autoptr (GPtrArray) non_terminal_first_set =
-                      production_fetch_non_terminal_first_set (symbol,
-                                                               &symbol_can_derive_epsilon);
+                    production_fetch_non_terminal_first_set (symbol,
+                                                             &symbol_can_derive_epsilon);
 
                   g_ptr_array_add_range_distinct (rule_first_set,
                                                   non_terminal_first_set,
@@ -200,12 +200,12 @@ production_compute_follow_set (Production *self)
         {
           for (guint i = 0; i < occurrences->len; ++i)
             {
-              DerivationItem *derivation_item = g_ptr_array_index (occurrences, i);
+              DerivationItem *occurrence = g_ptr_array_index (occurrences, i);
               g_autoptr (Production) left_hand_side = NULL;
               g_autoptr (Rule) right_hand_side = NULL;
               g_autoptr (GPtrArray) symbols = NULL;
 
-              g_object_get (derivation_item,
+              g_object_get (occurrence,
                             PROP_DERIVATION_ITEM_LEFT_HAND_SIDE, &left_hand_side,
                             PROP_DERIVATION_ITEM_RIGHT_HAND_SIDE, &right_hand_side,
                             NULL);

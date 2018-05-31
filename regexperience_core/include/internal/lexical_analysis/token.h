@@ -5,10 +5,10 @@
 
 G_BEGIN_DECLS
 
-#define SYNTACTIC_ANALYSIS_TYPE_TOKEN (token_get_type ())
-#define token_new(...) (g_object_new (SYNTACTIC_ANALYSIS_TYPE_TOKEN, ##__VA_ARGS__, NULL))
+#define LEXICAL_ANALYSIS_TYPE_TOKEN (token_get_type ())
+#define token_new(...) (g_object_new (LEXICAL_ANALYSIS_TYPE_TOKEN, ##__VA_ARGS__, NULL))
 
-G_DECLARE_FINAL_TYPE (Token, token, SYNTACTIC_ANALYSIS, TOKEN, GObject)
+G_DECLARE_FINAL_TYPE (Token, token, LEXICAL_ANALYSIS, TOKEN, GObject)
 
 typedef enum
 {

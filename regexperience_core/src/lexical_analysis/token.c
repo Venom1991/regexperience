@@ -1,5 +1,5 @@
-#include "internal/syntactic_analysis/token.h"
-#include "internal/syntactic_analysis/lexeme.h"
+#include "internal/lexical_analysis/token.h"
+#include "internal/lexical_analysis/lexeme.h"
 
 struct _Token
 {
@@ -57,7 +57,7 @@ token_class_init (TokenClass *klass)
     g_param_spec_object (PROP_TOKEN_LEXEME,
                          "Lexeme",
                          "Lexeme associated with the token.",
-                         SYNTACTIC_ANALYSIS_TYPE_LEXEME,
+                         LEXICAL_ANALYSIS_TYPE_LEXEME,
                          G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
@@ -77,7 +77,7 @@ token_get_property (GObject    *object,
                     GValue     *value,
                     GParamSpec *pspec)
 {
-  TokenPrivate *priv = token_get_instance_private (SYNTACTIC_ANALYSIS_TOKEN (object));
+  TokenPrivate *priv = token_get_instance_private (LEXICAL_ANALYSIS_TOKEN (object));
 
   switch (property_id)
     {
@@ -101,7 +101,7 @@ token_set_property (GObject      *object,
                     const GValue *value,
                     GParamSpec   *pspec)
 {
-  TokenPrivate *priv = token_get_instance_private (SYNTACTIC_ANALYSIS_TOKEN (object));
+  TokenPrivate *priv = token_get_instance_private (LEXICAL_ANALYSIS_TOKEN (object));
 
   switch (property_id)
     {
@@ -125,7 +125,7 @@ token_set_property (GObject      *object,
 static void
 token_dispose (GObject *object)
 {
-  TokenPrivate *priv = token_get_instance_private (SYNTACTIC_ANALYSIS_TOKEN (object));
+  TokenPrivate *priv = token_get_instance_private (LEXICAL_ANALYSIS_TOKEN (object));
 
   if (priv->lexeme != NULL)
     g_clear_object (&priv->lexeme);

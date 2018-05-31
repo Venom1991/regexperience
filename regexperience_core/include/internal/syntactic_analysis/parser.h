@@ -5,7 +5,7 @@
 
 #include "grammar.h"
 #include "production.h"
-#include "internal/syntactic_analysis/token.h"
+#include "../lexical_analysis/token.h"
 
 G_BEGIN_DECLS
 

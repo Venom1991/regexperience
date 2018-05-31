@@ -11,6 +11,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (Grammar, grammar, SYNTACTIC_ANALYSIS, GRAMMAR, GObject)
 
 #define PROP_GRAMMAR_ALL_PRODUCTIONS     "all-productions"
+#define PROP_GRAMMAR_ALL_TERMINALS       "all-terminals"
 #define PROP_GRAMMAR_START_PRODUCTION    "start-production"
 #define PROP_GRAMMAR_PARSING_TABLE       "parsing-table"
 

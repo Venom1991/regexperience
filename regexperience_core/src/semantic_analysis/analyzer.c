@@ -3,7 +3,7 @@
 #include "internal/syntactic_analysis/grammar.h"
 #include "internal/syntactic_analysis/production.h"
 #include "internal/syntactic_analysis/symbols/non_terminal.h"
-#include "internal/syntactic_analysis/token.h"
+#include "internal/lexical_analysis/token.h"
 
 struct _Analyzer
 {
@@ -179,6 +179,12 @@ analyzer_define_operator_types (GHashTable *operator_types)
   g_hash_table_insert (operator_types,
                        UPPER_CASE_LETTER_RANGE,
                        GINT_TO_POINTER (OPERATOR_TYPE_RANGE));
+  g_hash_table_insert (operator_types,
+                       LOWER_CASE_LETTER_RANGE,
+                       GINT_TO_POINTER (OPERATOR_TYPE_RANGE));
+  g_hash_table_insert (operator_types,
+                       DIGIT_RANGE,
+                       GINT_TO_POINTER (OPERATOR_TYPE_RANGE));
 }
 
 static gboolean
@@ -336,7 +342,7 @@ analyzer_fetch_cst_children (GNode                 *cst_root,
       if (((fetchCstChildrenFlags & FETCH_CST_CHILDREN_NON_TERMINAL) &&
            SYMBOLS_IS_NON_TERMINAL (child->data)) ||
           ((fetchCstChildrenFlags & FETCH_CST_CHILDREN_TOKEN) &&
-           SYNTACTIC_ANALYSIS_IS_TOKEN (child->data)))
+           LEXICAL_ANALYSIS_IS_TOKEN (child->data)))
         {
           g_ptr_array_add (children, child);
 

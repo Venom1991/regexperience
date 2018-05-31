@@ -1,4 +1,4 @@
-#include "internal/syntactic_analysis/lexeme.h"
+#include "internal/lexical_analysis/lexeme.h"
 
 struct _Lexeme
 {
@@ -87,7 +87,7 @@ lexeme_get_property (GObject    *object,
                      GValue     *value,
                      GParamSpec *pspec)
 {
-  LexemePrivate *priv = lexeme_get_instance_private (SYNTACTIC_ANALYSIS_LEXEME (object));
+  LexemePrivate *priv = lexeme_get_instance_private (LEXICAL_ANALYSIS_LEXEME (object));
 
   switch (property_id)
     {
@@ -115,7 +115,7 @@ lexeme_set_property (GObject      *object,
                      const GValue *value,
                      GParamSpec   *pspec)
 {
-  LexemePrivate *priv = lexeme_get_instance_private (SYNTACTIC_ANALYSIS_LEXEME (object));
+  LexemePrivate *priv = lexeme_get_instance_private (LEXICAL_ANALYSIS_LEXEME (object));
 
   switch (property_id)
     {
@@ -143,7 +143,7 @@ lexeme_set_property (GObject      *object,
 static void
 lexeme_finalize (GObject *object)
 {
-  LexemePrivate *priv = lexeme_get_instance_private (SYNTACTIC_ANALYSIS_LEXEME (object));
+  LexemePrivate *priv = lexeme_get_instance_private (LEXICAL_ANALYSIS_LEXEME (object));
 
   if (priv->content != NULL)
     g_string_free (priv->content, TRUE);

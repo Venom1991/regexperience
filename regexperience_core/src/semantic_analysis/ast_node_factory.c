@@ -5,15 +5,15 @@
 #include "internal/semantic_analysis/ast_nodes/quantification.h"
 #include "internal/semantic_analysis/ast_nodes/bracket_expression.h"
 #include "internal/semantic_analysis/ast_nodes/range.h"
-#include "internal/syntactic_analysis/lexeme.h"
-#include "internal/syntactic_analysis/token.h"
+#include "internal/lexical_analysis/lexeme.h"
+#include "internal/lexical_analysis/token.h"
 
 AstNode *
 create_constant (GNode *cst_context)
 {
   g_return_val_if_fail (cst_context != NULL, NULL);
 
-  Token *token = SYNTACTIC_ANALYSIS_TOKEN (cst_context->data);
+  Token *token = LEXICAL_ANALYSIS_TOKEN (cst_context->data);
   TokenCategory token_category = TOKEN_CATEGORY_UNDEFINED;
   g_autoptr (Lexeme) lexeme = NULL;
   g_autoptr (GString) lexeme_content = NULL;

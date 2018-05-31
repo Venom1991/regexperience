@@ -52,14 +52,15 @@ gboolean   g_ptr_array_has_items             (GPtrArray      *ptr_array);
 
 gboolean   g_array_has_items                 (GArray         *array);
 
+
+gboolean   g_queue_has_items                 (GQueue         *queue);
+
 gboolean   g_hash_table_has_items            (GHashTable     *hash_table);
 
 GPtrArray *g_hash_table_values_to_ptr_array  (GHashTable     *hash_table,
                                               GDestroyNotify  free_func);
 
-GQueue    *g_queue_copy_g_objects            (GQueue         *queue);
-
-void       g_queue_free_g_objects            (GQueue         *queue);
+void       g_queue_unref_g_objects           (GQueue         *queue);
 
 void       g_node_unref_g_objects            (GNode          *node);
 

@@ -178,23 +178,33 @@ g_ptr_array_add_if_not_exists (GPtrArray  *ptr_array,
     }
 }
 
-gboolean g_ptr_array_has_items (GPtrArray *ptr_array)
+gboolean
+g_ptr_array_has_items (GPtrArray *ptr_array)
 {
   return ptr_array != NULL && ptr_array->len > 0;
 }
 
-gboolean g_array_has_items (GArray *array)
+gboolean
+g_array_has_items (GArray *array)
 {
   return array != NULL && array->len > 0;
 }
 
-gboolean g_hash_table_has_items (GHashTable *hash_table)
+gboolean
+g_queue_has_items (GQueue *queue)
+{
+  return queue != NULL && g_queue_get_length (queue) > 0;
+}
+
+gboolean
+g_hash_table_has_items (GHashTable *hash_table)
 {
   return hash_table != NULL && g_hash_table_size (hash_table) > 0;
 }
 
-GPtrArray *g_hash_table_values_to_ptr_array (GHashTable     *hash_table,
-                                             GDestroyNotify  free_func)
+GPtrArray *
+g_hash_table_values_to_ptr_array (GHashTable     *hash_table,
+                                  GDestroyNotify  free_func)
 {
   g_return_val_if_fail (g_hash_table_has_items (hash_table), NULL);
 
@@ -217,32 +227,13 @@ GPtrArray *g_hash_table_values_to_ptr_array (GHashTable     *hash_table,
   return array;
 }
 
-GQueue *
-g_queue_copy_g_objects (GQueue *queue)
-{
-  g_return_val_if_fail (queue != NULL, NULL);
-
-  GQueue *result = g_queue_new ();
-  GList *list;
-
-  for (list = queue->head; list != NULL; list = list->next)
-    {
-      g_return_val_if_fail (G_IS_OBJECT (list->data), result);
-
-      gpointer copy = g_object_ref (list->data);
-
-      g_queue_push_tail (result, copy);
-    }
-
-  return result;
-}
-
 void
-g_queue_free_g_objects (GQueue *queue)
+g_queue_unref_g_objects (GQueue *queue)
 {
   g_return_if_fail (queue != NULL);
 
-  g_queue_free_full (queue, g_object_unref);
+  if (g_queue_has_items (queue))
+    g_queue_free_full (queue, g_object_unref);
 }
 
 gboolean

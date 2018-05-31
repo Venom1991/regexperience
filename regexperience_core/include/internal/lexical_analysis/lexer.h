@@ -3,14 +3,14 @@
 
 #include <glib-object.h>
 
-#include "internal/syntactic_analysis/token.h"
+#include "token.h"
 
 G_BEGIN_DECLS
 
-#define SYNTACTIC_ANALYSIS_TYPE_LEXER (lexer_get_type ())
-#define lexer_new(...) (g_object_new (SYNTACTIC_ANALYSIS_TYPE_LEXER, ##__VA_ARGS__, NULL))
+#define LEXICAL_ANALYSIS_TYPE_LEXER (lexer_get_type ())
+#define lexer_new(...) (g_object_new (LEXICAL_ANALYSIS_TYPE_LEXER, ##__VA_ARGS__, NULL))
 
-G_DECLARE_FINAL_TYPE (Lexer, lexer, SYNTACTIC_ANALYSIS, LEXER, GObject)
+G_DECLARE_FINAL_TYPE (Lexer, lexer, LEXICAL_ANALYSIS, LEXER, GObject)
 
 GPtrArray *lexer_tokenize (Lexer        *self,
                            const gchar  *regular_expression,
