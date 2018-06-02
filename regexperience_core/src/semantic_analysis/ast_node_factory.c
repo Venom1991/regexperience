@@ -3,7 +3,6 @@
 #include "internal/semantic_analysis/ast_nodes/alternation.h"
 #include "internal/semantic_analysis/ast_nodes/concatenation.h"
 #include "internal/semantic_analysis/ast_nodes/quantification.h"
-#include "internal/semantic_analysis/ast_nodes/bracket_expression.h"
 #include "internal/semantic_analysis/ast_nodes/range.h"
 #include "internal/lexical_analysis/lexeme.h"
 #include "internal/lexical_analysis/token.h"
@@ -64,9 +63,6 @@ create_unary_operator (OperatorType  operator_type,
       return quantification_new (PROP_UNARY_OPERATOR_OPERAND, operand,
                                  PROP_QUANTIFICATION_LOWER_BOUND, QUANTIFICATION_BOUND_TYPE_ZERO,
                                  PROP_QUANTIFICATION_UPPER_BOUND, QUANTIFICATION_BOUND_TYPE_ONE);
-
-    case OPERATOR_TYPE_BRACKET_EXPRESSION:
-      return bracket_expression_new (PROP_UNARY_OPERATOR_OPERAND, operand);
 
     default:
       return NULL;

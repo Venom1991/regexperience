@@ -12,7 +12,6 @@ set(SOURCE_FILES
         include/internal/semantic_analysis/ast_nodes/alternation.h
         include/internal/semantic_analysis/ast_nodes/ast_node.h
         include/internal/semantic_analysis/ast_nodes/binary_operator.h
-        include/internal/semantic_analysis/ast_nodes/bracket_expression.h
         include/internal/semantic_analysis/ast_nodes/concatenation.h
         include/internal/semantic_analysis/ast_nodes/constant.h
         include/internal/semantic_analysis/ast_nodes/quantification.h
@@ -55,7 +54,6 @@ set(SOURCE_FILES
         src/semantic_analysis/ast_nodes/alternation.c
         src/semantic_analysis/ast_nodes/ast_node.c
         src/semantic_analysis/ast_nodes/binary_operator.c
-        src/semantic_analysis/ast_nodes/bracket_expression.c
         src/semantic_analysis/ast_nodes/concatenation.c
         src/semantic_analysis/ast_nodes/constant.c
         src/semantic_analysis/ast_nodes/quantification.c

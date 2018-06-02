@@ -210,7 +210,7 @@ static GPtrArray *
 lexer_create_transitions_from (MealyMapping *mappings,
                                gsize         mappings_size)
 {
-  GPtrArray *transitions = g_ptr_array_new_with_free_func (g_object_unref);
+  GPtrArray *transitions = g_ptr_array_new_full ((guint) mappings_size, g_object_unref);
   const gchar uninitialized_character = 0;
 
   for (guint i = 0; i < mappings_size; ++i)

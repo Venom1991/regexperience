@@ -603,7 +603,9 @@ grammar_insert_parsing_table_entries (GHashTable *parsing_table,
                                                                    parsing_table_key,
                                                                    rule);
 
-          /* Asserting whether or not all of the keys are unique (i.e., there are no LL(1) grammar conflicts). */
+          /* Asserting whether or not all of the parsing table keys are unique
+             (i.e., there are no LL(1) grammar conflicts).
+           */
           g_assert (parsing_table_key_is_new);
         }
     }

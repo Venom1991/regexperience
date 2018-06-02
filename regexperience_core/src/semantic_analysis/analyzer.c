@@ -1,3 +1,4 @@
+#include <internal/common/helpers.h>
 #include "internal/semantic_analysis/analyzer.h"
 #include "internal/semantic_analysis/ast_node_factory.h"
 #include "internal/syntactic_analysis/grammar.h"
@@ -34,11 +35,15 @@ static gboolean      analyzer_is_constant                    (GNode             
                                                               GNode                 **first_cst_child);
 
 static gboolean      analyzer_is_unary_operator              (GNode                  *cst_root,
-                                                              GNode                 **first_cst_child);
+                                                              GNode                 **first_cst_child,
+                                                              GNode                 **operator_discerning_node);
 
 static gboolean      analyzer_is_binary_operator             (GNode                  *cst_root,
                                                               GNode                 **first_cst_child,
-                                                              GNode                 **second_cst_child);
+                                                              GNode                 **second_cst_child,
+                                                              GNode                 **operator_discerning_node);
+
+static gboolean      analyzer_is_empty                       (GNode                  *cst_root);
 
 static gboolean      analyzer_is_match                       (GNode                  *cst_root,
                                                               ...);
@@ -107,6 +112,9 @@ analyzer_transform_concrete_syntax_tree (GNode      *cst_root,
   AstNode *ast_node = NULL;
   GNode *first_cst_child = NULL;
   GNode *second_cst_child = NULL;
+  GNode *operator_discerning_node = NULL;
+
+  const gchar *caption = analyzer_fetch_node_caption (cst_root);
 
   if (analyzer_is_constant (cst_root,
                             &first_cst_child))
@@ -114,25 +122,27 @@ analyzer_transform_concrete_syntax_tree (GNode      *cst_root,
       ast_node = create_constant (first_cst_child);
     }
   else if (analyzer_is_unary_operator (cst_root,
-                                       &first_cst_child))
+                                       &first_cst_child,
+                                       &operator_discerning_node))
     {
       g_autoptr (AstNode) operand = analyzer_transform_concrete_syntax_tree (first_cst_child,
                                                                              operator_types);
 
-      ast_node = create_unary_operator (analyzer_discern_operator_type (cst_root,
+      ast_node = create_unary_operator (analyzer_discern_operator_type (operator_discerning_node,
                                                                         operator_types),
                                         operand);
     }
   else if (analyzer_is_binary_operator (cst_root,
                                         &first_cst_child,
-                                        &second_cst_child))
+                                        &second_cst_child,
+                                        &operator_discerning_node))
     {
       g_autoptr (AstNode) left_operand = analyzer_transform_concrete_syntax_tree (first_cst_child,
                                                                                   operator_types);
       g_autoptr (AstNode) right_operand = analyzer_transform_concrete_syntax_tree (second_cst_child,
                                                                                    operator_types);
 
-      ast_node = create_binary_operator (analyzer_discern_operator_type (cst_root,
+      ast_node = create_binary_operator (analyzer_discern_operator_type (operator_discerning_node,
                                                                          operator_types),
                                          left_operand,
                                          right_operand);
@@ -149,16 +159,16 @@ static void
 analyzer_define_operator_types (GHashTable *operator_types)
 {
   g_hash_table_insert (operator_types,
-                       EXPRESSION,
+                       EXPRESSION_PRIME,
                        GINT_TO_POINTER (OPERATOR_TYPE_ALTERNATION));
   g_hash_table_insert (operator_types,
-                       ALTERNATION,
+                       ALTERNATION_PRIME,
                        GINT_TO_POINTER (OPERATOR_TYPE_ALTERNATION));
   g_hash_table_insert (operator_types,
-                       SIMPLE_EXPRESSION,
+                       SIMPLE_EXPRESSION_PRIME,
                        GINT_TO_POINTER (OPERATOR_TYPE_CONCATENATION));
   g_hash_table_insert (operator_types,
-                       CONCATENATION,
+                       CONCATENATION_PRIME,
                        GINT_TO_POINTER (OPERATOR_TYPE_CONCATENATION));
   g_hash_table_insert (operator_types,
                        STAR_QUANTIFICATION,
@@ -169,14 +179,11 @@ analyzer_define_operator_types (GHashTable *operator_types)
   g_hash_table_insert (operator_types,
                        QUESTION_MARK_QUANTIFICATION,
                        GINT_TO_POINTER (OPERATOR_TYPE_QUESTION_MARK_QUANTIFICATION));
-  g_hash_table_insert (operator_types,
-                       BRACKET_EXPRESSION,
-                       GINT_TO_POINTER (OPERATOR_TYPE_BRACKET_EXPRESSION));
   /* Bracket expression items behave in exactly the same way as alternation does but without
    * the usage of an explicit operator ("|").
    */
   g_hash_table_insert (operator_types,
-                       BRACKET_EXPRESSION_ITEMS,
+                       BRACKET_EXPRESSION_ITEMS_PRIME,
                        GINT_TO_POINTER (OPERATOR_TYPE_ALTERNATION));
   g_hash_table_insert (operator_types,
                        UPPER_CASE_LETTER_RANGE,
@@ -193,8 +200,6 @@ static gboolean
 analyzer_is_constant (GNode  *cst_root,
                       GNode **first_cst_child)
 {
-  gboolean result = FALSE;
-
   if (analyzer_is_match (cst_root,
                          UPPER_CASE_LETTER,
                          LOWER_CASE_LETTER,
@@ -211,72 +216,145 @@ analyzer_is_constant (GNode  *cst_root,
 
       *first_cst_child = g_ptr_array_index (cst_children, 0);
 
-      result = TRUE;
+      return TRUE;
     }
 
-  return result;
+  return FALSE;
 }
 
 static gboolean
 analyzer_is_unary_operator (GNode  *cst_root,
-                            GNode **first_cst_child)
+                            GNode **first_cst_child,
+                            GNode **operator_discerning_node)
 {
-  gboolean result = FALSE;
-
   if (analyzer_is_match (cst_root,
-                         STAR_QUANTIFICATION,
-                         PLUS_QUANTIFICATION,
-                         QUESTION_MARK_QUANTIFICATION,
-                         BRACKET_EXPRESSION,
+                         BASIC_EXPRESSION,
                          NULL))
     {
       g_autoptr (GPtrArray) cst_children =
-        analyzer_fetch_cst_children (cst_root,
-                                     FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_FIRST);
-      const guint unary_operator_operands_count = 1;
+          analyzer_fetch_cst_children (cst_root,
+                                       FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_ALL);
 
-      if (cst_children->len == unary_operator_operands_count)
+      if (g_ptr_array_has_items (cst_children))
         {
-          *first_cst_child = g_ptr_array_index (cst_children, 0);
+          for (guint i = 0; i < cst_children->len; ++i)
+            {
+              GNode *cst_child = g_ptr_array_index (cst_children, i);
 
-          result = TRUE;
+              if (analyzer_is_match (cst_child,
+                                     BASIC_EXPRESSION_PRIME,
+                                     NULL) &&
+                  !analyzer_is_empty (cst_child))
+                {
+                  g_autoptr (GPtrArray) cst_grandchildren =
+                    analyzer_fetch_cst_children (cst_child,
+                                                 FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_FIRST);
+
+                  if (g_ptr_array_has_items (cst_grandchildren))
+                    {
+                      for (guint j = 0; j < cst_grandchildren->len; ++j)
+                        {
+                          GNode *cst_grandchild = g_ptr_array_index (cst_grandchildren, j);
+
+                          if (analyzer_is_match (cst_grandchild,
+                                                 STAR_QUANTIFICATION,
+                                                 PLUS_QUANTIFICATION,
+                                                 QUESTION_MARK_QUANTIFICATION,
+                                                 NULL))
+                            {
+                              *first_cst_child = g_ptr_array_index (cst_children, 0);
+                              *operator_discerning_node = cst_grandchild;
+
+                              return TRUE;
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
-  return result;
+  return FALSE;
 }
 
 static gboolean
 analyzer_is_binary_operator (GNode  *cst_root,
                              GNode **first_cst_child,
-                             GNode **second_cst_child)
+                             GNode **second_cst_child,
+                             GNode **operator_discerning_node)
 {
-  gboolean result = FALSE;
-
   if (analyzer_is_match (cst_root,
                          EXPRESSION,
                          ALTERNATION,
                          SIMPLE_EXPRESSION,
                          CONCATENATION,
                          BRACKET_EXPRESSION_ITEMS,
-                         UPPER_CASE_LETTER_RANGE,
+                         BRACKET_EXPRESSION_ITEM,
                          NULL))
     {
       g_autoptr (GPtrArray) cst_children =
         analyzer_fetch_cst_children (cst_root,
                                      FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_ALL);
-      const guint binary_operator_operands_count = 2;
 
-      if (cst_children->len == binary_operator_operands_count)
+      if (g_ptr_array_has_items (cst_children))
         {
-          *first_cst_child = g_ptr_array_index (cst_children, 0);
-          *second_cst_child = g_ptr_array_index (cst_children, 1);
+          for (guint i = 0; i < cst_children->len; ++i)
+            {
+              GNode *cst_child = g_ptr_array_index (cst_children, i);
 
-          result = TRUE;
+              if (analyzer_is_match (cst_child,
+                                     EXPRESSION_PRIME,
+                                     ALTERNATION_PRIME,
+                                     SIMPLE_EXPRESSION_PRIME,
+                                     CONCATENATION_PRIME,
+                                     BRACKET_EXPRESSION_ITEMS_PRIME,
+                                     UPPER_CASE_LETTER_RANGE,
+                                     LOWER_CASE_LETTER_RANGE,
+                                     DIGIT_RANGE,
+                                     NULL) &&
+                  !analyzer_is_empty (cst_child))
+                {
+                  g_autoptr (GPtrArray) cst_grandchildren =
+                    analyzer_fetch_cst_children (cst_child,
+                                                 FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_ALL);
+
+                  if (g_ptr_array_has_items (cst_grandchildren))
+                    {
+                      *first_cst_child = g_ptr_array_index (cst_children, 0);
+                      *second_cst_child = g_ptr_array_index (cst_grandchildren, cst_grandchildren->len - 1);
+                      *operator_discerning_node = cst_child;
+
+                      return TRUE;
+                    }
+                }
+            }
         }
     }
 
-  return result;
+  return FALSE;
+}
+
+static gboolean
+analyzer_is_empty (GNode *cst_root)
+{
+  g_autoptr (GPtrArray) cst_children =
+    analyzer_fetch_cst_children (cst_root,
+                                 FETCH_CST_CHILDREN_TERMINAL | FETCH_CST_CHILDREN_FIRST);
+
+  if (g_ptr_array_has_items (cst_children))
+    {
+      const guint empty_node_children_count = 1;
+
+      if (cst_children->len == empty_node_children_count)
+        {
+          GNode *cst_child = g_ptr_array_index (cst_children, 0);
+          Symbol *terminal = SYMBOLS_SYMBOL (cst_child->data);
+
+          return symbol_is_match (terminal, EPSILON);
+        }
+    }
+
+  return FALSE;
 }
 
 static gboolean
@@ -324,6 +402,9 @@ analyzer_continue (GNode      *cst_root,
   g_autoptr (GPtrArray) cst_children =
     analyzer_fetch_cst_children (cst_root,
                                  FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_FIRST);
+
+  g_assert (g_ptr_array_has_items (cst_children));
+
   GNode *first_cst_child = g_ptr_array_index (cst_children, 0);
 
   return analyzer_transform_concrete_syntax_tree (first_cst_child,
@@ -334,21 +415,22 @@ static GPtrArray *
 analyzer_fetch_cst_children (GNode                 *cst_root,
                              FetchCstChildrenFlags  fetch_cst_children_flags)
 {
-  GPtrArray *children = g_ptr_array_new ();
-  guint children_count = g_node_n_children (cst_root);
+  GPtrArray *cst_children = g_ptr_array_new ();
+  guint cst_children_count = g_node_n_children (cst_root);
 
-  for (guint i = 0; i < children_count; ++i)
+  for (guint i = 0; i < cst_children_count; ++i)
     {
-      GNode *child = g_node_nth_child (cst_root, i);
+      GNode *cst_child = g_node_nth_child (cst_root, i);
+      gpointer data = cst_child->data;
 
       if (((fetch_cst_children_flags & FETCH_CST_CHILDREN_TOKEN) &&
-           LEXICAL_ANALYSIS_IS_TOKEN (child->data)) ||
+           LEXICAL_ANALYSIS_IS_TOKEN (data)) ||
           ((fetch_cst_children_flags & FETCH_CST_CHILDREN_TERMINAL) &&
-           SYMBOLS_IS_TERMINAL (child->data)) &&
+           SYMBOLS_IS_TERMINAL (data)) ||
           ((fetch_cst_children_flags & FETCH_CST_CHILDREN_NON_TERMINAL) &&
-           SYMBOLS_IS_NON_TERMINAL (child->data)))
+           SYMBOLS_IS_NON_TERMINAL (data)))
         {
-          g_ptr_array_add (children, child);
+          g_ptr_array_add (cst_children, cst_child);
 
           if (fetch_cst_children_flags & FETCH_CST_CHILDREN_ALL)
             continue;
@@ -357,7 +439,7 @@ analyzer_fetch_cst_children (GNode                 *cst_root,
         }
     }
 
-  return children;
+  return cst_children;
 }
 
 static const gchar *
