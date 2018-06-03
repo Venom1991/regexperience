@@ -335,28 +335,28 @@ fsm_get_property (GObject    *object,
 
   switch (property_id)
     {
-      case PROP_ALL_STATES:
-        g_value_set_boxed (value, priv->all_states);
+    case PROP_ALL_STATES:
+      g_value_set_boxed (value, priv->all_states);
       break;
 
-      case PROP_START_STATE:
-        g_value_set_object (value, priv->start_state);
+    case PROP_START_STATE:
+      g_value_set_object (value, priv->start_state);
       break;
 
-      case PROP_FINAL_STATES:
-        g_value_set_boxed (value, priv->final_states);
+    case PROP_FINAL_STATES:
+      g_value_set_boxed (value, priv->final_states);
       break;
 
-      case PROP_NON_FINAL_STATES:
-        g_value_set_boxed (value, priv->non_final_states);
+    case PROP_NON_FINAL_STATES:
+      g_value_set_boxed (value, priv->non_final_states);
       break;
 
-      case PROP_ALPHABET:
-        g_value_set_pointer (value, priv->alphabet);
+    case PROP_ALPHABET:
+      g_value_set_pointer (value, priv->alphabet);
       break;
 
-      default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
     }
 }
@@ -371,9 +371,9 @@ fsm_set_property (GObject      *object,
 
   switch (property_id)
     {
-      case PROP_ALL_STATES:
-        if (priv->all_states != NULL)
-          g_ptr_array_unref (priv->all_states);
+    case PROP_ALL_STATES:
+      if (priv->all_states != NULL)
+        g_ptr_array_unref (priv->all_states);
 
       priv->all_states = g_value_dup_boxed (value);
 
@@ -382,8 +382,8 @@ fsm_set_property (GObject      *object,
 
       break;
 
-      default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
     }
 }

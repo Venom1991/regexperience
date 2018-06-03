@@ -8,8 +8,6 @@
 #include "internal/syntactic_analysis/symbols/terminal.h"
 #include "internal/common/helpers.h"
 
-#include <glib/gprintf.h>
-
 struct _Grammar
 {
     GObject parent_instance;
@@ -413,6 +411,9 @@ grammar_define_productions_and_terminals (GPtrArray **productions,
                                                           productions_table,
                                                           terminals_table);
 
+      /* Keeping track of the exact positions in which the non-terminals' underlying productions
+       * appear as members of the current production's rules.
+       */
       grammar_mark_non_terminal_occurrences (production,
                                              rules);
       g_object_set (production,
@@ -472,6 +473,7 @@ grammar_define_symbols (gchar      **symbols_array,
           Symbol *terminal = g_hash_table_lookup (terminals_table,
                                                   current_symbol_value);
 
+          /* Avoiding unnecessary duplication of terminals. */
           if (terminal == NULL)
             {
               symbol = terminal_new (PROP_SYMBOL_VALUE, current_symbol_value);
@@ -538,8 +540,8 @@ grammar_mark_non_terminal_occurrences (Production *left_hand_side,
 static GHashTable *
 grammar_build_parsing_table (GPtrArray *productions)
 {
-   GHashTable *parsing_table = g_hash_table_new_full (parsing_table_key_hash,
-                                                      parsing_table_key_is_equal,
+   GHashTable *parsing_table = g_hash_table_new_full ((GHashFunc) parsing_table_key_hash,
+                                                      (GEqualFunc) parsing_table_key_is_equal,
                                                       g_object_unref,
                                                       NULL);
 
@@ -603,8 +605,8 @@ grammar_insert_parsing_table_entries (GHashTable *parsing_table,
                                                                    parsing_table_key,
                                                                    rule);
 
-          /* Asserting whether or not all of the parsing table keys are unique
-             (i.e., there are no LL(1) grammar conflicts).
+          /* Asserting whether or not all of the parsing table keys
+           * are unique - i.e., there are no LL(1) grammar conflicts.
            */
           g_assert (parsing_table_key_is_new);
         }

@@ -1,4 +1,3 @@
-#include <internal/common/helpers.h>
 #include "internal/semantic_analysis/analyzer.h"
 #include "internal/semantic_analysis/ast_node_factory.h"
 #include "internal/syntactic_analysis/grammar.h"
@@ -6,6 +5,7 @@
 #include "internal/syntactic_analysis/symbols/terminal.h"
 #include "internal/syntactic_analysis/symbols/non_terminal.h"
 #include "internal/lexical_analysis/token.h"
+#include "internal/common/helpers.h"
 
 struct _Analyzer
 {
@@ -29,19 +29,19 @@ typedef enum
 static AstNode      *analyzer_transform_concrete_syntax_tree (GNode                  *cst_root,
                                                               GHashTable             *operator_types);
 
-static void          analyzer_define_operator_types          (GHashTable             *operator_types);
+static GHashTable   *analyzer_define_operator_types          (void);
 
 static gboolean      analyzer_is_constant                    (GNode                  *cst_root,
                                                               GNode                 **first_cst_child);
 
 static gboolean      analyzer_is_unary_operator              (GNode                  *cst_root,
                                                               GNode                 **first_cst_child,
-                                                              GNode                 **operator_discerning_node);
+                                                              GNode                 **operator_type_discerning_node);
 
 static gboolean      analyzer_is_binary_operator             (GNode                  *cst_root,
                                                               GNode                 **first_cst_child,
                                                               GNode                 **second_cst_child,
-                                                              GNode                 **operator_discerning_node);
+                                                              GNode                 **operator_type_discerning_node);
 
 static gboolean      analyzer_is_empty                       (GNode                  *cst_root);
 
@@ -76,10 +76,9 @@ analyzer_init (Analyzer *self)
 {
   AnalyzerPrivate *priv = analyzer_get_instance_private (self);
 
-  priv->operator_types = g_hash_table_new (g_str_hash,
-                                           g_str_equal);
+  GHashTable *operator_types = analyzer_define_operator_types ();
 
-  analyzer_define_operator_types (priv->operator_types);
+  priv->operator_types = operator_types;
 }
 
 AstNode *
@@ -112,7 +111,7 @@ analyzer_transform_concrete_syntax_tree (GNode      *cst_root,
   AstNode *ast_node = NULL;
   GNode *first_cst_child = NULL;
   GNode *second_cst_child = NULL;
-  GNode *operator_discerning_node = NULL;
+  GNode *operator_type_discerning_node = NULL;
 
   const gchar *caption = analyzer_fetch_node_caption (cst_root);
 
@@ -123,26 +122,26 @@ analyzer_transform_concrete_syntax_tree (GNode      *cst_root,
     }
   else if (analyzer_is_unary_operator (cst_root,
                                        &first_cst_child,
-                                       &operator_discerning_node))
+                                       &operator_type_discerning_node))
     {
       g_autoptr (AstNode) operand = analyzer_transform_concrete_syntax_tree (first_cst_child,
                                                                              operator_types);
 
-      ast_node = create_unary_operator (analyzer_discern_operator_type (operator_discerning_node,
+      ast_node = create_unary_operator (analyzer_discern_operator_type (operator_type_discerning_node,
                                                                         operator_types),
                                         operand);
     }
   else if (analyzer_is_binary_operator (cst_root,
                                         &first_cst_child,
                                         &second_cst_child,
-                                        &operator_discerning_node))
+                                        &operator_type_discerning_node))
     {
       g_autoptr (AstNode) left_operand = analyzer_transform_concrete_syntax_tree (first_cst_child,
                                                                                   operator_types);
       g_autoptr (AstNode) right_operand = analyzer_transform_concrete_syntax_tree (second_cst_child,
                                                                                    operator_types);
 
-      ast_node = create_binary_operator (analyzer_discern_operator_type (operator_discerning_node,
+      ast_node = create_binary_operator (analyzer_discern_operator_type (operator_type_discerning_node,
                                                                          operator_types),
                                          left_operand,
                                          right_operand);
@@ -155,9 +154,12 @@ analyzer_transform_concrete_syntax_tree (GNode      *cst_root,
   return ast_node;
 }
 
-static void
-analyzer_define_operator_types (GHashTable *operator_types)
+static GHashTable *
+analyzer_define_operator_types (void)
 {
+  GHashTable *operator_types = g_hash_table_new (g_str_hash,
+                                                 g_str_equal);
+
   g_hash_table_insert (operator_types,
                        EXPRESSION_PRIME,
                        GINT_TO_POINTER (OPERATOR_TYPE_ALTERNATION));
@@ -194,6 +196,8 @@ analyzer_define_operator_types (GHashTable *operator_types)
   g_hash_table_insert (operator_types,
                        DIGIT_RANGE,
                        GINT_TO_POINTER (OPERATOR_TYPE_RANGE));
+
+  return operator_types;
 }
 
 static gboolean
@@ -225,7 +229,7 @@ analyzer_is_constant (GNode  *cst_root,
 static gboolean
 analyzer_is_unary_operator (GNode  *cst_root,
                             GNode **first_cst_child,
-                            GNode **operator_discerning_node)
+                            GNode **operator_type_discerning_node)
 {
   if (analyzer_is_match (cst_root,
                          BASIC_EXPRESSION,
@@ -263,7 +267,7 @@ analyzer_is_unary_operator (GNode  *cst_root,
                                                  NULL))
                             {
                               *first_cst_child = g_ptr_array_index (cst_children, 0);
-                              *operator_discerning_node = cst_grandchild;
+                              *operator_type_discerning_node = cst_grandchild;
 
                               return TRUE;
                             }
@@ -281,7 +285,7 @@ static gboolean
 analyzer_is_binary_operator (GNode  *cst_root,
                              GNode **first_cst_child,
                              GNode **second_cst_child,
-                             GNode **operator_discerning_node)
+                             GNode **operator_type_discerning_node)
 {
   if (analyzer_is_match (cst_root,
                          EXPRESSION,
@@ -322,7 +326,7 @@ analyzer_is_binary_operator (GNode  *cst_root,
                     {
                       *first_cst_child = g_ptr_array_index (cst_children, 0);
                       *second_cst_child = g_ptr_array_index (cst_grandchildren, cst_grandchildren->len - 1);
-                      *operator_discerning_node = cst_child;
+                      *operator_type_discerning_node = cst_child;
 
                       return TRUE;
                     }

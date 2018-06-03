@@ -88,7 +88,8 @@ transition_is_possible (Transition *self,
 
   TransitionPrivate *priv = transition_get_instance_private (self);
   gchar expected_character = priv->expected_character;
-  GEqualFunc equality_function = transition_discern_equality_function (priv->condition_type);
+  EqualityConditionType condition_type = priv->condition_type;
+  GEqualFunc equality_function = transition_discern_equality_function (condition_type);
 
   g_return_val_if_fail (equality_function != NULL, FALSE);
 

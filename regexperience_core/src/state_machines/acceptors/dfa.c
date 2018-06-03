@@ -344,7 +344,10 @@ dfa_fetch_unreachable_states_from (GPtrArray *all_states)
         {
           State *current_state = g_ptr_array_index (all_states, i);
 
-          if (!g_ptr_array_find (transition_output_states, current_state, NULL))
+          if (!g_ptr_array_find_with_equal_func (transition_output_states,
+                                                 current_state,
+                                                 state_equal_func,
+                                                 NULL))
             {
               StateTypeFlags current_state_type_flags = STATE_TYPE_UNDEFINED;
 
@@ -352,7 +355,7 @@ dfa_fetch_unreachable_states_from (GPtrArray *all_states)
                             PROP_STATE_TYPE_FLAGS, &current_state_type_flags,
                             NULL);
 
-              /* Disregarding the start_production state (even if it does not have any incoming transitions)
+              /* Disregarding the start state (even if it does not have any incoming transitions)
                * due to it being reachable as is.
                */
               if (!(current_state_type_flags & STATE_TYPE_START))
@@ -601,6 +604,7 @@ dfa_can_states_transition_to_same_equivalence_class (State     *first_state,
   if (!states_transition_to_same_state)
     {
       g_autoptr (GPtrArray) output_states_equivalence_classes = g_ptr_array_new ();
+      GEqualFunc state_equal_func = g_direct_equal;
       GEqualFunc equivalence_class_equal_func = g_direct_equal;
       const guint acceptable_equivalence_classes_count = 1;
 
@@ -612,7 +616,10 @@ dfa_can_states_transition_to_same_equivalence_class (State     *first_state,
             {
               GPtrArray *equivalence_class = g_ptr_array_index (equivalence_classes, j);
 
-              if (g_ptr_array_find (equivalence_class, output_state, NULL))
+              if (g_ptr_array_find_with_equal_func (equivalence_class,
+                                                    output_state,
+                                                    state_equal_func,
+                                                    NULL))
                 {
                   g_ptr_array_add_if_not_exists (output_states_equivalence_classes,
                                                  equivalence_class,
@@ -637,6 +644,7 @@ dfa_fetch_matched_equivalence_class_from (GPtrArray *input_equivalence_class,
 {
   g_autoptr (GPtrArray) output_states = fsm_fetch_output_states_from_multiple (input_equivalence_class,
                                                                                expected_character);
+  GEqualFunc state_equal_func = g_direct_equal;
 
   for (guint i = 0; i < all_equivalence_classes->len; ++i)
     {
@@ -646,7 +654,10 @@ dfa_fetch_matched_equivalence_class_from (GPtrArray *input_equivalence_class,
         {
           State *output_state = g_ptr_array_index (output_states, j);
 
-          if (g_ptr_array_find (equivalence_class, output_state, NULL))
+          if (g_ptr_array_find_with_equal_func (equivalence_class,
+                                                output_state,
+                                                state_equal_func,
+                                                NULL))
             return equivalence_class;
         }
     }

@@ -10,13 +10,13 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (ParsingTableKey, parsing_table_key, SYNTACTIC_ANALYSIS, PARSING_TABLE_KEY, GObject)
 
-guint    parsing_table_key_hash     (gconstpointer key);
+guint    parsing_table_key_hash     (ParsingTableKey *self);
 
-gboolean parsing_table_key_is_equal (gconstpointer a,
-                                     gconstpointer b);
+gboolean parsing_table_key_is_equal (ParsingTableKey *a,
+                                     ParsingTableKey *b);
 
 #define PROP_PARSING_TABLE_KEY_PRODUCTION "production"
-#define PROP_PARSING_TABLE_KEY_TERMINAL     "symbol"
+#define PROP_PARSING_TABLE_KEY_TERMINAL   "terminal"
 
 G_END_DECLS
 

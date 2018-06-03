@@ -48,6 +48,7 @@ static Transition     *epsilon_nfa_build_epsilon_closed_transition         (Stat
 static void            epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                   *input_states,
                                                                             GPtrArray                  **epsilon_closed_transition_output_states,
                                                                             gchar                        explicit_character,
+                                                                            GPtrArray                   *visited_states,
                                                                             GHashTable                  *input_output_combinations,
                                                                             InitializeOutputStatesMode   find_output_states_mode);
 
@@ -98,25 +99,25 @@ epsilon_nfa_get_property (GObject    *object,
 {
   switch (property_id)
     {
-      case PROP_FINAL_STATE:
-        {
-          g_autoptr (GPtrArray) final_states = NULL;
-          const guint acceptable_epsilon_nfa_final_states_count = 1;
+    case PROP_FINAL_STATE:
+      {
+        g_autoptr (GPtrArray) final_states = NULL;
+        const guint acceptable_epsilon_nfa_final_states_count = 1;
 
-          g_object_get (object,
-                        PROP_FSM_INITIALIZABLE_FINAL_STATES, &final_states,
-                        NULL);
+        g_object_get (object,
+                      PROP_FSM_INITIALIZABLE_FINAL_STATES, &final_states,
+                      NULL);
 
-          g_return_if_fail (g_ptr_array_has_items (final_states));
-          g_return_if_fail (final_states->len == acceptable_epsilon_nfa_final_states_count);
+        g_return_if_fail (g_ptr_array_has_items (final_states));
+        g_return_if_fail (final_states->len == acceptable_epsilon_nfa_final_states_count);
 
-          g_value_set_object (value, g_ptr_array_index (final_states, 0));
-        }
+        g_value_set_object (value, g_ptr_array_index (final_states, 0));
+      }
 
       break;
 
-      default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
     }
 }
@@ -180,7 +181,6 @@ static FsmModifiable *
 epsilon_nfa_construct_subset (FsmConvertible *self)
 {
   g_return_val_if_fail (ACCEPTORS_IS_EPSILON_NFA (self), NULL);
-
   g_return_val_if_reached (NULL);
 }
 
@@ -217,6 +217,7 @@ epsilon_nfa_build_epsilon_closed_transition (State      *state,
                                              GHashTable *input_output_combinations)
 {
   g_autoptr (GPtrArray) initial_input_states = g_ptr_array_new ();
+  g_autoptr (GPtrArray) visited_states = g_ptr_array_new ();
   g_autoptr (GPtrArray) epsilon_closed_transition_output_states = NULL;
 
   g_ptr_array_add (initial_input_states, state);
@@ -224,6 +225,7 @@ epsilon_nfa_build_epsilon_closed_transition (State      *state,
   epsilon_nfa_initialize_epsilon_closed_output_states (initial_input_states,
                                                        &epsilon_closed_transition_output_states,
                                                        explicit_character,
+                                                       visited_states,
                                                        input_output_combinations,
                                                        INITIALIZE_OUTPUT_STATES_MODE_EPSILON_INITIAL);
 
@@ -252,9 +254,12 @@ static void
 epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                   *input_states,
                                                      GPtrArray                  **epsilon_closed_transition_output_states,
                                                      gchar                        explicit_character,
+                                                     GPtrArray                   *visited_states,
                                                      GHashTable                  *input_output_combinations,
                                                      InitializeOutputStatesMode   find_output_states_mode)
 {
+  g_return_if_fail (visited_states != NULL);
+  g_return_if_fail (input_output_combinations != NULL);
   g_return_if_fail (find_output_states_mode != INITIALIZE_OUTPUT_STATES_MODE_UNDEFINED);
 
   gboolean is_epsilon_step =
@@ -287,98 +292,117 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
           /* Avoiding the computation that was performed in one of the previous calls. */
           if (current_iteration_output_states == NULL)
             {
-              g_autoptr (GPtrArray) transitions = NULL;
-
-              g_object_get (input_state,
-                            PROP_STATE_TRANSITIONS, &transitions,
-                            NULL);
+              gboolean transition_cycle_detected = FALSE;
 
               current_iteration_output_states = g_ptr_array_new ();
 
-              /* Every state can, by definition, reach itself using solely an epsilon transition. */
               if (is_epsilon_step)
-                g_ptr_array_add (current_iteration_output_states, input_state);
-
-              if (g_ptr_array_has_items (transitions))
                 {
-                  for (guint j = 0; j < transitions->len; ++j)
+                  /* Every state can, by definition, reach itself using solely an epsilon transition. */
+                  g_ptr_array_add (current_iteration_output_states, input_state);
+
+                  /* Keeping track of previously visited states so as to break transition cycles and
+                   * consequently avoid infinite recursion.
+                   */
+                  if (g_ptr_array_find_with_equal_func (visited_states,
+                                                        input_state,
+                                                        state_equal_func,
+                                                        NULL))
+                    transition_cycle_detected = TRUE;
+                  else
+                    g_ptr_array_add (visited_states, input_state);
+                }
+
+              if (!transition_cycle_detected)
+                {
+                  g_autoptr (GPtrArray) transitions = NULL;
+
+                  g_object_get (input_state,
+                                PROP_STATE_TRANSITIONS, &transitions,
+                                NULL);
+
+                  if (g_ptr_array_has_items (transitions))
                     {
-                      Transition *transition = g_ptr_array_index (transitions, j);
-                      g_autoptr (GPtrArray) transition_output_states = g_ptr_array_new ();
-
-                      if (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (transition))
+                      for (guint j = 0; j < transitions->len; ++j)
                         {
-                          g_autoptr (State) deterministic_transition_output_state = NULL;
+                          Transition *transition = g_ptr_array_index (transitions, j);
+                          g_autoptr (GPtrArray) transition_output_states = g_ptr_array_new ();
 
-                          g_object_get (transition,
-                                        PROP_DETERMINISTIC_TRANSITION_OUTPUT_STATE, &deterministic_transition_output_state,
-                                        NULL);
-
-                          g_ptr_array_add (transition_output_states,
-                                           deterministic_transition_output_state);
-                        }
-                      else if (TRANSITIONS_IS_NONDETERMINISTIC_TRANSITION (transition))
-                        {
-                          g_autoptr (GPtrArray) nondeterministic_transition_output_states = NULL;
-
-                          g_object_get (transition,
-                                        PROP_NONDETERMINISTIC_TRANSITION_OUTPUT_STATES, &nondeterministic_transition_output_states,
-                                        NULL);
-
-                          g_ptr_array_add_range (transition_output_states,
-                                                 nondeterministic_transition_output_states,
-                                                 NULL);
-                        }
-
-                      if (g_ptr_array_has_items (transition_output_states))
-                        {
-                          if (is_epsilon_step && transition_is_epsilon (transition))
+                          if (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (transition))
                             {
-                                g_autoptr (GPtrArray) transitive_epsilon_closed_output_states = NULL;
+                              g_autoptr (State) deterministic_transition_output_state = NULL;
 
-                                g_ptr_array_add_range_distinct (current_iteration_output_states,
-                                                                transition_output_states,
-                                                                state_equal_func,
-                                                                NULL);
+                              g_object_get (transition,
+                                            PROP_DETERMINISTIC_TRANSITION_OUTPUT_STATE, &deterministic_transition_output_state,
+                                            NULL);
 
-                                /* Recursively finding all the states that are reachable from the input state
-                                 * using epsilon transitions only.
-                                 */
-                                epsilon_nfa_initialize_epsilon_closed_output_states (transition_output_states,
-                                                                                     &transitive_epsilon_closed_output_states,
-                                                                                     EPSILON,
-                                                                                     input_output_combinations,
-                                                                                     INITIALIZE_OUTPUT_STATES_MODE_EPSILON_SUBSEQUENT);
-
-                                if (g_ptr_array_has_items (transitive_epsilon_closed_output_states))
-                                  {
-                                    g_ptr_array_add_range_distinct (current_iteration_output_states,
-                                                                    transitive_epsilon_closed_output_states,
-                                                                    state_equal_func,
-                                                                    NULL);
-
-                                    /* Each state that can reach a final state using only epsilon transitions must
-                                     * be marked as final itself.
-                                     */
-                                    mark_input_state_as_final_if_needed (input_state,
-                                                                         transitive_epsilon_closed_output_states);
-                                  }
+                              g_ptr_array_add (transition_output_states,
+                                               deterministic_transition_output_state);
                             }
-                          else if (is_explicit_character_step && transition_is_possible (transition, explicit_character))
+                          else if (TRANSITIONS_IS_NONDETERMINISTIC_TRANSITION (transition))
                             {
-                                g_ptr_array_add_range_distinct (current_iteration_output_states,
-                                                                transition_output_states,
-                                                                state_equal_func,
-                                                                NULL);
+                              g_autoptr (GPtrArray) nondeterministic_transition_output_states = NULL;
+
+                              g_object_get (transition,
+                                            PROP_NONDETERMINISTIC_TRANSITION_OUTPUT_STATES, &nondeterministic_transition_output_states,
+                                            NULL);
+
+                              g_ptr_array_add_range (transition_output_states,
+                                                     nondeterministic_transition_output_states,
+                                                     NULL);
+                            }
+
+                          if (g_ptr_array_has_items (transition_output_states))
+                            {
+                              if (is_epsilon_step && transition_is_epsilon (transition))
+                                {
+                                  g_autoptr (GPtrArray) transitive_epsilon_closed_output_states = NULL;
+
+                                  g_ptr_array_add_range_distinct (current_iteration_output_states,
+                                                                  transition_output_states,
+                                                                  state_equal_func,
+                                                                  NULL);
+
+                                  /* Recursively finding all the states that are reachable from the input state
+                                   * using epsilon transitions only.
+                                   */
+                                  epsilon_nfa_initialize_epsilon_closed_output_states (transition_output_states,
+                                                                                       &transitive_epsilon_closed_output_states,
+                                                                                       EPSILON,
+                                                                                       visited_states,
+                                                                                       input_output_combinations,
+                                                                                       INITIALIZE_OUTPUT_STATES_MODE_EPSILON_SUBSEQUENT);
+
+                                  if (g_ptr_array_has_items (transitive_epsilon_closed_output_states))
+                                    {
+                                      g_ptr_array_add_range_distinct (current_iteration_output_states,
+                                                                      transitive_epsilon_closed_output_states,
+                                                                      state_equal_func,
+                                                                      NULL);
+
+                                      /* Each state that can reach a final state using only epsilon transitions must
+                                       * be marked as final itself.
+                                       */
+                                      mark_input_state_as_final_if_needed (input_state,
+                                                                           transitive_epsilon_closed_output_states);
+                                    }
+                                }
+                              else if (is_explicit_character_step && transition_is_possible (transition, explicit_character))
+                                {
+                                  g_ptr_array_add_range_distinct (current_iteration_output_states,
+                                                                  transition_output_states,
+                                                                  state_equal_func,
+                                                                  NULL);
+                                }
                             }
                         }
                     }
-                }
 
-              /* Keeping track of performed computations. */
-              g_hash_table_insert (input_output_combinations,
-                                   g_strdup (input),
-                                   current_iteration_output_states);
+                  /* Keeping track of performed computations. */
+                  g_hash_table_insert (input_output_combinations,
+                                       g_strdup (input),
+                                       current_iteration_output_states);
+                }
             }
 
           if (g_ptr_array_has_items (current_iteration_output_states))
@@ -409,6 +433,7 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
   epsilon_nfa_initialize_epsilon_closed_output_states (current_closure_step_output_states,
                                                        epsilon_closed_transition_output_states,
                                                        explicit_character,
+                                                       visited_states,
                                                        input_output_combinations,
                                                        ++find_output_states_mode);
 }

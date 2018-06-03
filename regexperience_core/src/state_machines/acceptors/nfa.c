@@ -58,7 +58,6 @@ static FsmConvertible *
 nfa_compute_epsilon_closures (FsmConvertible *self)
 {
   g_return_val_if_fail (ACCEPTORS_IS_NFA (self), NULL);
-
   g_return_val_if_reached (NULL);
 }
 
@@ -155,18 +154,21 @@ nfa_define_transitions_for_dfa_state (GPtrArray *output_states,
   if (g_ptr_array_has_items (output_states))
     {
       const guint acceptable_scalar_output_states_count = 1;
+      GEqualFunc state_equal_func = g_direct_equal;
 
       if (output_states->len == acceptable_scalar_output_states_count)
         {
           State *output_state = g_ptr_array_index (output_states, 0);
-
           Transition *dfa_transition = create_deterministic_transition (expected_character,
                                                                         output_state);
 
           g_ptr_array_add (dfa_transitions, dfa_transition);
 
           /* Avoid defining states from a scalar state that is already found in states intended for the DFA. */
-          if (!g_ptr_array_find (dfa_states, output_state, NULL))
+          if (!g_ptr_array_find_with_equal_func (dfa_states,
+                                                 output_state,
+                                                 state_equal_func,
+                                                 NULL))
             nfa_define_dfa_states_from_scalar (output_state,
                                                alphabet,
                                                dfa_states);
@@ -181,7 +183,6 @@ nfa_define_transitions_for_dfa_state (GPtrArray *output_states,
                                                                       output_states,
                                                                       COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_FINAL,
                                                                       &already_existed);
-
           Transition *dfa_transition = create_deterministic_transition (expected_character,
                                                                         composite_state);
 

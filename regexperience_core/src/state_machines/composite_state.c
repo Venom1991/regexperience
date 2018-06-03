@@ -77,8 +77,9 @@ composite_state_init (CompositeState *self)
   /* NOP */
 }
 
-static gboolean composite_state_is_composed_from (State           *self,
-                                                  const GPtrArray *states)
+static gboolean
+composite_state_is_composed_from (State           *self,
+                                  const GPtrArray *states)
 {
   g_return_val_if_fail (STATE_MACHINES_IS_COMPOSITE_STATE (self), FALSE);
 

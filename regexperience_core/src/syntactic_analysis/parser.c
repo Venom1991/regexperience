@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "internal/syntactic_analysis/parser.h"
 #include "internal/syntactic_analysis/derivation_item.h"
 #include "internal/lexical_analysis/lexeme.h"
@@ -56,7 +58,8 @@ static void             parser_report_error               (Token           *curr
 static gboolean         parser_token_exists_in_all_tokens (GPtrArray       *all_tokens,
                                                            TokenCategory    category,
                                                            guint            starting_position,
-                                                           Token          **found_token);
+                                                           Token          **found_token,
+                                                           guint           *found_token_position);
 
 static void             parser_dispose                    (GObject         *object);
 
@@ -118,14 +121,14 @@ parser_build_concrete_syntax_tree (Parser     *self,
             {
               g_queue_push_tail (analysis_queue, g_object_ref (token));
 
+              if (parser_can_accept (prediction_head, token))
+                {
+                  concrete_syntax_tree = parser_transform_analysis (analysis_queue);
+
+                  break;
+                }
+
               token_position++;
-            }
-
-          if (parser_can_accept (prediction_head, token))
-            {
-              concrete_syntax_tree = parser_transform_analysis (analysis_queue);
-
-              break;
             }
 
           prediction_head = g_queue_pop_head (prediction_queue);
@@ -435,7 +438,8 @@ void parser_report_error (Token      *current_token,
           if (parser_token_exists_in_all_tokens (all_tokens,
                                                  TOKEN_CATEGORY_OPEN_PARENTHESIS,
                                                  token_position,
-                                                 &found_token))
+                                                 &found_token,
+                                                 NULL))
             {
               invalid_token = found_token;
 
@@ -444,7 +448,8 @@ void parser_report_error (Token      *current_token,
           else if (parser_token_exists_in_all_tokens (all_tokens,
                                                       TOKEN_CATEGORY_OPEN_BRACKET,
                                                       token_position,
-                                                      &found_token))
+                                                      &found_token,
+                                                      NULL))
             {
               invalid_token = found_token;
 
@@ -453,7 +458,8 @@ void parser_report_error (Token      *current_token,
           else if (parser_token_exists_in_all_tokens (all_tokens,
                                                       TOKEN_CATEGORY_ALTERNATION_OPERATOR,
                                                       token_position,
-                                                      &found_token))
+                                                      &found_token,
+                                                      NULL))
             {
               invalid_token = found_token;
 
@@ -462,7 +468,8 @@ void parser_report_error (Token      *current_token,
           else if (parser_token_exists_in_all_tokens (all_tokens,
                                                       TOKEN_CATEGORY_METACHARACTER_ESCAPE,
                                                       token_position,
-                                                      &found_token))
+                                                      &found_token,
+                                                      NULL))
             {
               invalid_token = found_token;
 
@@ -472,11 +479,13 @@ void parser_report_error (Token      *current_token,
       else if (token_category == TOKEN_CATEGORY_CLOSE_PARENTHESIS)
         {
           Token *found_token = NULL;
+          guint found_token_position = 0;
 
           if (parser_token_exists_in_all_tokens (all_tokens,
                                                  TOKEN_CATEGORY_ALTERNATION_OPERATOR,
                                                  token_position,
-                                                 &found_token))
+                                                 &found_token,
+                                                 NULL))
             {
               invalid_token = found_token;
 
@@ -485,21 +494,29 @@ void parser_report_error (Token      *current_token,
           else if (parser_token_exists_in_all_tokens (all_tokens,
                                                       TOKEN_CATEGORY_OPEN_PARENTHESIS,
                                                       token_position,
-                                                      &found_token))
+                                                      &found_token,
+                                                      &found_token_position))
             {
-              invalid_token = found_token;
-              error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_EMPTY_GROUP;
-              error_message = "Empty groups are not allowed";
+              gint token_distance = abs (token_position - found_token_position);
+
+              if (token_distance == 1)
+                {
+                  invalid_token = found_token;
+                  error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_EMPTY_GROUP;
+                  error_message = "Empty groups are not allowed";
+                }
             }
         }
       else if (token_category == TOKEN_CATEGORY_CLOSE_BRACKET)
         {
           Token *found_token = NULL;
+          guint found_token_position = 0;
 
           if (parser_token_exists_in_all_tokens (all_tokens,
                                                  TOKEN_CATEGORY_RANGE_OPERATOR,
                                                  token_position,
-                                                 &found_token))
+                                                 &found_token,
+                                                 NULL))
             {
               invalid_token = found_token;
 
@@ -508,11 +525,17 @@ void parser_report_error (Token      *current_token,
           else if (parser_token_exists_in_all_tokens (all_tokens,
                                                       TOKEN_CATEGORY_OPEN_BRACKET,
                                                       token_position,
-                                                      &found_token))
+                                                      &found_token,
+                                                      &found_token_position))
             {
-              invalid_token = found_token;
-              error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_EMPTY_BRACKET_EXPRESSION;
-              error_message = "Empty bracket expressions are not allowed";
+              gint token_distance = abs (token_position - found_token_position);
+
+              if (token_distance == 1)
+                {
+                  invalid_token = found_token;
+                  error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_EMPTY_BRACKET_EXPRESSION;
+                  error_message = "Empty bracket expressions are not allowed";
+                }
             }
         }
 
@@ -601,7 +624,8 @@ static gboolean
 parser_token_exists_in_all_tokens (GPtrArray      *all_tokens,
                                    TokenCategory   category,
                                    guint           starting_position,
-                                   Token         **found_token)
+                                   Token         **found_token,
+                                   guint          *found_token_position)
 {
   g_return_val_if_fail (found_token != NULL, FALSE);
 
@@ -617,6 +641,9 @@ parser_token_exists_in_all_tokens (GPtrArray      *all_tokens,
       if (token_category == category)
         {
           *found_token = token;
+
+          if (found_token_position != NULL)
+            *found_token_position = i;
 
           return TRUE;
         }

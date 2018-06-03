@@ -70,27 +70,27 @@ parsing_table_key_init (ParsingTableKey *self)
 }
 
 guint
-parsing_table_key_hash (gconstpointer key)
+parsing_table_key_hash (ParsingTableKey *self)
 {
-  g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_PARSING_TABLE_KEY (key), 0);
+  g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_PARSING_TABLE_KEY (self), 0);
 
-  ParsingTableKey *parsing_table_key = SYNTACTIC_ANALYSIS_PARSING_TABLE_KEY ((gpointer) key);
+  ParsingTableKey *parsing_table_key = SYNTACTIC_ANALYSIS_PARSING_TABLE_KEY (self);
   ParsingTableKeyPrivate *priv = parsing_table_key_get_instance_private (parsing_table_key);
 
   return priv->hash;
 }
 
 gboolean
-parsing_table_key_is_equal (gconstpointer a,
-                            gconstpointer b)
+parsing_table_key_is_equal (ParsingTableKey *a,
+                            ParsingTableKey *b)
 {
   g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_PARSING_TABLE_KEY (a), FALSE);
   g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_PARSING_TABLE_KEY (b), FALSE);
 
   ParsingTableKeyPrivate *a_key_priv =
-    parsing_table_key_get_instance_private (SYNTACTIC_ANALYSIS_PARSING_TABLE_KEY ((gpointer) a));
+    parsing_table_key_get_instance_private (SYNTACTIC_ANALYSIS_PARSING_TABLE_KEY (a));
   ParsingTableKeyPrivate *b_key_priv =
-    parsing_table_key_get_instance_private (SYNTACTIC_ANALYSIS_PARSING_TABLE_KEY ((gpointer) b));
+    parsing_table_key_get_instance_private (SYNTACTIC_ANALYSIS_PARSING_TABLE_KEY (b));
 
   Production *a_production = a_key_priv->production;
   Production *b_production = b_key_priv->production;
@@ -102,7 +102,7 @@ parsing_table_key_is_equal (gconstpointer a,
 }
 
 static void
-parsing_table_key_constructed  (GObject *object)
+parsing_table_key_constructed (GObject *object)
 {
   ParsingTableKeyPrivate *priv = parsing_table_key_get_instance_private (SYNTACTIC_ANALYSIS_PARSING_TABLE_KEY (object));
   Production *production = priv->production;
