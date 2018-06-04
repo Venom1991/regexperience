@@ -113,8 +113,6 @@ analyzer_transform_concrete_syntax_tree (GNode      *cst_root,
   GNode *second_cst_child = NULL;
   GNode *operator_type_discerning_node = NULL;
 
-  const gchar *caption = analyzer_fetch_node_caption (cst_root);
-
   if (analyzer_is_constant (cst_root,
                             &first_cst_child))
     {
@@ -256,21 +254,18 @@ analyzer_is_unary_operator (GNode  *cst_root,
 
                   if (g_ptr_array_has_items (cst_grandchildren))
                     {
-                      for (guint j = 0; j < cst_grandchildren->len; ++j)
+                      GNode *cst_grandchild = g_ptr_array_index (cst_grandchildren, 0);
+
+                      if (analyzer_is_match (cst_grandchild,
+                                             STAR_QUANTIFICATION,
+                                             PLUS_QUANTIFICATION,
+                                             QUESTION_MARK_QUANTIFICATION,
+                                             NULL))
                         {
-                          GNode *cst_grandchild = g_ptr_array_index (cst_grandchildren, j);
+                          *first_cst_child = g_ptr_array_index (cst_children, 0);
+                          *operator_type_discerning_node = cst_grandchild;
 
-                          if (analyzer_is_match (cst_grandchild,
-                                                 STAR_QUANTIFICATION,
-                                                 PLUS_QUANTIFICATION,
-                                                 QUESTION_MARK_QUANTIFICATION,
-                                                 NULL))
-                            {
-                              *first_cst_child = g_ptr_array_index (cst_children, 0);
-                              *operator_type_discerning_node = cst_grandchild;
-
-                              return TRUE;
-                            }
+                          return TRUE;
                         }
                     }
                 }

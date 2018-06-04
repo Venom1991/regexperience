@@ -81,8 +81,8 @@ parsing_table_key_hash (ParsingTableKey *self)
 }
 
 gboolean
-parsing_table_key_is_equal (ParsingTableKey *a,
-                            ParsingTableKey *b)
+parsing_table_key_equal (ParsingTableKey *a,
+                         ParsingTableKey *b)
 {
   g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_PARSING_TABLE_KEY (a), FALSE);
   g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_PARSING_TABLE_KEY (b), FALSE);

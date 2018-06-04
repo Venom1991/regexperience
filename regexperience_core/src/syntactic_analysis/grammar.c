@@ -135,14 +135,10 @@ static Production*
 grammar_define_productions_and_terminals (GPtrArray **productions,
                                           GPtrArray **terminals)
 {
-  g_autoptr (GHashTable) productions_table = g_hash_table_new_full (g_str_hash,
-                                                                    g_str_equal,
-                                                                    NULL,
-                                                                    NULL);
-  g_autoptr (GHashTable) terminals_table = g_hash_table_new_full (g_str_hash,
-                                                                  g_str_equal,
-                                                                  NULL,
-                                                                  NULL);
+  g_autoptr (GHashTable) productions_table = g_hash_table_new (g_str_hash,
+                                                               g_str_equal);
+  g_autoptr (GHashTable) terminals_table = g_hash_table_new (g_str_hash,
+                                                             g_str_equal);
 
   /* The first element of each of the innermost nested arrays contains
    * the corresponding left-hand side's identifier which is used to
@@ -541,7 +537,7 @@ static GHashTable *
 grammar_build_parsing_table (GPtrArray *productions)
 {
    GHashTable *parsing_table = g_hash_table_new_full ((GHashFunc) parsing_table_key_hash,
-                                                      (GEqualFunc) parsing_table_key_is_equal,
+                                                      (GEqualFunc) parsing_table_key_equal,
                                                       g_object_unref,
                                                       NULL);
 
