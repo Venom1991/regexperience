@@ -96,7 +96,7 @@ production_mark_occurrence (Production     *self,
   GPtrArray **occurrences = &priv->occurrences;
 
   if (*occurrences == NULL)
-      *occurrences = g_ptr_array_new_with_free_func (g_object_unref);
+    *occurrences = g_ptr_array_new_with_free_func (g_object_unref);
 
   g_ptr_array_add (*occurrences, occurrence);
 }
@@ -107,11 +107,11 @@ production_compute_first_set (Production *self)
   g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_PRODUCTION (self), NULL);
 
   ProductionPrivate *priv = production_get_instance_private (self);
-  GPtrArray **first_sets = &priv->first_set;
+  GPtrArray **production_first_set = &priv->first_set;
 
-  if (*first_sets == NULL)
+  if (*production_first_set == NULL)
     {
-      *first_sets = g_ptr_array_new ();
+      *production_first_set = g_ptr_array_new ();
 
       GPtrArray *rules = priv->rules;
       GEqualFunc symbol_equal_func = (GEqualFunc) symbol_is_equal;
@@ -172,13 +172,13 @@ production_compute_first_set (Production *self)
           g_object_set (rule,
                         PROP_RULE_FIRST_SET, rule_first_set,
                         NULL);
-          g_ptr_array_add_range (*first_sets,
+          g_ptr_array_add_range (*production_first_set,
                                  rule_first_set,
                                  NULL);
         }
     }
 
-  return *first_sets;
+  return *production_first_set;
 }
 
 GPtrArray *
@@ -187,11 +187,11 @@ production_compute_follow_set (Production *self)
   g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_PRODUCTION (self), NULL);
 
   ProductionPrivate *priv = production_get_instance_private (self);
-  GPtrArray **follow_set = &priv->follow_set;
+  GPtrArray **production_follow_set = &priv->follow_set;
 
-  if (*follow_set == NULL)
+  if (*production_follow_set == NULL)
     {
-      *follow_set = g_ptr_array_new_with_free_func (g_object_unref);
+      *production_follow_set = g_ptr_array_new_with_free_func (g_object_unref);
 
       GPtrArray *occurrences = priv->occurrences;
       GEqualFunc symbol_equal_func = (GEqualFunc) symbol_is_equal;
@@ -229,7 +229,7 @@ production_compute_follow_set (Production *self)
 
                             if (SYMBOLS_IS_TERMINAL (following_symbol))
                               {
-                                g_ptr_array_add_if_not_exists (*follow_set,
+                                g_ptr_array_add_if_not_exists (*production_follow_set,
                                                                following_symbol,
                                                                symbol_equal_func,
                                                                g_object_ref);
@@ -242,7 +242,7 @@ production_compute_follow_set (Production *self)
                                     production_fetch_non_terminal_first_set (following_symbol,
                                                                              &symbol_can_derive_epsilon);
 
-                                g_ptr_array_add_range_distinct (*follow_set,
+                                g_ptr_array_add_range_distinct (*production_follow_set,
                                                                 non_terminal_first_set,
                                                                 symbol_equal_func,
                                                                 g_object_ref);
@@ -262,9 +262,9 @@ production_compute_follow_set (Production *self)
                       if (should_add_left_hand_side_follow_set)
                         {
                           GPtrArray *left_hand_side_follow_set =
-                              production_compute_follow_set (left_hand_side);
+                            production_compute_follow_set (left_hand_side);
 
-                          g_ptr_array_add_range_distinct (*follow_set,
+                          g_ptr_array_add_range_distinct (*production_follow_set,
                                                           left_hand_side_follow_set,
                                                           symbol_equal_func,
                                                           g_object_ref);
@@ -275,7 +275,7 @@ production_compute_follow_set (Production *self)
         }
     }
 
-  return *follow_set;
+  return *production_follow_set;
 }
 
 static GPtrArray *
@@ -290,6 +290,7 @@ production_fetch_non_terminal_first_set (Symbol   *non_terminal,
   GPtrArray *filtered_first_set = g_ptr_array_new ();
 
   symbol_extract_value (non_terminal, &value);
+
   production = g_value_get_object (&value);
 
   GPtrArray *non_terminal_first_set = production_compute_first_set (production);
@@ -297,10 +298,8 @@ production_fetch_non_terminal_first_set (Symbol   *non_terminal,
   for (guint i = 0; i < non_terminal_first_set->len; ++i)
     {
       Symbol *symbol = g_ptr_array_index (non_terminal_first_set, i);
-      gboolean is_epsilon = symbol_is_match (symbol,
-                                             EPSILON);
 
-      if (is_epsilon)
+      if (symbol_is_match (symbol, EPSILON))
         {
           *can_derive_epsilon = TRUE;
 

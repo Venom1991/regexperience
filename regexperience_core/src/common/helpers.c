@@ -233,7 +233,13 @@ g_queue_unref_g_objects (GQueue *queue)
   g_return_if_fail (queue != NULL);
 
   if (g_queue_has_items (queue))
-    g_queue_free_full (queue, g_object_unref);
+    {
+      g_queue_free_full (queue, g_object_unref);
+
+      return;
+    }
+
+  g_queue_free (queue);
 }
 
 gboolean

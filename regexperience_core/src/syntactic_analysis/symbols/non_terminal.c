@@ -26,6 +26,9 @@ static gboolean non_terminal_is_match      (Symbol          *self,
                                             gconstpointer    value,
                                             SymbolValueType  value_type);
 
+static gboolean non_terminal_is_equal      (Symbol          *self,
+                                            Symbol          *other);
+
 static void     non_terminal_set_property  (GObject         *object,
                                             guint            property_id,
                                             const GValue    *value,
@@ -43,6 +46,7 @@ non_terminal_class_init (NonTerminalClass *klass)
 
   symbol_class->extract_value = non_terminal_extract_value;
   symbol_class->is_match = non_terminal_is_match;
+  symbol_class->is_equal = non_terminal_is_equal;
 
   object_class->set_property = non_terminal_set_property;
   object_class->dispose = non_terminal_dispose;
@@ -96,6 +100,29 @@ non_terminal_is_match (Symbol          *self,
       g_autoptr (Production) self_value = g_weak_ref_get (&priv->value);
 
       return g_direct_equal (self_value, value_as_production);
+    }
+
+  return FALSE;
+}
+
+static gboolean
+non_terminal_is_equal (Symbol *self,
+                       Symbol *other)
+{
+  g_return_val_if_fail (SYMBOLS_IS_NON_TERMINAL (self), FALSE);
+
+  if (SYMBOLS_IS_NON_TERMINAL (other))
+    {
+      NonTerminalPrivate *priv = non_terminal_get_instance_private (SYMBOLS_NON_TERMINAL (self));
+      g_autoptr (Production) self_value = g_weak_ref_get (&priv->value);
+      g_autoptr (Production) other_value = NULL;
+      GValue value = G_VALUE_INIT;
+
+      symbol_extract_value (other, &value);
+
+      other_value = g_value_get_object (&value);
+
+      return g_direct_equal (self_value, other_value);
     }
 
   return FALSE;

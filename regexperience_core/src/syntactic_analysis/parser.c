@@ -173,8 +173,8 @@ parser_prepare_for_parsing (Parser *self)
   g_autoptr (Production) start_production = NULL;
   g_autoptr (GPtrArray) rules = NULL;
 
-  g_queue_unref_g_objects (analysis_queue);
-  g_queue_unref_g_objects (prediction_queue);
+  g_queue_clear (analysis_queue);
+  g_queue_clear (prediction_queue);
 
   g_object_get (grammar,
                 PROP_GRAMMAR_START_PRODUCTION, &start_production,
@@ -417,20 +417,21 @@ void parser_report_error (Token      *current_token,
                           Symbol     *prediction_head,
                           GError    **error)
 {
+  gboolean is_last_token = (token_position == all_tokens->len);
   TokenCategory token_category = TOKEN_CATEGORY_UNDEFINED;
   Token *invalid_token = NULL;
   SyntacticAnalysisParserError error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_UNDEFINED;
   const gchar *error_message = NULL;
 
-  g_object_get (current_token,
-                PROP_TOKEN_CATEGORY, &token_category,
-                NULL);
-
   /* Trying to discern an informative error message in case a parsing table entry was not found
      or the input was exhausted without being accepted beforehand.
    */
-  if (!parsing_table_entry_found || prediction_head == NULL)
+  if (!parsing_table_entry_found || prediction_head == NULL || is_last_token)
     {
+      g_object_get (current_token,
+                    PROP_TOKEN_CATEGORY, &token_category,
+                    NULL);
+
       if (token_category == TOKEN_CATEGORY_END_OF_INPUT_MARKER)
         {
           Token *found_token = NULL;
@@ -629,7 +630,12 @@ parser_token_exists_in_all_tokens (GPtrArray      *all_tokens,
 {
   g_return_val_if_fail (found_token != NULL, FALSE);
 
-  for (guint i = starting_position; i != G_MAXUINT; --i)
+  guint i = starting_position;
+
+  if (starting_position == all_tokens->len)
+    i--;
+
+  for (; i != G_MAXUINT; --i)
     {
       Token *token = g_ptr_array_index (all_tokens, i);
       TokenCategory token_category = TOKEN_CATEGORY_UNDEFINED;
@@ -661,7 +667,7 @@ parser_dispose (GObject *object)
     g_clear_pointer (&priv->analysis_queue, g_queue_unref_g_objects);
 
   if (priv->prediction_queue != NULL)
-    g_clear_pointer (&priv->prediction_queue, g_queue_unref_g_objects);
+    g_clear_pointer (&priv->prediction_queue, g_queue_free);
 
   if (priv->grammar != NULL)
     g_clear_object (&priv->grammar);

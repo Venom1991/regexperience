@@ -9,8 +9,8 @@ struct _DerivationItem
 
 typedef struct
 {
-    Production *left_hand_side;
-    Rule       *right_hand_side;
+    GWeakRef left_hand_side;
+    GWeakRef right_hand_side;
 } DerivationItemPrivate;
 
 enum
@@ -67,7 +67,10 @@ derivation_item_class_init (DerivationItemClass *klass)
 static void
 derivation_item_init (DerivationItem *self)
 {
-  /* NOP */
+  DerivationItemPrivate *priv = derivation_item_get_instance_private (self);
+
+  g_weak_ref_init (&priv->left_hand_side, NULL);
+  g_weak_ref_init (&priv->right_hand_side, NULL);
 }
 
 static void
@@ -81,11 +84,19 @@ derivation_item_get_property (GObject    *object,
   switch (property_id)
     {
     case PROP_LEFT_HAND_SIDE:
-      g_value_set_object (value, priv->left_hand_side);
+      {
+        Production *production = g_weak_ref_get (&priv->left_hand_side);
+
+        g_value_take_object (value, production);
+      }
       break;
 
     case PROP_RIGHT_HAND_SIDE:
-      g_value_set_object (value, priv->right_hand_side);
+      {
+        Rule *rule = g_weak_ref_get (&priv->right_hand_side);
+
+        g_value_take_object (value, rule);
+      }
       break;
 
     default:
@@ -105,17 +116,19 @@ derivation_item_set_property (GObject      *object,
   switch (property_id)
     {
     case PROP_LEFT_HAND_SIDE:
-      if (priv->left_hand_side != NULL)
-        g_object_unref (priv->left_hand_side);
+      {
+        Production *production = g_value_get_object (value);
 
-      priv->left_hand_side = g_value_dup_object (value);
+        g_weak_ref_set (&priv->left_hand_side, production);
+      }
       break;
 
     case PROP_RIGHT_HAND_SIDE:
-      if (priv->right_hand_side != NULL)
-        g_object_unref (priv->right_hand_side);
+      {
+        Rule *production = g_value_get_object (value);
 
-      priv->right_hand_side = g_value_dup_object (value);
+        g_weak_ref_set (&priv->right_hand_side, production);
+      }
       break;
 
     default:
@@ -129,11 +142,8 @@ derivation_item_dispose (GObject *object)
 {
   DerivationItemPrivate *priv = derivation_item_get_instance_private (SYNTACTIC_ANALYSIS_DERIVATION_ITEM (object));
 
-  if (priv->left_hand_side != NULL)
-    g_clear_object (&priv->left_hand_side);
-
-  if (priv->right_hand_side != NULL)
-    g_clear_object (&priv->right_hand_side);
+  g_weak_ref_clear (&priv->left_hand_side);
+  g_weak_ref_clear (&priv->right_hand_side);
 
   G_OBJECT_CLASS (derivation_item_parent_class)->dispose (object);
 }

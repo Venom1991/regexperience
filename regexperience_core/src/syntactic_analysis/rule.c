@@ -92,10 +92,8 @@ rule_discern_epsilon_derivability (RulePrivate *priv)
       for (guint i = 0; i < first_set->len; ++i)
         {
           Symbol *symbol = g_ptr_array_index (first_set, i);
-          gboolean is_epsilon = symbol_is_match (symbol,
-                                                 EPSILON);
 
-          if (is_epsilon)
+          if (symbol_is_match (symbol, EPSILON))
             {
               priv->derives_epsilon = TRUE;
 

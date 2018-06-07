@@ -288,12 +288,11 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                                                      (gpointer) input_state, input_character);
           GPtrArray *current_iteration_output_states = g_hash_table_lookup (input_output_combinations,
                                                                             input);
+          gboolean transition_cycle_detected = FALSE;
 
           /* Avoiding the computation that was performed in one of the previous calls. */
           if (current_iteration_output_states == NULL)
             {
-              gboolean transition_cycle_detected = FALSE;
-
               current_iteration_output_states = g_ptr_array_new ();
 
               if (is_epsilon_step)
@@ -410,6 +409,9 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                                             current_iteration_output_states,
                                             state_equal_func,
                                             NULL);
+
+          if (transition_cycle_detected)
+            g_ptr_array_unref (current_iteration_output_states);
         }
     }
 
