@@ -30,7 +30,7 @@ gint main (gint argc, gchar *argv[])
     {
       g_fprintf (stderr, "Unable to compile the regular expression - reason: \"%s\"\n", error->message);
 
-      exit (EXIT_FAILURE);
+      return EXIT_FAILURE;
     }
 
   gboolean match = regexperience_match (regexperience, input, &error);
@@ -39,10 +39,10 @@ gint main (gint argc, gchar *argv[])
     {
       g_fprintf (stderr, "Unable to match the input - reason: \"%s\"\n", error->message);
 
-      exit (EXIT_FAILURE);
+      return EXIT_FAILURE;
     }
 
   g_printf ("Input matched - %s\n", match ? "yes" : "no");
 
-  exit (EXIT_SUCCESS);
+  return EXIT_SUCCESS;
 }
