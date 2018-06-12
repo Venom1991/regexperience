@@ -50,7 +50,7 @@ static void            epsilon_nfa_initialize_epsilon_closed_output_states (GPtr
                                                                             gchar                        explicit_character,
                                                                             GPtrArray                   *visited_states,
                                                                             GHashTable                  *input_output_combinations,
-                                                                            InitializeOutputStatesMode   find_output_states_mode);
+                                                                            InitializeOutputStatesMode   initialize_output_states_mode);
 
 static void            mark_input_state_as_final_if_needed                 (State                       *input_state,
                                                                             GPtrArray                   *transitive_epsilon_closed_output_states);
@@ -256,21 +256,33 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                                                      gchar                        explicit_character,
                                                      GPtrArray                   *visited_states,
                                                      GHashTable                  *input_output_combinations,
-                                                     InitializeOutputStatesMode   find_output_states_mode)
+                                                     InitializeOutputStatesMode   initialize_output_states_mode)
 {
   g_return_if_fail (visited_states != NULL);
   g_return_if_fail (input_output_combinations != NULL);
-  g_return_if_fail (find_output_states_mode != INITIALIZE_OUTPUT_STATES_MODE_UNDEFINED);
+  g_return_if_fail (initialize_output_states_mode != INITIALIZE_OUTPUT_STATES_MODE_UNDEFINED);
 
-  gboolean is_epsilon_step =
-      ((find_output_states_mode == INITIALIZE_OUTPUT_STATES_MODE_EPSILON_INITIAL) ||
-       (find_output_states_mode == INITIALIZE_OUTPUT_STATES_MODE_EPSILON_SUBSEQUENT));
-  gboolean is_explicit_character_step =
-      (find_output_states_mode == INITIALIZE_OUTPUT_STATES_MODE_EXPLICIT_CHARACTER);
-  gboolean is_final_step =
-      (find_output_states_mode == INITIALIZE_OUTPUT_STATES_MODE_EPSILON_SUBSEQUENT);
+  gboolean is_epsilon_step = FALSE;
+  gboolean is_explicit_character_step = FALSE;
+  gboolean is_final_step = FALSE;
   GEqualFunc state_equal_func = g_direct_equal;
   g_autoptr (GPtrArray) current_closure_step_output_states = NULL;
+
+  switch (initialize_output_states_mode)
+    {
+    case INITIALIZE_OUTPUT_STATES_MODE_EPSILON_INITIAL:
+      is_epsilon_step = TRUE;
+      break;
+    case INITIALIZE_OUTPUT_STATES_MODE_EXPLICIT_CHARACTER:
+      is_explicit_character_step = TRUE;
+      break;
+    case INITIALIZE_OUTPUT_STATES_MODE_EPSILON_SUBSEQUENT:
+      is_epsilon_step = TRUE;
+      is_final_step = TRUE;
+      break;
+    default:
+      g_return_if_reached ();
+    }
 
   if (g_ptr_array_has_items (input_states))
     {
@@ -437,7 +449,7 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                                                        explicit_character,
                                                        visited_states,
                                                        input_output_combinations,
-                                                       ++find_output_states_mode);
+                                                       ++initialize_output_states_mode);
 }
 
 static void

@@ -10,7 +10,7 @@ fsm_modifiable_default_init (FsmModifiableInterface *iface)
 }
 
 void
-state_machine_modifiable_minimize (FsmModifiable *self)
+fsm_modifiable_minimize (FsmModifiable *self)
 {
   FsmModifiableInterface *iface;
 
@@ -24,7 +24,7 @@ state_machine_modifiable_minimize (FsmModifiable *self)
 }
 
 void
-state_machine_modifiable_complement (FsmModifiable *self)
+fsm_modifiable_complement (FsmModifiable *self)
 {
   FsmModifiableInterface *iface;
 

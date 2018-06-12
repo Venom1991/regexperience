@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(regexperience_core VERSION 1.1 LANGUAGES C)
 
 set(SOURCE_FILES

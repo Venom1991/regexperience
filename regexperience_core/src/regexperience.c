@@ -103,7 +103,7 @@ void regexperience_compile (Regexperience  *self,
   g_autoptr (FsmConvertible) nfa = fsm_convertible_compute_epsilon_closures (epsilon_nfa);
   FsmModifiable *dfa = fsm_convertible_construct_subset (nfa);
 
-  state_machine_modifiable_minimize (dfa);
+  fsm_modifiable_minimize (dfa);
 
   priv->acceptor = ACCEPTORS_ACCEPTOR_RUNNABLE (dfa);
 }

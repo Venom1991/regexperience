@@ -18,7 +18,7 @@ transducer_runnable_reset (TransducerRunnable *self)
 
   iface = TRANSDUCERS_TRANSDUCER_RUNNABLE_GET_IFACE (self);
 
-  g_return_if_fail (iface->run != NULL);
+  g_return_if_fail (iface->reset != NULL);
 
   iface->reset (self);
 }

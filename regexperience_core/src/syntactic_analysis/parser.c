@@ -98,6 +98,9 @@ parser_build_concrete_syntax_tree (Parser     *self,
   g_return_val_if_fail (g_ptr_array_has_items (tokens), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
+  /* Preparing the prediction and analysis queues using
+   * the grammar's start production and its sole rule.
+   */
   parser_prepare_for_parsing (self);
 
   ParserPrivate *priv = parser_get_instance_private (self);
@@ -117,17 +120,27 @@ parser_build_concrete_syntax_tree (Parser     *self,
 
       if (SYMBOLS_IS_TERMINAL (prediction_head))
         {
+          /* Skipping the epsilon symbol. */
           if (!symbol_is_match (prediction_head, EPSILON))
             {
               g_queue_push_tail (analysis_queue, g_object_ref (token));
 
+              /* Checking if the input is exhausted by examining whether the
+               * current token is an end of input marker and whether or not
+               * it is equal to the prediction queue's head.
+               */
               if (parser_can_accept (prediction_head, token))
                 {
+                  /* Transforming the last remaining analysis queue (which actually
+                   * represents a leftmost derivation of the input, in reverse) into a
+                   * concrete syntax tree.
+                   */
                   concrete_syntax_tree = parser_transform_analysis (analysis_queue);
 
                   break;
                 }
 
+              /* Moving on to the next token. */
               token_position++;
             }
 
@@ -135,6 +148,11 @@ parser_build_concrete_syntax_tree (Parser     *self,
         }
       else if (SYMBOLS_IS_NON_TERMINAL (prediction_head))
         {
+          /* Trying to find an eligible rule belonging to the prediction head's
+           * underlying production.
+           * In case it is found both the prediction queue as well as the
+           * analysis queue are expanded accordingly.
+           */
           parsing_table_entry_found = parser_predict (grammar,
                                                       prediction_head,
                                                       token,
@@ -145,6 +163,7 @@ parser_build_concrete_syntax_tree (Parser     *self,
             prediction_head = g_queue_pop_head (prediction_queue);
         }
 
+      /* Reporting errors (if required). */
       parser_report_error (token,
                            token_position,
                            tokens,
@@ -284,6 +303,9 @@ parser_create_parsing_table_keys (Grammar     *grammar,
                 PROP_LEXEME_CONTENT, &lexeme_content,
                 NULL);
 
+  /* Multiple parsing table keys are required as certain overlaps
+   * exist concerning some of the terminal symbols' values.
+   */
   for (guint i = 0; i < all_terminals->len; ++i)
     {
       Symbol *terminal = g_ptr_array_index (all_terminals, i);

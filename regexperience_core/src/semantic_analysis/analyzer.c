@@ -146,6 +146,7 @@ analyzer_transform_concrete_syntax_tree (GNode      *cst_root,
     }
   else
     {
+      /* Continuing the analysis with the current root node's first (and only) child. */
       ast_node = analyzer_continue (cst_root, operator_types);
     }
 

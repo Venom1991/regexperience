@@ -1,7 +1,11 @@
 #include "internal/syntactic_analysis/symbols/symbol.h"
 
-static gboolean symbol_default_is_equal (Symbol      *self,
-                                         Symbol      *other);
+static gboolean symbol_default_is_match (Symbol          *self,
+                                         gconstpointer    value,
+                                         SymbolValueType  value_type);
+
+static gboolean symbol_default_is_equal (Symbol          *self,
+                                         Symbol          *other);
 
 G_DEFINE_ABSTRACT_TYPE (Symbol, symbol, G_TYPE_OBJECT)
 
@@ -9,7 +13,7 @@ static void
 symbol_class_init (SymbolClass *klass)
 {
   klass->extract_value = NULL;
-  klass->is_match = NULL;
+  klass->is_match = symbol_default_is_match;
   klass->is_equal = symbol_default_is_equal;
 }
 
@@ -17,6 +21,14 @@ static void
 symbol_init (Symbol *self)
 {
   /* NOP */
+}
+
+static gboolean
+symbol_default_is_match (Symbol          *self,
+                         gconstpointer    value,
+                         SymbolValueType  value_type)
+{
+  return FALSE;
 }
 
 static gboolean
@@ -61,7 +73,7 @@ gboolean symbol_is_string_match (Symbol *self,
 
   klass = SYMBOLS_SYMBOL_GET_CLASS (self);
 
-  g_return_val_if_fail (klass->is_match != NULL, FALSE);
+  g_assert (klass->is_match != NULL);
 
   return klass->is_match (self,
                           (gconstpointer) value,
@@ -75,7 +87,7 @@ gboolean symbol_is_production_match (Symbol     *self,
 
   SymbolClass *klass = SYMBOLS_SYMBOL_GET_CLASS (self);
 
-  g_return_val_if_fail (klass->is_match != NULL, FALSE);
+  g_assert (klass->is_match != NULL);
 
   return klass->is_match (self,
                           (gconstpointer) value,

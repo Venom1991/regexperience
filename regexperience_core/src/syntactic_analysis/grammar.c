@@ -476,6 +476,7 @@ grammar_define_symbols (gchar      **symbols_array,
         {
           g_autoptr (Symbol) terminal = terminal_new (PROP_SYMBOL_VALUE, current_symbol_value);
 
+          /* Avoiding the duplication of terminal symbols. */
           symbol = grammar_get_or_create_symbol (terminal,
                                                  terminals_array);
         }
@@ -483,6 +484,7 @@ grammar_define_symbols (gchar      **symbols_array,
         {
           g_autoptr (Symbol) non_terminal = non_terminal_new (PROP_SYMBOL_VALUE, production);
 
+          /* Avoiding the duplication of non-terminal symbols. */
           symbol = grammar_get_or_create_symbol (non_terminal,
                                                  non_terminals_array);
         }
@@ -572,12 +574,16 @@ grammar_build_parsing_table (GPtrArray *productions)
       Production *production = g_ptr_array_index (productions, i);
       g_autoptr (GPtrArray) rules = NULL;
 
+      /* Preparing the process firstly by computing the current production's first set. */
       production_compute_first_set (production);
 
       g_object_get (production,
                     PROP_PRODUCTION_RULES, &rules,
                     NULL);
 
+      /* The previous computation's results are stored for each
+       * of the current production's rules, as well.
+       */
       for (guint j = 0; j < rules->len; ++j)
         {
           Rule *rule = g_ptr_array_index (rules, j);
@@ -589,15 +595,24 @@ grammar_build_parsing_table (GPtrArray *productions)
                         PROP_RULE_CAN_DERIVE_EPSILON, &can_derive_epsilon,
                         NULL);
 
+          /* Using the terminal symbols found in the current rule's
+           * first set to insert new parsing table entries.
+           */
           grammar_insert_parsing_table_entries (parsing_table,
                                                 production,
                                                 first_set,
                                                 rule);
 
+          /* Avoiding the computation of the current production's follow set
+           * in case the current rule cannot be used to derive epsilon.
+           */
            if (can_derive_epsilon)
              {
                GPtrArray *follow_set = production_compute_follow_set (production);
 
+               /* Using the terminal symbols found in the current productions's
+                * follow set to insert new parsing table entries.
+                */
                grammar_insert_parsing_table_entries (parsing_table,
                                                      production,
                                                      follow_set,
@@ -615,24 +630,26 @@ grammar_insert_parsing_table_entries (GHashTable *parsing_table,
                                       GPtrArray  *terminals,
                                       Rule       *rule)
 {
-  for (guint i = 0; i < terminals->len; ++i)
-    {
-      Symbol *terminal = g_ptr_array_index (terminals, i);
+  if (g_ptr_array_has_items (terminals))
+    for (guint i = 0; i < terminals->len; ++i)
+      {
+        Symbol *terminal = g_ptr_array_index (terminals, i);
 
-      if (!symbol_is_match (terminal, EPSILON))
-        {
-          ParsingTableKey *parsing_table_key = parsing_table_key_new (PROP_PARSING_TABLE_KEY_PRODUCTION, production,
-                                                                      PROP_PARSING_TABLE_KEY_TERMINAL, terminal);
-          gboolean parsing_table_key_is_new = g_hash_table_insert (parsing_table,
-                                                                   parsing_table_key,
-                                                                   rule);
+        /* Epsilon should not appear as the second dimension of a parsing table entry. */
+        if (!symbol_is_match (terminal, EPSILON))
+          {
+            ParsingTableKey *parsing_table_key = parsing_table_key_new (PROP_PARSING_TABLE_KEY_PRODUCTION, production,
+                                                                        PROP_PARSING_TABLE_KEY_TERMINAL, terminal);
+            gboolean parsing_table_key_is_new = g_hash_table_insert (parsing_table,
+                                                                     parsing_table_key,
+                                                                     rule);
 
-          /* Asserting whether or not all of the parsing table keys
-           * are unique - i.e., there are no LL(1) grammar conflicts.
-           */
-          g_assert (parsing_table_key_is_new);
-        }
-    }
+            /* Asserting whether or not all of the parsing table keys
+             * are unique - i.e., there are no LL(1) grammar conflicts.
+             */
+            g_assert (parsing_table_key_is_new);
+          }
+      }
 }
 
 static GObject *

@@ -142,7 +142,7 @@ dfa_complement (FsmModifiable *self)
             {
               complement_state_type_flags &= ~STATE_TYPE_FINAL;
 
-              /* No need to set the default flag for the start_production state as it is already a non-final state. */
+              /* No need to set the default flag for the start state as it is already a non-final state. */
               if (!(state_type_flags & STATE_TYPE_START))
                 complement_state_type_flags |= STATE_TYPE_DEFAULT;
             }

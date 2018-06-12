@@ -33,7 +33,9 @@ gboolean
 g_ptr_array_equal (gconstpointer a,
                    gconstpointer b)
 {
-  return g_ptr_array_equal_with_equal_func (a, b, g_direct_equal);
+  return g_ptr_array_equal_with_equal_func (a,
+                                            b,
+                                            g_direct_equal);
 }
 
 gboolean
@@ -54,7 +56,10 @@ g_ptr_array_equal_with_equal_func (gconstpointer a,
       {
         gpointer a_data = g_ptr_array_index (a_ptr, i);
 
-        if (!g_ptr_array_find_with_equal_func (b_ptr, a_data, equal_func, NULL))
+        if (!g_ptr_array_find_with_equal_func (b_ptr,
+                                               a_data,
+                                               equal_func,
+                                               NULL))
           return FALSE;
       }
   else
@@ -208,23 +213,23 @@ g_hash_table_values_to_ptr_array (GHashTable     *hash_table,
 {
   g_return_val_if_fail (g_hash_table_has_items (hash_table), NULL);
 
-  GPtrArray *array = NULL;
+  GPtrArray *ptr_array = NULL;
   GHashTableIter iter;
   gpointer key = NULL;
   gpointer value = NULL;
   guint hash_table_size = g_hash_table_size (hash_table);
 
-  array = g_ptr_array_sized_new (hash_table_size);
+  ptr_array = g_ptr_array_sized_new (hash_table_size);
 
   if (free_func != NULL)
-    g_ptr_array_set_free_func (array, free_func);
+    g_ptr_array_set_free_func (ptr_array, free_func);
 
   g_hash_table_iter_init (&iter, hash_table);
 
   while (g_hash_table_iter_next (&iter, &key, &value))
-    g_ptr_array_add (array, value);
+    g_ptr_array_add (ptr_array, value);
 
-  return array;
+  return ptr_array;
 }
 
 void

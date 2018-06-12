@@ -136,6 +136,7 @@ production_compute_first_set (Production *self)
 
               if (SYMBOLS_IS_TERMINAL (symbol))
                 {
+                  /* Simply adding the terminal symbol to the current rule's first set. */
                   g_ptr_array_add_if_not_exists (rule_first_set,
                                                  symbol,
                                                  symbol_equal_func,
@@ -143,6 +144,9 @@ production_compute_first_set (Production *self)
                 }
               else if (SYMBOLS_IS_NON_TERMINAL (symbol))
                 {
+                  /* Expanding the current rule's first set with all of the members (without epsilon)
+                   * belonging to the non-terminal symbol's underlying production's first set.
+                   */
                   g_autoptr (GPtrArray) non_terminal_first_set =
                     production_fetch_non_terminal_first_set (symbol,
                                                              &symbol_can_derive_epsilon);
@@ -153,20 +157,27 @@ production_compute_first_set (Production *self)
                                                   g_object_ref);
                 }
 
+              /* Stopping the computation in case epsilon was not found as a member
+               * of the non-terminal symbol's underlying production's first set.
+               */
               if (!symbol_can_derive_epsilon)
                 break;
 
               epsilon_derivable_symbols_count++;
             }
 
+          /* Adding epsilon to the current rule's first if all of its non-terminal
+           * members can derive epsilon. This means that the rule is itself
+           * completely transparent.
+           */
           if (epsilon_derivable_symbols_count == symbols->len)
             {
-              g_autoptr (Terminal) epsilon = terminal_new (PROP_SYMBOL_VALUE, EPSILON);
+              Symbol *epsilon = terminal_new (PROP_SYMBOL_VALUE, EPSILON);
 
               g_ptr_array_add_if_not_exists (rule_first_set,
                                              epsilon,
                                              symbol_equal_func,
-                                             g_object_ref);
+                                             NULL);
             }
 
           g_object_set (rule,
@@ -217,11 +228,18 @@ production_compute_follow_set (Production *self)
                 {
                   Symbol *symbol = g_ptr_array_index (symbols, j);
 
+                  /* Searching for the exact index in which the production appears
+                   * as the current non-terminal symbol's underlying value.
+                   */
                   if (symbol_is_match (symbol, self))
                     {
                       guint k = j + 1;
                       gboolean should_add_left_hand_side_follow_set = FALSE;
 
+                      /* Iterating over the symbols that appear after the current production
+                       * in case it is not the very last member of the current right hand side,
+                       * setting the left hand side follow set addition flag otherwise.
+                       */
                       if (k < symbols->len)
                         do
                           {
@@ -229,6 +247,9 @@ production_compute_follow_set (Production *self)
 
                             if (SYMBOLS_IS_TERMINAL (following_symbol))
                               {
+                                /* Simply adding the terminal symbol appearing right after
+                                 * the current production to its follow set.
+                                 */
                                 g_ptr_array_add_if_not_exists (*production_follow_set,
                                                                following_symbol,
                                                                symbol_equal_func,
@@ -238,15 +259,21 @@ production_compute_follow_set (Production *self)
                               {
                                 gboolean symbol_can_derive_epsilon = FALSE;
 
+                                /* Expanding the production's follow set with all of the members (without epsilon)
+                                 * belonging to the non-terminal symbol's underlying production's first set.
+                                 */
                                 g_autoptr (GPtrArray) non_terminal_first_set =
-                                    production_fetch_non_terminal_first_set (following_symbol,
-                                                                             &symbol_can_derive_epsilon);
+                                  production_fetch_non_terminal_first_set (following_symbol,
+                                                                           &symbol_can_derive_epsilon);
 
                                 g_ptr_array_add_range_distinct (*production_follow_set,
                                                                 non_terminal_first_set,
                                                                 symbol_equal_func,
                                                                 g_object_ref);
 
+                                /* Setting the left hand side follow set addition flag in case
+                                 * the current non-terminal symbol can derive epsilon, breaking otherwise.
+                                 */
                                 if (symbol_can_derive_epsilon)
                                   should_add_left_hand_side_follow_set = TRUE;
                                 else
@@ -259,6 +286,9 @@ production_compute_follow_set (Production *self)
                       else
                         should_add_left_hand_side_follow_set = TRUE;
 
+                      /* Adding the left hand side's follow set
+                       * members to the current production's follow set.
+                       */
                       if (should_add_left_hand_side_follow_set)
                         {
                           GPtrArray *left_hand_side_follow_set =
@@ -299,6 +329,7 @@ production_fetch_non_terminal_first_set (Symbol   *non_terminal,
     {
       Symbol *symbol = g_ptr_array_index (non_terminal_first_set, i);
 
+      /* Skipping the addition of epsilon to the filtered first set. */
       if (symbol_is_match (symbol, EPSILON))
         {
           *can_derive_epsilon = TRUE;

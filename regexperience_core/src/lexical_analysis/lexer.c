@@ -73,7 +73,7 @@ lexer_tokenize (Lexer        *self,
 
   LexerPrivate *priv = lexer_get_instance_private (self);
   TransducerRunnable *transducer = priv->transducer;
-  GPtrArray *tokens = g_ptr_array_new_with_free_func (g_object_unref);
+  GPtrArray *tokens = NULL;
   guint character_position = 1;
   GError *temporary_error = NULL;
 
@@ -85,6 +85,8 @@ lexer_tokenize (Lexer        *self,
 
       return NULL;
     }
+
+  tokens = g_ptr_array_new_with_free_func (g_object_unref);
 
   transducer_runnable_reset (transducer);
 
@@ -236,8 +238,8 @@ lexer_create_transitions_from (MealyMapping *mappings,
 }
 
 static void
-lexer_report_error (const gchar *regular_expression,
-                    GError **error)
+lexer_report_error (const gchar  *regular_expression,
+                    GError      **error)
 {
   LexicalAnalysisLexerError error_code = LEXICAL_ANALYSIS_LEXER_ERROR_UNDEFINED;
   const gchar *error_message = NULL;
