@@ -555,7 +555,6 @@ grammar_mark_non_terminal_occurrences (Production *production,
                 {
                   production_mark_occurrence (underlying_production, g_object_ref (occurrence));
                 }
-
             }
         }
     }
