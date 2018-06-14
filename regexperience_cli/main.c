@@ -6,7 +6,8 @@
 
 #include <regexperience.h>
 
-gint main (gint argc, gchar *argv[])
+gint
+main (gint argc, gchar *argv[])
 {
   const gchar *empty_string = "";
   const gchar *locale = empty_string;

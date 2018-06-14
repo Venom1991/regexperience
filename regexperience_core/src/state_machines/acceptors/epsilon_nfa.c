@@ -286,11 +286,13 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
 
   if (g_ptr_array_has_items (input_states))
     {
-      gchar input_character = EPSILON;
+      gchar input_character = 0;
 
       current_closure_step_output_states = g_ptr_array_new ();
 
-      if (is_explicit_character_step)
+      if (is_epsilon_step)
+        input_character = EPSILON;
+      else if (is_explicit_character_step)
         input_character = explicit_character;
 
       for (guint i = 0; i < input_states->len; ++i)
@@ -398,7 +400,7 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                                                                            transitive_epsilon_closed_output_states);
                                     }
                                 }
-                              else if (is_explicit_character_step && transition_is_possible (transition, explicit_character))
+                              else if (is_explicit_character_step && transition_is_possible (transition, input_character))
                                 {
                                   g_ptr_array_add_range_distinct (current_iteration_output_states,
                                                                   transition_output_states,

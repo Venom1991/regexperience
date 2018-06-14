@@ -33,42 +33,42 @@ enum
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 static Grammar *singleton = NULL;
 
-static Production *grammar_define_productions               (GPtrArray              **productions,
-                                                             GPtrArray              **terminals);
+static Production *grammar_define_productions            (GPtrArray              **productions,
+                                                          GPtrArray              **terminals);
 
-static GPtrArray  *grammar_define_rules                     (gchar                 ***right_hand_sides,
-                                                             GHashTable              *productions_table,
-                                                             GPtrArray               *terminals_array,
-                                                             GPtrArray               *non_terminals_array);
+static GPtrArray  *grammar_define_rules                  (gchar                 ***right_hand_sides,
+                                                          GHashTable              *productions_table,
+                                                          GPtrArray               *terminals_array,
+                                                          GPtrArray               *non_terminals_array);
 
-static GPtrArray  *grammar_define_symbols                   (gchar                  **symbols_array,
-                                                             GHashTable              *productions_table,
-                                                             GPtrArray               *terminals_array,
-                                                             GPtrArray               *non_terminals_array);
+static GPtrArray  *grammar_define_symbols                (gchar                  **symbols_array,
+                                                          GHashTable              *productions_table,
+                                                          GPtrArray               *terminals_array,
+                                                          GPtrArray               *non_terminals_array);
 
-static Symbol     *grammar_get_or_create_symbol             (Symbol                  *symbol,
-                                                             GPtrArray               *symbols_array);
+static Symbol     *grammar_get_or_create_symbol          (Symbol                  *symbol,
+                                                          GPtrArray               *symbols_array);
 
-static void        grammar_mark_non_terminal_occurrences    (Production              *production,
-                                                             GPtrArray               *rules);
+static void        grammar_mark_non_terminal_occurrences (Production              *production,
+                                                          GPtrArray               *rules);
 
-static GHashTable *grammar_build_parsing_table              (GPtrArray               *productions);
+static GHashTable *grammar_build_parsing_table           (GPtrArray               *productions);
 
-static void        grammar_insert_parsing_table_entries     (GHashTable              *parsing_table,
-                                                             Production              *production,
-                                                             GPtrArray               *terminals,
-                                                             Rule                    *rule);
+static void        grammar_insert_parsing_table_entries  (GHashTable              *parsing_table,
+                                                          Production              *production,
+                                                          GPtrArray               *terminals,
+                                                          Rule                    *rule);
 
-static GObject    *grammar_constructor                      (GType                    type,
-                                                             guint                    n_construct_properties,
-                                                             GObjectConstructParam   *construct_properties);
+static GObject    *grammar_constructor                   (GType                    type,
+                                                          guint                    n_construct_properties,
+                                                          GObjectConstructParam   *construct_properties);
 
-static void        grammar_get_property                     (GObject                 *object,
-                                                             guint                    property_id,
-                                                             GValue                  *value,
-                                                             GParamSpec              *pspec);
+static void        grammar_get_property                  (GObject                 *object,
+                                                          guint                    property_id,
+                                                          GValue                  *value,
+                                                          GParamSpec              *pspec);
 
-static void        grammar_dispose                          (GObject                 *object);
+static void        grammar_dispose                       (GObject                 *object);
 
 G_DEFINE_TYPE_WITH_PRIVATE (Grammar, grammar, G_TYPE_OBJECT)
 

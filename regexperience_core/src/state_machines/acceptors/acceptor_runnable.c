@@ -33,7 +33,7 @@ acceptor_runnable_can_accept (AcceptorRunnable *self)
 
   iface = ACCEPTORS_ACCEPTOR_RUNNABLE_GET_IFACE (self);
 
-  g_return_val_if_fail (iface->run != NULL, FALSE);
+  g_return_val_if_fail (iface->can_accept != NULL, FALSE);
 
   return iface->can_accept (self);
 }

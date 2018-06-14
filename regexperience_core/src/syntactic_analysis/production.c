@@ -157,8 +157,8 @@ production_compute_first_set (Production *self)
                                                   g_object_ref);
                 }
 
-              /* Stopping the computation in case epsilon was not found as a member
-               * of the non-terminal symbol's underlying production's first set.
+              /* Breaking in case epsilon was not found as a member of the
+               * non-terminal symbol's underlying production's first set.
                */
               if (!symbol_can_derive_epsilon)
                 break;

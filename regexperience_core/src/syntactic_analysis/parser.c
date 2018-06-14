@@ -131,8 +131,8 @@ parser_build_concrete_syntax_tree (Parser     *self,
                */
               if (parser_can_accept (prediction_head, token))
                 {
-                  /* Transforming the last remaining analysis queue (which actually
-                   * represents a leftmost derivation of the input, in reverse) into a
+                  /* Transforming the analysis queue (which actually represents
+                   * a leftmost derivation of the input, in reverse) into a
                    * concrete syntax tree.
                    */
                   concrete_syntax_tree = parser_transform_analysis (analysis_queue);
