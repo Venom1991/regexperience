@@ -239,6 +239,7 @@ dfa_transition_to_next_state (Dfa   *self,
                 NULL);
 
   g_return_val_if_fail (g_ptr_array_has_items (transitions), FALSE);
+  g_object_unref (current_state);
 
   /* Trying to find an eligible transition found among the current state's transitions. */
   for (guint i = 0; i < transitions->len; ++i)
@@ -251,7 +252,6 @@ dfa_transition_to_next_state (Dfa   *self,
         {
           State *next_state = NULL;
 
-          g_object_unref (current_state);
           g_object_get (transition,
                         PROP_DETERMINISTIC_TRANSITION_OUTPUT_STATE, &next_state,
                         NULL);
@@ -273,7 +273,7 @@ dfa_transition_to_next_state (Dfa   *self,
 
   State *dead_state = fsm_get_or_create_dead_state (all_states);
 
-  priv->current_state = dead_state;
+  priv->current_state = g_object_ref (dead_state);
 
   return FALSE;
 }

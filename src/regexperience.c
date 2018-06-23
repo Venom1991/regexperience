@@ -50,6 +50,7 @@ void regexperience_compile (Regexperience  *self,
                             const gchar    *regular_expression,
                             GError        **error)
 {
+  g_return_if_fail (CORE_IS_REGEXPERIENCE (self));
   g_return_if_fail (error == NULL || *error == NULL);
 
   RegexperiencePrivate *priv = regexperience_get_instance_private (self);
@@ -112,6 +113,7 @@ gboolean regexperience_match (Regexperience  *self,
                               const gchar    *input,
                               GError        **error)
 {
+  g_return_val_if_fail (CORE_IS_REGEXPERIENCE (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   RegexperiencePrivate *priv = regexperience_get_instance_private (self);

@@ -64,11 +64,8 @@ concatenation_build_acceptor (AstNode *self)
   g_ptr_array_add (left_final_transitions, left_on_epsilon);
 
   g_object_set (left_final,
-                PROP_STATE_TRANSITIONS, left_final_transitions,
-                NULL);
-
-  g_object_set (left_final,
                 PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT,
+                PROP_STATE_TRANSITIONS, left_final_transitions,
                 NULL);
   g_object_set (right_start,
                 PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT,

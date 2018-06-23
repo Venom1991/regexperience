@@ -260,7 +260,6 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
 {
   g_return_if_fail (visited_states != NULL);
   g_return_if_fail (input_output_combinations != NULL);
-  g_return_if_fail (initialize_output_states_mode != INITIALIZE_OUTPUT_STATES_MODE_UNDEFINED);
 
   gboolean is_epsilon_step = FALSE;
   gboolean is_explicit_character_step = FALSE;

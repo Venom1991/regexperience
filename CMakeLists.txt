@@ -126,20 +126,19 @@ endif()
 
 # compiler-dependent options
 # setting the desired linker explicitly on Unix systems (GNU linker is used on other systems, by default)
-
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     target_compile_options (${PROJECT_NAME} PRIVATE -Wall -Wextra)
 
-    if (UNIX)
+    if(UNIX)
         # linker (gold)
         target_link_libraries(${PROJECT_NAME} -fuse-ld=gold)
     endif()
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     target_compile_options (${PROJECT_NAME} PRIVATE -Weverything)
 
-    if (UNIX)
-    # linker (LLD)
-    target_link_libraries(${PROJECT_NAME} -fuse-ld=lld)
+    if(UNIX)
+        # linker (LLD)
+        target_link_libraries(${PROJECT_NAME} -fuse-ld=lld)
     endif()
 else()
     message( FATAL_ERROR "Only Clang and GCC are supported, exiting." )
