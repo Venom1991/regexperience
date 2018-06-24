@@ -335,6 +335,8 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
 
                   if (g_ptr_array_has_items (transitions))
                     {
+                      g_ptr_array_sort (transitions, g_compare_transitions);
+
                       for (guint j = 0; j < transitions->len; ++j)
                         {
                           Transition *transition = g_ptr_array_index (transitions, j);
@@ -411,9 +413,9 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                     }
 
                   /* Keeping track of performed computations. */
-                  g_hash_table_insert (input_output_combinations,
-                                       g_strdup (input),
-                                       current_iteration_output_states);
+//                  g_hash_table_insert (input_output_combinations,
+//                                       g_strdup (input),
+//                                       current_iteration_output_states);
                 }
             }
 

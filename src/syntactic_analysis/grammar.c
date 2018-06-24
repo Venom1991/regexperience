@@ -257,6 +257,7 @@ grammar_define_productions (GPtrArray **productions,
       (gchar*[]) { DIGIT, NULL                             },
       (gchar*[]) { SPECIAL_CHARACTER, NULL                 },
       (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER, NULL  },
+      (gchar*[]) { ANY_CHARACTER, NULL  },
       (gchar*[]) { "\\", ELEMENTARY_EXPRESSION_PRIME, NULL },
       NULL
     },
@@ -362,22 +363,28 @@ grammar_define_productions (GPtrArray **productions,
     {
       (gchar*[]) { SPECIAL_CHARACTER },
       (gchar*[]) { "!" DELIMITER "#" DELIMITER "$" DELIMITER "%" DELIMITER "&" DELIMITER "," DELIMITER
-                   "." DELIMITER "/" DELIMITER ":" DELIMITER ";" DELIMITER ">" DELIMITER "=" DELIMITER
-                   "<" DELIMITER "@" DELIMITER "^" DELIMITER "_" DELIMITER "`" DELIMITER "{" DELIMITER
-                   "}" DELIMITER " " DELIMITER "\n" DELIMITER "\t", NULL },
+                   "/" DELIMITER ":" DELIMITER ";" DELIMITER ">" DELIMITER "=" DELIMITER "<" DELIMITER
+                   "@" DELIMITER "^" DELIMITER "_" DELIMITER "`" DELIMITER "{" DELIMITER "}" DELIMITER
+                   " " DELIMITER "\n" DELIMITER "\t", NULL },
       NULL
     },
     (gchar**[])
     {
       (gchar*[]) { REGULAR_METACHARACTER },
       (gchar*[]) { "[" DELIMITER "(" DELIMITER ")" DELIMITER "*" DELIMITER "+" DELIMITER "?" DELIMITER
-                   "|", NULL },
+                   "|" DELIMITER ".", NULL },
       NULL
     },
     (gchar**[])
     {
       (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER },
       (gchar*[]) { "-" DELIMITER "]", NULL },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { ANY_CHARACTER },
+      (gchar*[]) { ".", NULL },
       NULL
     },
     (gchar**[])

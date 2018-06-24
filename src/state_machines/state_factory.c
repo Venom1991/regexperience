@@ -17,7 +17,7 @@ State *create_dead_state (void)
 {
   State *dead_state = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
   g_autoptr (GPtrArray) transitions = g_ptr_array_new_with_free_func (g_object_unref);
-  Transition *transition = create_deterministic_unconditional_transition (dead_state);
+  Transition *transition = create_deterministic_transition (EPSILON, dead_state);
 
   g_ptr_array_add (transitions, transition);
   g_object_set (dead_state,

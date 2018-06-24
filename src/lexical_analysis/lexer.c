@@ -155,7 +155,8 @@ lexer_build_transducer (void)
     { '?',  regular_character,            TOKEN_CATEGORY_QUESTION_MARK_QUANTIFICATION_OPERATOR },
     { '|',  regular_character,            TOKEN_CATEGORY_ALTERNATION_OPERATOR                  },
     { '\\', regular_escape,               TOKEN_CATEGORY_METACHARACTER_ESCAPE                  },
-    { 0,    regular_character,            TOKEN_CATEGORY_ORDINARY_CHARACTER                    }
+    { '.',  regular_character,            TOKEN_CATEGORY_ANY_CHARACTER                         },
+    { EPSILON,    regular_character,            TOKEN_CATEGORY_ORDINARY_CHARACTER                    }
   };
   g_autoptr (GPtrArray) regular_transitions =
     lexer_create_transitions_from (regular_metacharacter_mappings,
@@ -163,7 +164,7 @@ lexer_build_transducer (void)
 
   MealyMapping regular_escape_mappings[] =
   {
-    { 0, regular_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
+    { EPSILON, regular_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
   };
   g_autoptr (GPtrArray) regular_escape_transitions =
     lexer_create_transitions_from (regular_escape_mappings,
@@ -174,7 +175,7 @@ lexer_build_transducer (void)
     { '-',  bracket_expression_character, TOKEN_CATEGORY_RANGE_OPERATOR       },
     { ']',  regular_character,            TOKEN_CATEGORY_CLOSE_BRACKET        },
     { '\\', bracket_expression_escape,    TOKEN_CATEGORY_METACHARACTER_ESCAPE },
-    { 0,    bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER   }
+    { EPSILON,    bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER   }
   };
   g_autoptr (GPtrArray) bracket_expression_transitions =
     lexer_create_transitions_from (bracket_expression_mappings,
@@ -182,7 +183,7 @@ lexer_build_transducer (void)
 
   MealyMapping bracket_expression_escape_mappings[] =
   {
-    { 0, bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
+    { EPSILON, bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
   };
   g_autoptr (GPtrArray) bracket_expression_escape_transitions =
     lexer_create_transitions_from (bracket_expression_escape_mappings,
@@ -213,7 +214,6 @@ lexer_create_transitions_from (MealyMapping *mappings,
                                gsize         mappings_size)
 {
   GPtrArray *transitions = g_ptr_array_new_full ((guint) mappings_size, g_object_unref);
-  const gchar uninitialized_character = 0;
 
   for (guint i = 0; i < mappings_size; ++i)
     {
@@ -221,17 +221,11 @@ lexer_create_transitions_from (MealyMapping *mappings,
       gchar expected_character = mapping.character;
       State *output_state = mapping.next_state;
       gpointer output_data = GINT_TO_POINTER (mapping.token_category);
-      Transition *transition = NULL;
+      Transition *mealy_transition = create_mealy_transition (expected_character,
+                                                              output_state,
+                                                              output_data);
 
-      if (expected_character != uninitialized_character)
-        transition = create_mealy_transition (expected_character,
-                                              output_state,
-                                              output_data);
-      else
-        transition = create_mealy_unconditional_transition (output_state,
-                                                            output_data);
-
-      g_ptr_array_add (transitions, transition);
+      g_ptr_array_add (transitions, mealy_transition);
     }
 
   return transitions;

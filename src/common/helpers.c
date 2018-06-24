@@ -1,6 +1,8 @@
 #include "internal/common/helpers.h"
 
 #include <glib-object.h>
+#include <internal/state_machines/state.h>
+#include <internal/state_machines/transitions/transition.h>
 
 gboolean
 g_char_any (gconstpointer a,
@@ -76,6 +78,22 @@ g_compare_strings (gconstpointer a,
   const gchar **b_ptr = (const gchar **) b;
 
   return g_strcmp0 (*a_ptr, *b_ptr);
+}
+
+gint
+g_compare_transitions  (gconstpointer a,
+                        gconstpointer b)
+{
+  const Transition **a_ptr = (const State **) a;
+  const Transition **b_ptr = (const State **) b;
+
+  EqualityConditionType a_eq;
+  EqualityConditionType b_eq;
+
+  g_object_get (*a_ptr, PROP_TRANSITION_EQUALITY_CONDITION_TYPE, &a_eq, NULL);
+  g_object_get (*b_ptr, PROP_TRANSITION_EQUALITY_CONDITION_TYPE, &b_eq, NULL);
+
+  return -((a_eq > b_eq) - (a_eq < b_eq));
 }
 
 gpointer

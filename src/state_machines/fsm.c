@@ -109,6 +109,8 @@ fsm_fetch_output_states_from_multiple (GPtrArray *input_states,
 
       if (g_ptr_array_has_items (transitions))
         {
+          g_ptr_array_sort (transitions, g_compare_transitions);
+
           for (guint j = 0; j < transitions->len; ++j)
             {
               Transition *transition = g_ptr_array_index (transitions, j);
@@ -312,6 +314,7 @@ fsm_prepare_alphabet (FsmPrivate *priv)
                       g_object_get (transition,
                                     PROP_TRANSITION_EXPECTED_CHARACTER, &expected_character,
                                     NULL);
+
                       expected_character_as_pointer = GINT_TO_POINTER (expected_character);
 
                       if (g_slist_find (alphabet, expected_character_as_pointer) == NULL)

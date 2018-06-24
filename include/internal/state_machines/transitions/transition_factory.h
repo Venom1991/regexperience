@@ -14,13 +14,8 @@ Transition *create_deterministic_transition               (gchar      expected_c
 
 Transition *create_deterministic_epsilon_transition       (State     *output_state);
 
-Transition *create_deterministic_unconditional_transition (State     *output_state);
-
 Transition *create_mealy_transition                       (gchar      expected_character,
                                                            State     *output_state,
-                                                           gpointer   output_data);
-
-Transition *create_mealy_unconditional_transition         (State     *output_state,
                                                            gpointer   output_data);
 
 #endif /* REGEXPERIENCE_TRANSITION_FACTORY_H */

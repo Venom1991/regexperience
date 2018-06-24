@@ -210,6 +210,7 @@ analyzer_is_constant (GNode  *cst_root,
                          SPECIAL_CHARACTER,
                          REGULAR_METACHARACTER,
                          BRACKET_EXPRESSION_METACHARACTER,
+                         ANY_CHARACTER,
                          METACHARACTER_ESCAPE,
                          NULL))
     {

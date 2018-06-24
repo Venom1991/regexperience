@@ -48,6 +48,7 @@ G_DECLARE_FINAL_TYPE (Grammar, grammar, SYNTACTIC_ANALYSIS, GRAMMAR, GObject)
 #define SPECIAL_CHARACTER                "special-character"
 #define REGULAR_METACHARACTER            "regular-metacharacter"
 #define BRACKET_EXPRESSION_METACHARACTER "bracket-expression-metacharacter"
+#define ANY_CHARACTER                    "any-character"
 #define METACHARACTER_ESCAPE             "metacharacter-escape"
 
 G_END_DECLS

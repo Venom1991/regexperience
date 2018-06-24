@@ -89,8 +89,13 @@ constant_build_acceptor (AstNode *self)
   State *start = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_START);
   State *final = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_FINAL);
   g_autoptr (GPtrArray) start_transitions = g_ptr_array_new_with_free_func (g_object_unref);
-  Transition *start_on_value = create_deterministic_transition (expected_character,
-                                                                final);
+
+  Transition *start_on_value = NULL;
+
+  if (expected_character == '.')
+    start_on_value = create_deterministic_transition (EPSILON, final);
+  else
+    start_on_value = create_deterministic_transition (expected_character, final);
 
   g_ptr_array_add (start_transitions, start_on_value);
   g_object_set (start,

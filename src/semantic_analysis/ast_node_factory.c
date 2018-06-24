@@ -24,7 +24,7 @@ create_constant (GNode *cst_context)
                 PROP_TOKEN_CATEGORY, &token_category,
                 NULL);
 
-  g_assert (token_category == TOKEN_CATEGORY_ORDINARY_CHARACTER);
+  //g_assert (token_category == TOKEN_CATEGORY_ANY_CHARACTER);
 
   g_object_get (token,
                 PROP_TOKEN_LEXEME, &lexeme,
