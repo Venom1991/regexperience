@@ -3,10 +3,6 @@
 
 #include <glib-object.h>
 
-#include "grammar.h"
-#include "production.h"
-#include "../lexical_analysis/token.h"
-
 G_BEGIN_DECLS
 
 #define SYNTACTIC_ANALYSIS_TYPE_PARSER (parser_get_type ())

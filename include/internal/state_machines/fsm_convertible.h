@@ -3,7 +3,7 @@
 
 #include <glib-object.h>
 
-#include "internal/state_machines/fsm_modifiable.h"
+#include "fsm_modifiable.h"
 
 G_BEGIN_DECLS
 

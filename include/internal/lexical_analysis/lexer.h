@@ -3,8 +3,6 @@
 
 #include <glib-object.h>
 
-#include "token.h"
-
 G_BEGIN_DECLS
 
 #define LEXICAL_ANALYSIS_TYPE_LEXER (lexer_get_type ())

@@ -3,7 +3,7 @@
 
 #include <glib-object.h>
 
-#include "internal/semantic_analysis/ast_nodes/ast_node.h"
+#include "ast_nodes/ast_node.h"
 
 G_BEGIN_DECLS
 

@@ -1,12 +1,15 @@
 #include <math.h>
 
 #include "internal/syntactic_analysis/parser.h"
-#include "internal/syntactic_analysis/derivation_item.h"
-#include "internal/lexical_analysis/lexeme.h"
+#include "internal/syntactic_analysis/grammar.h"
+#include "internal/syntactic_analysis/production.h"
 #include "internal/syntactic_analysis/rule.h"
+#include "internal/syntactic_analysis/derivation_item.h"
 #include "internal/syntactic_analysis/parsing_table_key.h"
 #include "internal/syntactic_analysis/symbols/terminal.h"
 #include "internal/syntactic_analysis/symbols/non_terminal.h"
+#include "internal/lexical_analysis/lexeme.h"
+#include "internal/lexical_analysis/token.h"
 #include "internal/common/helpers.h"
 #include "core/errors.h"
 

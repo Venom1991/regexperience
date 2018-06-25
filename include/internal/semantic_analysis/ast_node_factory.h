@@ -1,7 +1,7 @@
 #ifndef REGEXPERIENCE_AST_NODE_FACTORY_H
 #define REGEXPERIENCE_AST_NODE_FACTORY_H
 
-#include "internal/semantic_analysis/ast_nodes/ast_node.h"
+#include "ast_nodes/ast_node.h"
 
 AstNode *create_constant        (GNode        *cst_context);
 
