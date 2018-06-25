@@ -131,6 +131,22 @@ state_is_dead (State *self)
   return FALSE;
 }
 
+gint
+state_compare (State *a,
+               State *b)
+{
+  State **a_ptr = (State **) a;
+  State **b_ptr = (State **) b;
+
+  g_return_val_if_fail (STATE_MACHINES_IS_STATE (*a_ptr), 0);
+  g_return_val_if_fail (STATE_MACHINES_IS_STATE (*b_ptr), 0);
+
+  gboolean a_is_dead = state_is_dead (STATE_MACHINES_STATE (*a_ptr));
+  gboolean b_is_dead = state_is_dead (STATE_MACHINES_STATE (*b_ptr));
+
+  return -((a_is_dead > b_is_dead) - (a_is_dead < b_is_dead));
+}
+
 static void
 state_get_property (GObject    *object,
                     guint       property_id,

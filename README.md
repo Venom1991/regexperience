@@ -9,6 +9,7 @@ GCC or Clang are required to compile the source code due to the usage of GLib's 
 * groups: ( )
 * bracket expressions: [ ]
     * value ranges: -
+* dot metacharacter: .
 
 Metacharacters are escaped the usual way - using the backslash character.
 
@@ -18,20 +19,25 @@ Metacharacters are escaped the usual way - using the backslash character.
 /* 1. Instantiate */
 Regexperience *regex = regexperience_new ();
 GError *error = NULL;
+gboolean match = FALSE;
 
 /* 2. Compile */
 regexperience_compile (regex, "(ab|CD|[4-8])*", &error);
 /* ... check if an error happened ... */
 
 /* 3. Match */
-gboolean match = FALSE;
-
 match = regexperience_match (regex, "ab", &error);  /* TRUE */
 match = regexperience_match (regex, "CD", &error);  /* TRUE */
 match = regexperience_match (regex, "468", &error); /* TRUE */
 match = regexperience_match (regex, "", &error);    /* TRUE */
 match = regexperience_match (regex, "0", &error);   /* FALSE */
 /* ... so on and so forth ... */
+
+/* Same instance can be reused to compile another expression */
+regexperience_compile (regex, ".+", &error);
+
+match = regexperience_match (regex, "foobar", &error); /* TRUE */
+match = regexperience_match (regex, "", &error);       /* FALSE */
 
 /* 4. Release resources (either explicitly or by using the aforementioned automatic cleanup macros) */
 g_error_free (error);

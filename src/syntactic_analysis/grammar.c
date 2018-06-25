@@ -365,7 +365,7 @@ grammar_define_productions (GPtrArray **productions,
       (gchar*[]) { "!" DELIMITER "#" DELIMITER "$" DELIMITER "%" DELIMITER "&" DELIMITER "," DELIMITER
                    "/" DELIMITER ":" DELIMITER ";" DELIMITER ">" DELIMITER "=" DELIMITER "<" DELIMITER
                    "@" DELIMITER "^" DELIMITER "_" DELIMITER "`" DELIMITER "{" DELIMITER "}" DELIMITER
-                   " " DELIMITER "\n" DELIMITER "\t", NULL },
+                   " " DELIMITER "\t", NULL },
       NULL
     },
     (gchar**[])

@@ -646,13 +646,18 @@ dfa_fetch_matched_equivalence_class_from (GPtrArray *input_equivalence_class,
                                                                                expected_character);
   GEqualFunc state_equal_func = g_direct_equal;
 
-  for (guint i = 0; i < all_equivalence_classes->len; ++i)
-    {
-      GPtrArray *equivalence_class = g_ptr_array_index (all_equivalence_classes, i);
+  /* Forcing the dead state (if it exists) to appear at the end of the
+   * output states array as other states should take precedence over it.
+   */
+  g_ptr_array_sort (output_states, (GCompareFunc) state_compare);
 
-      for (guint j = 0; j < output_states->len; ++j)
+  for (guint i = 0; i < output_states->len; ++i)
+    {
+      State *output_state = g_ptr_array_index (output_states, i);
+
+      for (guint j = 0; j < all_equivalence_classes->len; ++j)
         {
-          State *output_state = g_ptr_array_index (output_states, j);
+          GPtrArray *equivalence_class = g_ptr_array_index (all_equivalence_classes, j);
 
           if (g_ptr_array_find_with_equal_func (equivalence_class,
                                                 output_state,
