@@ -4,6 +4,7 @@
 #include "internal/semantic_analysis/ast_nodes/concatenation.h"
 #include "internal/semantic_analysis/ast_nodes/quantification.h"
 #include "internal/semantic_analysis/ast_nodes/range.h"
+#include "internal/state_machines/transitions/transition.h"
 #include "internal/lexical_analysis/lexeme.h"
 #include "internal/lexical_analysis/token.h"
 
@@ -19,14 +20,10 @@ create_constant (GNode *cst_context)
   const guint acceptable_lexeme_content_length = 1;
   guint lexeme_start_position = 0;
   guint lexeme_end_position = 0;
+  gchar expected_character = 0;
 
   g_object_get (token,
                 PROP_TOKEN_CATEGORY, &token_category,
-                NULL);
-
-  //g_assert (token_category == TOKEN_CATEGORY_ANY_CHARACTER);
-
-  g_object_get (token,
                 PROP_TOKEN_LEXEME, &lexeme,
                 NULL);
   g_object_get (lexeme,
@@ -37,7 +34,19 @@ create_constant (GNode *cst_context)
 
   g_return_val_if_fail (lexeme_content->len == acceptable_lexeme_content_length, NULL);
 
-  return constant_new (PROP_CONSTANT_VALUE, lexeme_content->str[0],
+  switch (token_category)
+    {
+    case TOKEN_CATEGORY_ANY_CHARACTER:
+      expected_character = SUBSTITUTE;
+      break;
+    case TOKEN_CATEGORY_ORDINARY_CHARACTER:
+      expected_character = lexeme_content->str[0];
+      break;
+    default:
+      g_return_val_if_reached (NULL);
+    }
+
+  return constant_new (PROP_CONSTANT_VALUE, expected_character,
                        PROP_CONSTANT_POSITION, (lexeme_start_position + lexeme_end_position) / 2);
 }
 

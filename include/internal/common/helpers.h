@@ -27,9 +27,6 @@ gboolean   g_ptr_array_equal_with_equal_func (gconstpointer   a,
 gint       g_compare_strings                 (gconstpointer   a,
                                               gconstpointer   b);
 
-gint       g_compare_transitions             (gconstpointer   a,
-                                              gconstpointer   b);
-
 gpointer   g_ptr_array_bsearch               (GPtrArray      *ptr_array,
                                               GCompareFunc    compare_func,
                                               gconstpointer   key);

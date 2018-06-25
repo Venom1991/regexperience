@@ -46,7 +46,7 @@ transition_class_init (TransitionClass *klass)
                        "Expected character used to check if the equality condition is met.",
                        0,
                        G_MAXINT8,
-                       EPSILON,
+                       0,
                        G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   obj_properties[PROP_REQUIRES_INPUT] =
@@ -107,6 +107,25 @@ transition_is_epsilon (Transition *self)
   return priv->expected_character == EPSILON &&
          priv->requires_input == FALSE &&
          priv->condition_type == EQUALITY_CONDITION_TYPE_ANY;
+}
+
+gint
+transition_compare (Transition *a,
+                    Transition *b)
+{
+  Transition **a_ptr = (Transition **) a;
+  Transition **b_ptr = (Transition **) b;
+
+  g_return_val_if_fail (TRANSITIONS_IS_TRANSITION (*a_ptr), 0);
+  g_return_val_if_fail (TRANSITIONS_IS_TRANSITION (*b_ptr), 0);
+
+  TransitionPrivate *a_priv = transition_get_instance_private (TRANSITIONS_TRANSITION (*a_ptr));
+  TransitionPrivate *b_priv = transition_get_instance_private (TRANSITIONS_TRANSITION (*b_ptr));
+
+  EqualityConditionType a_condition_type = a_priv->condition_type;
+  EqualityConditionType b_condition_type = b_priv->condition_type;
+
+  return -((a_condition_type > b_condition_type) - (a_condition_type < b_condition_type));
 }
 
 static GEqualFunc

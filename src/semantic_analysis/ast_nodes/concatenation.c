@@ -59,7 +59,7 @@ concatenation_build_acceptor (AstNode *self)
                 NULL);
 
   g_autoptr (GPtrArray) left_final_transitions = g_ptr_array_new_with_free_func (g_object_unref);
-  Transition *left_on_epsilon = create_deterministic_epsilon_transition (right_start);
+  Transition *left_on_epsilon = create_deterministic_transition (EPSILON, right_start);
 
   g_ptr_array_add (left_final_transitions, left_on_epsilon);
 

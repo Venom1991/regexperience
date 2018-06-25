@@ -72,8 +72,8 @@ alternation_build_acceptor (AstNode *self)
                             left_start, right_start,
                             NULL);
 
-  Transition *alternation_start_on_epsilon =
-    create_nondeterministic_epsilon_transition (alternation_start_output_states);
+  Transition *alternation_start_on_epsilon = create_nondeterministic_transition (EPSILON,
+                                                                                 alternation_start_output_states);
 
   g_ptr_array_add (alternation_start_transitions, alternation_start_on_epsilon);
 
@@ -84,8 +84,8 @@ alternation_build_acceptor (AstNode *self)
   g_autoptr (GPtrArray) left_final_transitions = g_ptr_array_new_with_free_func (g_object_unref);
   g_autoptr (GPtrArray) right_final_transitions = g_ptr_array_new_with_free_func (g_object_unref);
 
-  Transition *left_final_on_epsilon = create_deterministic_epsilon_transition (alternation_final);
-  Transition *right_final_on_epsilon = create_deterministic_epsilon_transition (alternation_final);
+  Transition *left_final_on_epsilon = create_deterministic_transition (EPSILON, alternation_final);
+  Transition *right_final_on_epsilon = create_deterministic_transition (EPSILON, alternation_final);
 
   g_ptr_array_add (left_final_transitions, left_final_on_epsilon);
   g_ptr_array_add (right_final_transitions, right_final_on_epsilon);

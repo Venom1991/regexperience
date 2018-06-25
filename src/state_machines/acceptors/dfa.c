@@ -241,19 +241,12 @@ dfa_transition_to_next_state (Dfa   *self,
   g_return_val_if_fail (g_ptr_array_has_items (transitions), FALSE);
   g_object_unref (current_state);
 
-  g_ptr_array_sort (transitions, g_compare_transitions);
-
   /* Trying to find an eligible transition found among the current state's transitions. */
   for (guint i = 0; i < transitions->len; ++i)
     {
       Transition *transition = g_ptr_array_index (transitions, i);
-      EqualityConditionType equality_condition_type = EQUALITY_CONDITION_TYPE_UNDEFINED;
 
       g_return_val_if_fail (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (transition), FALSE);
-
-      g_object_get (transition,
-                    PROP_TRANSITION_EQUALITY_CONDITION_TYPE, &equality_condition_type,
-                    NULL);
 
       if (transition_is_possible (transition, input_character))
         {
@@ -603,8 +596,8 @@ dfa_can_states_transition_to_same_equivalence_class (State     *first_state,
                             first_state, second_state,
                             NULL);
 
-  g_autoptr (GPtrArray) output_states =fsm_fetch_output_states_from_multiple (input_states,
-                                                                              expected_character);
+  g_autoptr (GPtrArray) output_states = fsm_fetch_output_states_from_multiple (input_states,
+                                                                               expected_character);
   gboolean states_transition_to_same_state = output_states->len == 1;
 
   /* Avoiding further checks if both states output to the same state on a given input. */

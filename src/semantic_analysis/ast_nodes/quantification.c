@@ -118,12 +118,12 @@ quantification_build_acceptor (AstNode *self)
                                   start, quantification_final,
                                   NULL);
 
-        quantification_start_on_epsilon = create_nondeterministic_epsilon_transition (quantification_start_output_states);
+        quantification_start_on_epsilon = create_nondeterministic_transition (EPSILON, quantification_start_output_states);
       }
       break;
 
     case QUANTIFICATION_BOUND_TYPE_ONE:
-      quantification_start_on_epsilon = create_deterministic_epsilon_transition (start);
+      quantification_start_on_epsilon = create_deterministic_transition (EPSILON, start);
       break;
 
     default:
@@ -146,12 +146,12 @@ quantification_build_acceptor (AstNode *self)
                                   start, quantification_final,
                                   NULL);
 
-        final_on_epsilon = create_nondeterministic_epsilon_transition (final_output_states);
+        final_on_epsilon = create_nondeterministic_transition (EPSILON, final_output_states);
       }
       break;
 
     case QUANTIFICATION_BOUND_TYPE_ONE:
-      final_on_epsilon = create_deterministic_epsilon_transition (quantification_final);
+      final_on_epsilon = create_deterministic_transition (EPSILON ,quantification_final);
       break;
 
     default:

@@ -170,10 +170,17 @@ state_set_property (GObject      *object,
       break;
 
     case PROP_TRANSITIONS:
-      if (priv->transitions != NULL)
-        g_ptr_array_unref (priv->transitions);
+      {
+        if (priv->transitions != NULL)
+          g_ptr_array_unref (priv->transitions);
 
-      priv->transitions = g_value_dup_boxed (value);
+        GPtrArray *transitions = g_value_dup_boxed (value);
+
+        if (g_ptr_array_has_items (transitions))
+          g_ptr_array_sort (transitions, (GCompareFunc) transition_compare);
+
+        priv->transitions = transitions;
+      }
       break;
 
     default:
