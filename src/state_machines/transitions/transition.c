@@ -12,7 +12,7 @@ enum
 {
     PROP_EXPECTED_CHARACTER = 1,
     PROP_REQUIRES_INPUT,
-    PROP_CONDITION,
+    PROP_EQUALITY_CONDITION_TYPE,
     N_PROPERTIES
 };
 
@@ -57,7 +57,7 @@ transition_class_init (TransitionClass *klass)
                           TRUE,
                           G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
-  obj_properties[PROP_CONDITION] =
+  obj_properties[PROP_EQUALITY_CONDITION_TYPE] =
     g_param_spec_uint (PROP_TRANSITION_EQUALITY_CONDITION_TYPE,
                        "Equality condition type",
                        "Type of equality condition that needs to be satisfied in order for the transition to occur.",
@@ -75,6 +75,19 @@ static void
 transition_init (Transition *self)
 {
   /* NOP */
+}
+
+void
+transition_supplement_states_array_with_output (Transition *self,
+                                                GPtrArray  *states_array)
+{
+  g_return_if_fail (TRANSITIONS_IS_TRANSITION (self));
+
+  TransitionClass *klass = TRANSITIONS_TRANSITION_GET_CLASS (self);
+
+  g_return_if_fail (klass->supplement_states_array_with_output != NULL);
+
+  klass->supplement_states_array_with_output (self, states_array);
 }
 
 gboolean
@@ -110,8 +123,8 @@ transition_is_epsilon (Transition *self)
 }
 
 gint
-transition_compare (Transition *a,
-                    Transition *b)
+transition_compare_equality_condition_type (Transition *a,
+                                            Transition *b)
 {
   Transition **a_ptr = (Transition **) a;
   Transition **b_ptr = (Transition **) b;
@@ -165,7 +178,7 @@ transition_get_property (GObject    *object,
       g_value_set_boolean (value, priv->requires_input);
       break;
 
-    case PROP_CONDITION:
+    case PROP_EQUALITY_CONDITION_TYPE:
       g_value_set_uint (value, priv->condition_type);
       break;
 
@@ -193,7 +206,7 @@ transition_set_property (GObject      *object,
       priv->requires_input = g_value_get_boolean (value);
       break;
 
-    case PROP_CONDITION:
+    case PROP_EQUALITY_CONDITION_TYPE:
       priv->condition_type = (EqualityConditionType) g_value_get_uint (value);
       break;
 

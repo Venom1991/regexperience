@@ -649,7 +649,7 @@ dfa_fetch_matched_equivalence_class_from (GPtrArray *input_equivalence_class,
   /* Forcing the dead state (if it exists) to appear at the end of the
    * output states array as other states should take precedence over it.
    */
-  g_ptr_array_sort (output_states, (GCompareFunc) state_compare);
+  g_ptr_array_sort (output_states, (GCompareFunc) state_compare_deadness);
 
   for (guint i = 0; i < output_states->len; ++i)
     {

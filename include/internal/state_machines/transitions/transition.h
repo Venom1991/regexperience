@@ -20,22 +20,30 @@ typedef enum
 struct _TransitionClass
 {
     GObjectClass parent_class;
+
+    void (*supplement_states_array_with_output) (Transition *self,
+                                                 GPtrArray  *states_array);
+
+    gpointer padding[8];
 };
 
-gboolean transition_is_possible (Transition *self,
-                                 gchar       input_character);
+void     transition_supplement_states_array_with_output (Transition *self,
+                                                         GPtrArray  *states_array);
 
-gboolean transition_is_epsilon  (Transition *self);
+gboolean transition_is_possible                         (Transition *self,
+                                                         gchar       input_character);
 
-gint     transition_compare     (Transition *a,
-                                 Transition *b);
+gboolean transition_is_epsilon                          (Transition *self);
+
+gint     transition_compare_equality_condition_type     (Transition *a,
+                                                         Transition *b);
 
 #define PROP_TRANSITION_EXPECTED_CHARACTER      "expected-character"
 #define PROP_TRANSITION_REQUIRES_INPUT          "requires-input"
 #define PROP_TRANSITION_EQUALITY_CONDITION_TYPE "equality-condition-type"
 
-#define EPSILON                                 0x00
-#define SUBSTITUTE                              0x1A
+#define EPSILON                                 0x00 /* ASCII "NULL" */
+#define ANY                                     0x1A /* ASCII "SUB" */
 
 G_END_DECLS
 

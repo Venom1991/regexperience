@@ -4,9 +4,9 @@
 #include "internal/semantic_analysis/ast_nodes/concatenation.h"
 #include "internal/semantic_analysis/ast_nodes/quantification.h"
 #include "internal/semantic_analysis/ast_nodes/range.h"
-#include "internal/state_machines/transitions/transition.h"
-#include "internal/lexical_analysis/lexeme.h"
 #include "internal/lexical_analysis/token.h"
+#include "internal/lexical_analysis/lexeme.h"
+#include "internal/state_machines/transitions/transition.h"
 
 AstNode *
 create_constant (GNode *cst_context)
@@ -37,7 +37,7 @@ create_constant (GNode *cst_context)
   switch (token_category)
     {
     case TOKEN_CATEGORY_ANY_CHARACTER:
-      expected_character = SUBSTITUTE;
+      expected_character = ANY;
       break;
     case TOKEN_CATEGORY_ORDINARY_CHARACTER:
       expected_character = lexeme_content->str[0];

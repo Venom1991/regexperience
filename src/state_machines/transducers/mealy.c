@@ -94,7 +94,7 @@ mealy_run (TransducerRunnable *self,
       if (transition_is_possible (transition, input))
         {
           State *next_state = NULL;
-          gpointer *output_data = NULL;
+          gpointer output_data = NULL;
 
           g_object_unref (current_state);
           g_object_get (transition,

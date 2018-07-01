@@ -340,29 +340,8 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                           Transition *transition = g_ptr_array_index (transitions, j);
                           g_autoptr (GPtrArray) transition_output_states = g_ptr_array_new ();
 
-                          if (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (transition))
-                            {
-                              g_autoptr (State) deterministic_transition_output_state = NULL;
-
-                              g_object_get (transition,
-                                            PROP_DETERMINISTIC_TRANSITION_OUTPUT_STATE, &deterministic_transition_output_state,
-                                            NULL);
-
-                              g_ptr_array_add (transition_output_states,
-                                               deterministic_transition_output_state);
-                            }
-                          else if (TRANSITIONS_IS_NONDETERMINISTIC_TRANSITION (transition))
-                            {
-                              g_autoptr (GPtrArray) nondeterministic_transition_output_states = NULL;
-
-                              g_object_get (transition,
-                                            PROP_NONDETERMINISTIC_TRANSITION_OUTPUT_STATES, &nondeterministic_transition_output_states,
-                                            NULL);
-
-                              g_ptr_array_add_range (transition_output_states,
-                                                     nondeterministic_transition_output_states,
-                                                     NULL);
-                            }
+                          transition_supplement_states_array_with_output (transition,
+                                                                          transition_output_states);
 
                           if (g_ptr_array_has_items (transition_output_states))
                             {

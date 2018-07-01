@@ -132,8 +132,8 @@ state_is_dead (State *self)
 }
 
 gint
-state_compare (State *a,
-               State *b)
+state_compare_deadness (State *a,
+                        State *b)
 {
   State **a_ptr = (State **) a;
   State **b_ptr = (State **) b;
@@ -193,7 +193,7 @@ state_set_property (GObject      *object,
         GPtrArray *transitions = g_value_dup_boxed (value);
 
         if (g_ptr_array_has_items (transitions))
-          g_ptr_array_sort (transitions, (GCompareFunc) transition_compare);
+          g_ptr_array_sort (transitions, (GCompareFunc) transition_compare_equality_condition_type);
 
         priv->transitions = transitions;
       }

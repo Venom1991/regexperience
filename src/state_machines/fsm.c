@@ -96,7 +96,6 @@ fsm_fetch_output_states_from_multiple (GPtrArray *input_states,
                                        gchar      expected_character)
 {
   GPtrArray *output_states = g_ptr_array_new ();
-  GCompareFunc state_equal_func = g_direct_equal;
 
   for (guint i = 0; i < input_states->len; ++i)
     {
@@ -114,34 +113,8 @@ fsm_fetch_output_states_from_multiple (GPtrArray *input_states,
               Transition *transition = g_ptr_array_index (transitions, j);
 
               if (transition_is_possible (transition, expected_character))
-                {
-                  if (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (transition))
-                    {
-                      g_autoptr (State) deterministic_transition_output_state = NULL;
-
-                      g_object_get (transition,
-                                    PROP_DETERMINISTIC_TRANSITION_OUTPUT_STATE, &deterministic_transition_output_state,
-                                    NULL);
-
-                      g_ptr_array_add_if_not_exists (output_states,
-                                                     deterministic_transition_output_state,
-                                                     state_equal_func,
-                                                     NULL);
-                    }
-                  else if (TRANSITIONS_IS_NONDETERMINISTIC_TRANSITION (transition))
-                    {
-                      g_autoptr (GPtrArray) nondeterministic_transition_output_states = NULL;
-
-                      g_object_get (transition,
-                                    PROP_NONDETERMINISTIC_TRANSITION_OUTPUT_STATES, &nondeterministic_transition_output_states,
-                                    NULL);
-
-                      g_ptr_array_add_range_distinct (output_states,
-                                                      nondeterministic_transition_output_states,
-                                                      state_equal_func,
-                                                      NULL);
-                    }
-                }
+                  transition_supplement_states_array_with_output (transition,
+                                                                  output_states);
             }
         }
     }

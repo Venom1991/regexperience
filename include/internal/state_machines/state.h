@@ -33,7 +33,7 @@ gboolean state_is_composed_from (State           *self,
 
 gboolean state_is_dead          (State           *self);
 
-gint     state_compare          (State           *a,
+gint     state_compare_deadness (State           *a,
                                  State           *b);
 
 #define PROP_STATE_TYPE_FLAGS  "type-flags"

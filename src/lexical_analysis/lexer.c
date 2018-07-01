@@ -147,16 +147,16 @@ lexer_build_transducer (void)
 
   MealyMapping regular_metacharacter_mappings[] =
   {
-    { '[',        bracket_expression_character, TOKEN_CATEGORY_OPEN_BRACKET,                         },
-    { '(',        regular_character,            TOKEN_CATEGORY_OPEN_PARENTHESIS                      },
-    { ')',        regular_character,            TOKEN_CATEGORY_CLOSE_PARENTHESIS                     },
-    { '*',        regular_character,            TOKEN_CATEGORY_STAR_QUANTIFICATION_OPERATOR          },
-    { '+',        regular_character,            TOKEN_CATEGORY_PLUS_QUANTIFICATION_OPERATOR          },
-    { '?',        regular_character,            TOKEN_CATEGORY_QUESTION_MARK_QUANTIFICATION_OPERATOR },
-    { '|',        regular_character,            TOKEN_CATEGORY_ALTERNATION_OPERATOR                  },
-    { '\\',       regular_escape,               TOKEN_CATEGORY_METACHARACTER_ESCAPE                  },
-    { '.',        regular_character,            TOKEN_CATEGORY_ANY_CHARACTER                         },
-    { SUBSTITUTE, regular_character,            TOKEN_CATEGORY_ORDINARY_CHARACTER                    }
+    { '[',  bracket_expression_character, TOKEN_CATEGORY_OPEN_BRACKET,                         },
+    { '(',  regular_character,            TOKEN_CATEGORY_OPEN_PARENTHESIS                      },
+    { ')',  regular_character,            TOKEN_CATEGORY_CLOSE_PARENTHESIS                     },
+    { '*',  regular_character,            TOKEN_CATEGORY_STAR_QUANTIFICATION_OPERATOR          },
+    { '+',  regular_character,            TOKEN_CATEGORY_PLUS_QUANTIFICATION_OPERATOR          },
+    { '?',  regular_character,            TOKEN_CATEGORY_QUESTION_MARK_QUANTIFICATION_OPERATOR },
+    { '|',  regular_character,            TOKEN_CATEGORY_ALTERNATION_OPERATOR                  },
+    { '\\', regular_escape,               TOKEN_CATEGORY_METACHARACTER_ESCAPE                  },
+    { '.',  regular_character,            TOKEN_CATEGORY_ANY_CHARACTER                         },
+    { ANY,  regular_character,            TOKEN_CATEGORY_ORDINARY_CHARACTER                    }
   };
   g_autoptr (GPtrArray) regular_transitions =
     lexer_create_transitions_from (regular_metacharacter_mappings,
@@ -164,7 +164,7 @@ lexer_build_transducer (void)
 
   MealyMapping regular_escape_mappings[] =
   {
-    { SUBSTITUTE, regular_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
+    { ANY, regular_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
   };
   g_autoptr (GPtrArray) regular_escape_transitions =
     lexer_create_transitions_from (regular_escape_mappings,
@@ -172,10 +172,10 @@ lexer_build_transducer (void)
 
   MealyMapping bracket_expression_mappings[] =
   {
-    { '-',        bracket_expression_character, TOKEN_CATEGORY_RANGE_OPERATOR       },
-    { ']',        regular_character,            TOKEN_CATEGORY_CLOSE_BRACKET        },
-    { '\\',       bracket_expression_escape,    TOKEN_CATEGORY_METACHARACTER_ESCAPE },
-    { SUBSTITUTE, bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER   }
+    { '-',  bracket_expression_character, TOKEN_CATEGORY_RANGE_OPERATOR       },
+    { ']',  regular_character,            TOKEN_CATEGORY_CLOSE_BRACKET        },
+    { '\\', bracket_expression_escape,    TOKEN_CATEGORY_METACHARACTER_ESCAPE },
+    { ANY,  bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER   }
   };
   g_autoptr (GPtrArray) bracket_expression_transitions =
     lexer_create_transitions_from (bracket_expression_mappings,
@@ -183,7 +183,7 @@ lexer_build_transducer (void)
 
   MealyMapping bracket_expression_escape_mappings[] =
   {
-    { SUBSTITUTE, bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
+    { ANY, bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
   };
   g_autoptr (GPtrArray) bracket_expression_escape_transitions =
     lexer_create_transitions_from (bracket_expression_escape_mappings,

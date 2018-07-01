@@ -67,11 +67,9 @@ symbol_is_equal (Symbol *self,
 gboolean symbol_is_string_match (Symbol *self,
                                  gchar  *value)
 {
-  SymbolClass *klass;
-
   g_return_val_if_fail (SYMBOLS_IS_SYMBOL (self), FALSE);
 
-  klass = SYMBOLS_SYMBOL_GET_CLASS (self);
+  SymbolClass *klass = SYMBOLS_SYMBOL_GET_CLASS (self);
 
   g_assert (klass->is_match != NULL);
 
