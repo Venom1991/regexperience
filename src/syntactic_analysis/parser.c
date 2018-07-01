@@ -8,8 +8,8 @@
 #include "internal/syntactic_analysis/parsing_table_key.h"
 #include "internal/syntactic_analysis/symbols/terminal.h"
 #include "internal/syntactic_analysis/symbols/non_terminal.h"
-#include "internal/lexical_analysis/lexeme.h"
 #include "internal/lexical_analysis/token.h"
+#include "internal/lexical_analysis/lexeme.h"
 #include "internal/common/helpers.h"
 #include "core/errors.h"
 
