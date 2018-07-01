@@ -1,5 +1,6 @@
 #include "internal/lexical_analysis/lexer.h"
 #include "internal/lexical_analysis/lexeme.h"
+#include "internal/lexical_analysis/token.h"
 #include "internal/state_machines/fsm_initializable.h"
 #include "internal/state_machines/transducers/transducer_runnable.h"
 #include "internal/state_machines/transducers/mealy.h"

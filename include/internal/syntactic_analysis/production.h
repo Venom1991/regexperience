@@ -3,7 +3,7 @@
 
 #include <glib-object.h>
 
-#include "internal/syntactic_analysis/derivation_item.h"
+#include "derivation_item.h"
 
 G_BEGIN_DECLS
 

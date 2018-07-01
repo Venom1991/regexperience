@@ -257,7 +257,7 @@ grammar_define_productions (GPtrArray **productions,
       (gchar*[]) { DIGIT, NULL                             },
       (gchar*[]) { SPECIAL_CHARACTER, NULL                 },
       (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER, NULL  },
-      (gchar*[]) { ANY_CHARACTER, NULL  },
+      (gchar*[]) { ANY_CHARACTER, NULL                     },
       (gchar*[]) { "\\", ELEMENTARY_EXPRESSION_PRIME, NULL },
       NULL
     },

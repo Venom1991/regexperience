@@ -3,8 +3,8 @@
 
 #include <glib-object.h>
 
-#include "internal/state_machines/state.h"
-#include "internal/state_machines/composite_state.h"
+#include "state.h"
+#include "composite_state.h"
 
 G_BEGIN_DECLS
 
