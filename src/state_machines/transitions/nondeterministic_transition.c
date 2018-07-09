@@ -4,25 +4,25 @@
 
 struct _NondeterministicTransition
 {
-    Transition parent_instance;
+  Transition parent_instance;
 };
 
 typedef struct
 {
-    GWeakRef *output_states;
-    guint     count;
+  GWeakRef *output_states;
+  guint     count;
 } NondeterministicTransitionPrivate;
 
 enum
 {
-    PROP_OUTPUT_STATES = 1,
-    N_PROPERTIES
+  PROP_OUTPUT_STATES = 1,
+  N_PROPERTIES
 };
 
 typedef enum
 {
-    MANIPULATE_OUTPUT_STATES_MODE_INITIALIZATION,
-    MANIPULATE_OUTPUT_STATES_MODE_CLEARING
+  MANIPULATE_OUTPUT_STATES_MODE_INITIALIZATION,
+  MANIPULATE_OUTPUT_STATES_MODE_CLEARING
 } ManipulateOutputStatesMode;
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

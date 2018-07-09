@@ -6,20 +6,20 @@
 
 struct _Quantification
 {
-    UnaryOperator parent_instance;
+  UnaryOperator parent_instance;
 };
 
 typedef struct
 {
-    QuantificationBoundType lower_bound;
-    QuantificationBoundType upper_bound;
+  QuantificationBoundType lower_bound;
+  QuantificationBoundType upper_bound;
 } QuantificationPrivate;
 
 enum
 {
-    PROP_LOWER_BOUND = 1,
-    PROP_UPPER_BOUND,
-    N_PROPERTIES
+  PROP_LOWER_BOUND = 1,
+  PROP_UPPER_BOUND,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

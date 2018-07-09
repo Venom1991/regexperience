@@ -4,20 +4,20 @@
 
 struct _DerivationItem
 {
-    GObject parent_instance;
+  GObject parent_instance;
 };
 
 typedef struct
 {
-    GWeakRef left_hand_side;
-    GWeakRef right_hand_side;
+  GWeakRef left_hand_side;
+  GWeakRef right_hand_side;
 } DerivationItemPrivate;
 
 enum
 {
-    PROP_LEFT_HAND_SIDE = 1,
-    PROP_RIGHT_HAND_SIDE,
-    N_PROPERTIES
+  PROP_LEFT_HAND_SIDE = 1,
+  PROP_RIGHT_HAND_SIDE,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

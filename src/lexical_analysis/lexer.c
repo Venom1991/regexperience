@@ -10,19 +10,19 @@
 
 struct _Lexer
 {
-    GObject parent_instance;
+  GObject parent_instance;
 };
 
 typedef struct
 {
-    TransducerRunnable *transducer;
+  TransducerRunnable *transducer;
 } LexerPrivate;
 
 typedef struct
 {
-    gchar          character;
-    State         *next_state;
-    TokenCategory  token_category;
+  gchar          character;
+  State         *next_state;
+  TokenCategory  token_category;
 } MealyMapping;
 
 static Token            *lexer_create_token            (TokenCategory  category,

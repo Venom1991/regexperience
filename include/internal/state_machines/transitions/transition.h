@@ -11,20 +11,20 @@ G_DECLARE_DERIVABLE_TYPE (Transition, transition, TRANSITIONS, TRANSITION, GObje
 
 typedef enum
 {
-    EQUALITY_CONDITION_TYPE_UNDEFINED,
-    EQUALITY_CONDITION_TYPE_ANY,
-    EQUALITY_CONDITION_TYPE_EQUAL,
-    EQUALITY_CONDITION_TYPE_NOT_EQUAL
+  EQUALITY_CONDITION_TYPE_UNDEFINED,
+  EQUALITY_CONDITION_TYPE_ANY,
+  EQUALITY_CONDITION_TYPE_EQUAL,
+  EQUALITY_CONDITION_TYPE_NOT_EQUAL
 } EqualityConditionType;
 
 struct _TransitionClass
 {
-    GObjectClass parent_class;
+  GObjectClass parent_class;
 
-    void (*supplement_states_array_with_output) (Transition *self,
-                                                 GPtrArray  *states_array);
+  void (*supplement_states_array_with_output) (Transition *self,
+                                               GPtrArray  *states_array);
 
-    gpointer padding[8];
+  gpointer padding[8];
 };
 
 void     transition_supplement_states_array_with_output (Transition *self,

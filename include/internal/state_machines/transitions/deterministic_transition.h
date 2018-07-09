@@ -18,7 +18,7 @@ G_DECLARE_DERIVABLE_TYPE (DeterministicTransition,
 
 struct _DeterministicTransitionClass
 {
-    TransitionClass parent_class;
+  TransitionClass parent_class;
 };
 
 #define PROP_DETERMINISTIC_TRANSITION_OUTPUT_STATE "output-state"

@@ -2,13 +2,13 @@
 
 typedef struct
 {
-    AstNode *operand;
+  AstNode *operand;
 } UnaryOperatorPrivate;
 
 enum
 {
-    PROP_OPERAND = 1,
-    N_PROPERTIES
+  PROP_OPERAND = 1,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

@@ -12,20 +12,20 @@ G_DECLARE_DERIVABLE_TYPE (State, state, STATE_MACHINES, STATE, GObject)
 
 typedef enum
 {
-    STATE_TYPE_UNDEFINED = 0x0000,
-    STATE_TYPE_DEFAULT = 1 << 0,
-    STATE_TYPE_START = 1 << 1,
-    STATE_TYPE_FINAL = 1 << 2
+  STATE_TYPE_UNDEFINED = 0x0000,
+  STATE_TYPE_DEFAULT = 1 << 0,
+  STATE_TYPE_START = 1 << 1,
+  STATE_TYPE_FINAL = 1 << 2
 } StateTypeFlags;
 
 struct _StateClass
 {
-    GObjectClass parent_instance;
+  GObjectClass parent_instance;
 
-    gboolean (*is_composed_from) (State           *self,
-                                  const GPtrArray *states);
+  gboolean (*is_composed_from) (State           *self,
+                                const GPtrArray *states);
 
-    gpointer padding[8];
+  gpointer padding[8];
 };
 
 gboolean state_is_composed_from (State           *self,

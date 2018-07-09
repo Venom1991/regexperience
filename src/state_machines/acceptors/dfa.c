@@ -8,13 +8,13 @@
 
 struct _Dfa
 {
-    Fsm parent_instance;
+  Fsm parent_instance;
 };
 
 typedef struct
 {
-    State    *current_state;
-    gboolean  is_input_exhausted;
+  State    *current_state;
+  gboolean  is_input_exhausted;
 } DfaPrivate;
 
 static void       dfa_fsm_modifiable_interface_init                   (FsmModifiableInterface    *iface);

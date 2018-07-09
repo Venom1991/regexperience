@@ -15,56 +15,55 @@
 
 struct _Parser
 {
-    GObject parent_instance;
+  GObject parent_instance;
 };
 
 typedef struct
 {
-    GQueue  *analysis_queue;
-    GQueue  *prediction_queue;
-    Grammar *grammar;
+  GQueue  *analysis_queue;
+  GQueue  *prediction_queue;
+  Grammar *grammar;
 } ParserPrivate;
 
-static void             parser_prepare_for_parsing        (Parser          *self);
+static void       parser_prepare_for_parsing        (Parser          *self);
 
-static gboolean         parser_predict                    (Grammar         *grammar,
-                                                           Symbol          *non_terminal,
-                                                           Token           *token,
-                                                           GQueue          *analysis_queue,
-                                                           GQueue          *prediction_queue);
+static gboolean   parser_predict                    (Grammar         *grammar,
+                                                     Symbol          *non_terminal,
+                                                     Token           *token,
+                                                     GQueue          *analysis_queue,
+                                                     GQueue          *prediction_queue);
 
-static void             parser_expand_queues              (GQueue          *analysis_queue,
-                                                           GQueue          *prediction_queue,
-                                                           Production      *production,
-                                                           Rule            *rule);
+static void       parser_expand_queues              (GQueue          *analysis_queue,
+                                                     GQueue          *prediction_queue,
+                                                     Production      *production,
+                                                     Rule            *rule);
 
-static GPtrArray       *parser_create_parsing_table_keys  (Grammar         *grammar,
-                                                           Symbol          *non_terminal,
-                                                           Token           *token,
-                                                           Production     **extracted_production);
+static GPtrArray *parser_create_parsing_table_keys  (Grammar         *grammar,
+                                                     Symbol          *non_terminal,
+                                                     Token           *token,
+                                                     Production     **extracted_production);
 
-static gboolean         parser_can_accept                 (Symbol          *terminal,
-                                                           Token           *token);
+static gboolean   parser_can_accept                 (Symbol          *terminal,
+                                                     Token           *token);
 
-static GNode           *parser_transform_analysis         (GQueue          *analysis_queue);
+static GNode     *parser_transform_analysis         (GQueue          *analysis_queue);
 
-static void             parser_insert_children            (GNode           *root,
-                                                           GQueue          *analysis_queue);
+static void       parser_insert_children            (GNode           *root,
+                                                     GQueue          *analysis_queue);
 
-static void             parser_report_error               (Token           *current_token,
-                                                           guint            token_position,
-                                                           GPtrArray       *all_tokens,
-                                                           gboolean         parsing_table_entry_found,
-                                                           Symbol          *prediction_head,
-                                                           GError         **error);
+static void       parser_report_error               (guint            token_position,
+                                                     GPtrArray       *all_tokens,
+                                                     gboolean         parsing_table_entry_found,
+                                                     Symbol          *prediction_head,
+                                                     GError         **error);
 
-static gboolean         parser_token_exists_in_all_tokens (GPtrArray       *all_tokens,
-                                                           TokenCategory    category,
-                                                           guint            starting_position,
-                                                           Token          **found_token,
-                                                           guint           *found_token_position);
+static gboolean   parser_token_exists_in_all_tokens (GPtrArray       *all_tokens,
+                                                     TokenCategory    category,
+                                                     guint            starting_position,
+                                                     Token          **found_token,
+                                                     guint           *found_token_position);
 
-static void             parser_dispose                    (GObject         *object);
+static void       parser_dispose                    (GObject         *object);
 
 G_DEFINE_QUARK (syntactic-analysis-parser-error-quark, syntactic_analysis_parser_error)
 #define SYNTACTIC_ANALYSIS_PARSER_ERROR (syntactic_analysis_parser_error_quark ())
@@ -167,8 +166,7 @@ parser_build_concrete_syntax_tree (Parser     *self,
         }
 
       /* Reporting errors (if required). */
-      parser_report_error (token,
-                           token_position,
+      parser_report_error (token_position,
                            tokens,
                            parsing_table_entry_found,
                            prediction_head,
@@ -435,18 +433,24 @@ parser_insert_children (GNode  *root,
 }
 
 static
-void parser_report_error (Token      *current_token,
-                          guint       token_position,
+void parser_report_error (guint       token_position,
                           GPtrArray  *all_tokens,
                           gboolean    parsing_table_entry_found,
                           Symbol     *prediction_head,
                           GError    **error)
 {
+  Token *current_token = NULL;
   gboolean is_last_token = (token_position == all_tokens->len);
   TokenCategory token_category = TOKEN_CATEGORY_UNDEFINED;
   Token *invalid_token = NULL;
   SyntacticAnalysisParserError error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_UNDEFINED;
   const gchar *error_message = NULL;
+  guint starting_position = token_position;
+
+  if (is_last_token)
+    starting_position--;
+
+  current_token = g_ptr_array_index (all_tokens, starting_position);
 
   /* Trying to discern an informative error message in case a parsing table entry was not found
      or the input was exhausted without being accepted beforehand.
@@ -463,7 +467,7 @@ void parser_report_error (Token      *current_token,
 
           if (parser_token_exists_in_all_tokens (all_tokens,
                                                  TOKEN_CATEGORY_OPEN_PARENTHESIS,
-                                                 token_position,
+                                                 starting_position,
                                                  &found_token,
                                                  NULL))
             {
@@ -473,7 +477,7 @@ void parser_report_error (Token      *current_token,
             }
           else if (parser_token_exists_in_all_tokens (all_tokens,
                                                       TOKEN_CATEGORY_OPEN_BRACKET,
-                                                      token_position,
+                                                      starting_position,
                                                       &found_token,
                                                       NULL))
             {
@@ -483,7 +487,7 @@ void parser_report_error (Token      *current_token,
             }
           else if (parser_token_exists_in_all_tokens (all_tokens,
                                                       TOKEN_CATEGORY_ALTERNATION_OPERATOR,
-                                                      token_position,
+                                                      starting_position,
                                                       &found_token,
                                                       NULL))
             {
@@ -493,7 +497,7 @@ void parser_report_error (Token      *current_token,
             }
           else if (parser_token_exists_in_all_tokens (all_tokens,
                                                       TOKEN_CATEGORY_METACHARACTER_ESCAPE,
-                                                      token_position,
+                                                      starting_position,
                                                       &found_token,
                                                       NULL))
             {
@@ -509,7 +513,7 @@ void parser_report_error (Token      *current_token,
 
           if (parser_token_exists_in_all_tokens (all_tokens,
                                                  TOKEN_CATEGORY_ALTERNATION_OPERATOR,
-                                                 token_position,
+                                                 starting_position,
                                                  &found_token,
                                                  NULL))
             {
@@ -519,7 +523,7 @@ void parser_report_error (Token      *current_token,
             }
           else if (parser_token_exists_in_all_tokens (all_tokens,
                                                       TOKEN_CATEGORY_OPEN_PARENTHESIS,
-                                                      token_position,
+                                                      starting_position,
                                                       &found_token,
                                                       &found_token_position))
             {
@@ -540,7 +544,7 @@ void parser_report_error (Token      *current_token,
 
           if (parser_token_exists_in_all_tokens (all_tokens,
                                                  TOKEN_CATEGORY_RANGE_OPERATOR,
-                                                 token_position,
+                                                 starting_position,
                                                  &found_token,
                                                  NULL))
             {
@@ -550,7 +554,7 @@ void parser_report_error (Token      *current_token,
             }
           else if (parser_token_exists_in_all_tokens (all_tokens,
                                                       TOKEN_CATEGORY_OPEN_BRACKET,
-                                                      token_position,
+                                                      starting_position,
                                                       &found_token,
                                                       &found_token_position))
             {

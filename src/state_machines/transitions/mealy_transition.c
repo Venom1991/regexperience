@@ -2,18 +2,18 @@
 
 struct _MealyTransition
 {
-    DeterministicTransition parent_instance;
+  DeterministicTransition parent_instance;
 };
 
 typedef struct
 {
-    gpointer output_data;
+  gpointer output_data;
 } MealyTransitionPrivate;
 
 enum
 {
-    PROP_OUTPUT_DATA = 1,
-    N_PROPERTIES
+  PROP_OUTPUT_DATA = 1,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

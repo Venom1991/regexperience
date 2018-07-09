@@ -6,7 +6,7 @@
 
 struct _Concatenation
 {
-    BinaryOperator parent_instance;
+  BinaryOperator parent_instance;
 };
 
 static FsmConvertible *concatenation_build_acceptor (AstNode *self);

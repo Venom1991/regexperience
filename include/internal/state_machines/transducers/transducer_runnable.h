@@ -11,12 +11,12 @@ G_DECLARE_INTERFACE (TransducerRunnable, transducer_runnable, TRANSDUCERS, TRANS
 
 struct _TransducerRunnableInterface
 {
-    GTypeInterface parent_iface;
+  GTypeInterface parent_iface;
 
-    void     (*reset) (TransducerRunnable *self);
+  void     (*reset) (TransducerRunnable *self);
 
-    gpointer (*run)   (TransducerRunnable *self,
-                       gchar               input);
+  gpointer (*run)   (TransducerRunnable *self,
+                     gchar               input);
 };
 
 void     transducer_runnable_reset (TransducerRunnable *self);

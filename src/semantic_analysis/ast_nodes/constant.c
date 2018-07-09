@@ -6,20 +6,20 @@
 
 struct _Constant
 {
-    AstNode parent_instance;
+  AstNode parent_instance;
 };
 
 typedef struct
 {
-    gchar value;
-    guint position;
+  gchar value;
+  guint position;
 } ConstantPrivate;
 
 enum
 {
-    PROP_VALUE = 1,
-    PROP_POSITION = 2,
-    N_PROPERTIES
+  PROP_VALUE = 1,
+  PROP_POSITION = 2,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

@@ -4,13 +4,13 @@
 
 typedef struct
 {
-    GWeakRef output_state;
+  GWeakRef output_state;
 } DeterministicTransitionPrivate;
 
 enum
 {
-    PROP_OUTPUT_STATE = 1,
-    N_PROPERTIES
+  PROP_OUTPUT_STATE = 1,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

@@ -11,10 +11,10 @@ G_DECLARE_INTERFACE (FsmModifiable, fsm_modifiable, STATE_MACHINES, FSM_MODIFIAB
 
 struct _FsmModifiableInterface
 {
-    GTypeInterface parent_iface;
+  GTypeInterface parent_iface;
 
-    void (*minimize)   (FsmModifiable  *self);
-    void (*complement) (FsmModifiable  *self);
+  void (*minimize)   (FsmModifiable *self);
+  void (*complement) (FsmModifiable *self);
 };
 
 void fsm_modifiable_minimize (FsmModifiable *self);

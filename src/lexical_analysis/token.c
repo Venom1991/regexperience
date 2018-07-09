@@ -3,20 +3,20 @@
 
 struct _Token
 {
-    GObject parent_instance;
+  GObject parent_instance;
 };
 
 typedef struct
 {
-    TokenCategory  category;
-    Lexeme        *lexeme;
+  TokenCategory  category;
+  Lexeme        *lexeme;
 } TokenPrivate;
 
 enum
 {
-    PROP_CATEGORY = 1,
-    PROP_LEXEME,
-    N_PROPERTIES
+  PROP_CATEGORY = 1,
+  PROP_LEXEME,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

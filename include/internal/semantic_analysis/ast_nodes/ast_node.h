@@ -13,24 +13,24 @@ G_DECLARE_DERIVABLE_TYPE (AstNode, ast_node, AST_NODES, AST_NODE, GObject)
 
 typedef enum
 {
-    OPERATOR_TYPE_UNDEFINED,
-    OPERATOR_TYPE_ALTERNATION,
-    OPERATOR_TYPE_CONCATENATION,
-    OPERATOR_TYPE_STAR_QUANTIFICATION,
-    OPERATOR_TYPE_PLUS_QUANTIFICATION,
-    OPERATOR_TYPE_QUESTION_MARK_QUANTIFICATION,
-    OPERATOR_TYPE_RANGE
+  OPERATOR_TYPE_UNDEFINED,
+  OPERATOR_TYPE_ALTERNATION,
+  OPERATOR_TYPE_CONCATENATION,
+  OPERATOR_TYPE_STAR_QUANTIFICATION,
+  OPERATOR_TYPE_PLUS_QUANTIFICATION,
+  OPERATOR_TYPE_QUESTION_MARK_QUANTIFICATION,
+  OPERATOR_TYPE_RANGE
 } OperatorType;
 
 struct _AstNodeClass
 {
-    GObjectClass parent_class;
+  GObjectClass parent_class;
 
-    FsmConvertible * (*build_acceptor) (AstNode  *self);
-    gboolean         (*is_valid)       (AstNode  *self,
-                                        GError  **error);
+  FsmConvertible * (*build_acceptor) (AstNode  *self);
+  gboolean         (*is_valid)       (AstNode  *self,
+                                      GError  **error);
 
-    gpointer     padding[8];
+  gpointer     padding[8];
 };
 
 FsmConvertible *ast_node_build_acceptor (AstNode  *self);

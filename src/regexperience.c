@@ -7,18 +7,18 @@
 
 struct _Regexperience
 {
-    GObject parent_instance;
+  GObject parent_instance;
 };
 
 typedef struct
 {
-    /* Compilation */
-    Lexer            *lexer;
-    Parser           *parser;
-    Analyzer         *analyzer;
+  /* Compilation */
+  Lexer            *lexer;
+  Parser           *parser;
+  Analyzer         *analyzer;
 
-    /* Matching */
-    AcceptorRunnable *acceptor;
+  /* Matching */
+  AcceptorRunnable *acceptor;
 } RegexperiencePrivate;
 
 static void regexperience_dispose (GObject *object);

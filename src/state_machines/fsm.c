@@ -7,21 +7,21 @@
 
 typedef struct
 {
-    GPtrArray *all_states;
-    State     *start_state;
-    GPtrArray *final_states;
-    GPtrArray *non_final_states;
-    GSList    *alphabet;
+  GPtrArray *all_states;
+  State     *start_state;
+  GPtrArray *final_states;
+  GPtrArray *non_final_states;
+  GSList    *alphabet;
 } FsmPrivate;
 
 enum
 {
-    PROP_ALL_STATES = 1,
-    PROP_START_STATE,
-    PROP_FINAL_STATES,
-    PROP_NON_FINAL_STATES,
-    PROP_ALPHABET,
-    N_PROPERTIES
+  PROP_ALL_STATES = 1,
+  PROP_START_STATE,
+  PROP_FINAL_STATES,
+  PROP_NON_FINAL_STATES,
+  PROP_ALPHABET,
+  N_PROPERTIES
 };
 
 static void fsm_fsm_initializable_interface_init (FsmInitializableInterface *iface);

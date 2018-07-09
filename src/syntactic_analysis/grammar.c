@@ -10,24 +10,24 @@
 
 struct _Grammar
 {
-    GObject parent_instance;
+  GObject parent_instance;
 };
 
 typedef struct
 {
-    GPtrArray  *all_productions;
-    GPtrArray  *all_terminals;
-    Production *start_production;
-    GHashTable *parsing_table;
+  GPtrArray  *all_productions;
+  GPtrArray  *all_terminals;
+  Production *start_production;
+  GHashTable *parsing_table;
 } GrammarPrivate;
 
 enum
 {
-    PROP_ALL_PRODUCTIONS = 1,
-    PROP_ALL_TERMINALS,
-    PROP_START_PRODUCTION,
-    PROP_PARSING_TABLE,
-    N_PROPERTIES
+  PROP_ALL_PRODUCTIONS = 1,
+  PROP_ALL_TERMINALS,
+  PROP_START_PRODUCTION,
+  PROP_PARSING_TABLE,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
@@ -365,7 +365,7 @@ grammar_define_productions (GPtrArray **productions,
       (gchar*[]) { "!" DELIMITER "#" DELIMITER "$" DELIMITER "%" DELIMITER "&" DELIMITER "," DELIMITER
                    "/" DELIMITER ":" DELIMITER ";" DELIMITER ">" DELIMITER "=" DELIMITER "<" DELIMITER
                    "@" DELIMITER "^" DELIMITER "_" DELIMITER "`" DELIMITER "{" DELIMITER "}" DELIMITER
-                   " " DELIMITER "\t", NULL },
+                   " " DELIMITER "\n" DELIMITER "\t", NULL },
       NULL
     },
     (gchar**[])

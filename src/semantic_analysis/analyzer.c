@@ -9,21 +9,21 @@
 
 struct _Analyzer
 {
-    GObject parent_instance;
+  GObject parent_instance;
 };
 
 typedef struct
 {
-    GHashTable *operator_types;
+  GHashTable *operator_types;
 } AnalyzerPrivate;
 
 typedef enum
 {
-    FETCH_CST_CHILDREN_TOKEN = 1 << 0,
-    FETCH_CST_CHILDREN_TERMINAL = 1 << 1,
-    FETCH_CST_CHILDREN_NON_TERMINAL = 1 << 2,
-    FETCH_CST_CHILDREN_ALL = 1 << 3,
-    FETCH_CST_CHILDREN_FIRST = 1 << 4
+  FETCH_CST_CHILDREN_TOKEN = 1 << 0,
+  FETCH_CST_CHILDREN_TERMINAL = 1 << 1,
+  FETCH_CST_CHILDREN_NON_TERMINAL = 1 << 2,
+  FETCH_CST_CHILDREN_ALL = 1 << 3,
+  FETCH_CST_CHILDREN_FIRST = 1 << 4
 } FetchCstChildrenFlags;
 
 static AstNode      *analyzer_transform_concrete_syntax_tree (GNode                  *cst_root,

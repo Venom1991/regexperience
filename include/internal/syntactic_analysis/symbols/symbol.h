@@ -13,23 +13,23 @@ G_DECLARE_DERIVABLE_TYPE (Symbol, symbol, SYMBOLS, SYMBOL, GObject)
 
 typedef enum
 {
-    SYMBOL_VALUE_TYPE_POINTER_TO_GCHAR,
-    SYMBOL_VALUE_TYPE_POINTER_TO_PRODUCTION
+  SYMBOL_VALUE_TYPE_POINTER_TO_GCHAR,
+  SYMBOL_VALUE_TYPE_POINTER_TO_PRODUCTION
 } SymbolValueType;
 
 struct _SymbolClass
 {
-    GObjectClass parent_class;
+  GObjectClass parent_class;
 
-    void     (*extract_value) (Symbol          *self,
-                               GValue          *value);
-    gboolean (*is_match)      (Symbol          *self,
-                               gconstpointer    value,
-                               SymbolValueType  value_type);
-    gboolean (*is_equal)      (Symbol          *self,
-                               Symbol          *other);
+  void     (*extract_value) (Symbol          *self,
+                             GValue          *value);
+  gboolean (*is_match)      (Symbol          *self,
+                             gconstpointer    value,
+                             SymbolValueType  value_type);
+  gboolean (*is_equal)      (Symbol          *self,
+                             Symbol          *other);
 
-    gpointer padding[8];
+  gpointer padding[8];
 };
 
 void     symbol_extract_value       (Symbol     *self,

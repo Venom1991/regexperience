@@ -5,22 +5,22 @@
 
 struct _Rule
 {
-    GObject parent_instance;
+  GObject parent_instance;
 };
 
 typedef struct
 {
-    GPtrArray *symbols;
-    GPtrArray *first_set;
-    gboolean   derives_epsilon;
+  GPtrArray *symbols;
+  GPtrArray *first_set;
+  gboolean   derives_epsilon;
 } RulePrivate;
 
 enum
 {
-    PROP_SYMBOLS = 1,
-    PROP_FIRST_SET,
-    PROP_CAN_DERIVE_EPSILON,
-    N_PROPERTIES
+  PROP_SYMBOLS = 1,
+  PROP_FIRST_SET,
+  PROP_CAN_DERIVE_EPSILON,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

@@ -13,7 +13,7 @@ G_DECLARE_DERIVABLE_TYPE (BinaryOperator, binary_operator, AST_NODES, BINARY_OPE
 
 struct _BinaryOperatorClass
 {
-    AstNodeClass parent_class;
+  AstNodeClass parent_class;
 };
 
 #define PROP_BINARY_OPERATOR_LEFT_OPERAND  "left-operand"

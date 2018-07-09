@@ -2,22 +2,22 @@
 
 struct _Lexeme
 {
-    GObject parent_instance;
+  GObject parent_instance;
 };
 
 typedef struct
 {
-    GString *content;
-    guint    start_position;
-    guint    end_position;
+  GString *content;
+  guint    start_position;
+  guint    end_position;
 } LexemePrivate;
 
 enum
 {
-    PROP_CONTENT = 1,
-    PROP_START_POSITION,
-    PROP_END_POSITION,
-    N_PROPERTIES
+  PROP_CONTENT = 1,
+  PROP_START_POSITION,
+  PROP_END_POSITION,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
@@ -54,7 +54,7 @@ lexeme_class_init (LexemeClass *klass)
 
   obj_properties[PROP_START_POSITION] =
     g_param_spec_uint (PROP_LEXEME_START_POSITION,
-                       "Start Position",
+                       "Start position",
                        "Start of the position in which the lexeme appears in the input.",
                        0,
                        G_MAXUINT32,
@@ -63,7 +63,7 @@ lexeme_class_init (LexemeClass *klass)
 
   obj_properties[PROP_END_POSITION] =
     g_param_spec_uint (PROP_LEXEME_END_POSITION,
-                       "End Position",
+                       "End position",
                        "End of the position in which the lexeme appears in the input.",
                        0,
                        G_MAXUINT32,

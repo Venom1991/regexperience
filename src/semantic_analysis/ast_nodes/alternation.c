@@ -6,7 +6,7 @@
 
 struct _Alternation
 {
-    BinaryOperator parent_instance;
+  BinaryOperator parent_instance;
 };
 
 static FsmConvertible *alternation_build_acceptor (AstNode *self);

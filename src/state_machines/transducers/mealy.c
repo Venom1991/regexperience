@@ -7,12 +7,12 @@
 
 struct _Mealy
 {
-    Fsm parent_instance;
+  Fsm parent_instance;
 };
 
 typedef struct
 {
-    State *current_state;
+  State *current_state;
 } MealyPrivate;
 
 static void     mealy_transducer_runnable_interface_init (TransducerRunnableInterface *iface);

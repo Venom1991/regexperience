@@ -5,21 +5,21 @@
 
 struct _ParsingTableKey
 {
-    GObject parent_instance;
+  GObject parent_instance;
 };
 
 typedef struct
 {
-    Production *production;
-    Symbol     *terminal;
-    guint       hash;
+  Production *production;
+  Symbol     *terminal;
+  guint       hash;
 } ParsingTableKeyPrivate;
 
 enum
 {
-    PROP_PRODUCTION = 1,
-    PROP_TERMINAL,
-    N_PROPERTIES
+  PROP_PRODUCTION = 1,
+  PROP_TERMINAL,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

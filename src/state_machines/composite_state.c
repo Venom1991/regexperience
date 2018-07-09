@@ -3,20 +3,20 @@
 
 struct _CompositeState
 {
-    State parent_instance;
+  State parent_instance;
 };
 
 typedef struct
 {
-    GPtrArray                      *composed_from_states;
-    CompositeStateResolveTypeFlags  resolve_type_flags;
+  GPtrArray                      *composed_from_states;
+  CompositeStateResolveTypeFlags  resolve_type_flags;
 } CompositeStatePrivate;
 
 enum
 {
-    PROP_COMPOSED_FROM_STATES = 1,
-    PROP_RESOLVE_TYPE_FLAGS,
-    N_PROPERTIES
+  PROP_COMPOSED_FROM_STATES = 1,
+  PROP_RESOLVE_TYPE_FLAGS,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

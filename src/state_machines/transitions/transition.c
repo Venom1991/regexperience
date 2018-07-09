@@ -3,17 +3,17 @@
 
 typedef struct
 {
-    gchar                 expected_character;
-    gboolean              requires_input;
-    EqualityConditionType condition_type;
+  gchar                 expected_character;
+  gboolean              requires_input;
+  EqualityConditionType condition_type;
 } TransitionPrivate;
 
 enum
 {
-    PROP_EXPECTED_CHARACTER = 1,
-    PROP_REQUIRES_INPUT,
-    PROP_EQUALITY_CONDITION_TYPE,
-    N_PROPERTIES
+  PROP_EXPECTED_CHARACTER = 1,
+  PROP_REQUIRES_INPUT,
+  PROP_EQUALITY_CONDITION_TYPE,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

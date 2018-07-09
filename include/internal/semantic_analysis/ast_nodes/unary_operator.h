@@ -13,7 +13,7 @@ G_DECLARE_DERIVABLE_TYPE (UnaryOperator, unary_operator, AST_NODES, UNARY_OPERAT
 
 struct _UnaryOperatorClass
 {
-    AstNodeClass parent_class;
+  AstNodeClass parent_class;
 };
 
 #define PROP_UNARY_OPERATOR_OPERAND "operand"

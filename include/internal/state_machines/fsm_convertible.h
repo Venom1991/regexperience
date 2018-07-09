@@ -13,10 +13,10 @@ G_DECLARE_INTERFACE (FsmConvertible, fsm_convertible, STATE_MACHINES, FSM_CONVER
 
 struct _FsmConvertibleInterface
 {
-    GTypeInterface parent_iface;
+  GTypeInterface parent_iface;
 
-    FsmConvertible * (*compute_epsilon_closures) (FsmConvertible  *self);
-    FsmModifiable  * (*construct_subset)         (FsmConvertible  *self);
+  FsmConvertible * (*compute_epsilon_closures) (FsmConvertible *self);
+  FsmModifiable  * (*construct_subset)         (FsmConvertible *self);
 };
 
 FsmConvertible *fsm_convertible_compute_epsilon_closures (FsmConvertible *self);

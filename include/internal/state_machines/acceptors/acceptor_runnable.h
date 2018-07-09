@@ -11,11 +11,11 @@ G_DECLARE_INTERFACE (AcceptorRunnable, acceptor_runnable, ACCEPTORS, ACCEPTOR_RU
 
 struct _AcceptorRunnableInterface
 {
-    GTypeInterface parent_iface;
+  GTypeInterface parent_iface;
 
-    void     (*run)        (AcceptorRunnable *self,
-                            const gchar      *input);
-    gboolean (*can_accept) (AcceptorRunnable *self);
+  void     (*run)        (AcceptorRunnable *self,
+                          const gchar      *input);
+  gboolean (*can_accept) (AcceptorRunnable *self);
 };
 
 void     acceptor_runnable_run        (AcceptorRunnable *self,

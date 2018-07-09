@@ -2,33 +2,33 @@
 
 typedef struct
 {
-    AstNode *left_operand;
-    AstNode *right_operand;
+  AstNode *left_operand;
+  AstNode *right_operand;
 } BinaryOperatorPrivate;
 
 enum
 {
-    PROP_LEFT_OPERAND = 1,
-    PROP_RIGHT_OPERAND = 2,
-    N_PROPERTIES
+  PROP_LEFT_OPERAND = 1,
+  PROP_RIGHT_OPERAND = 2,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static gboolean    binary_operator_is_valid     (AstNode       *self,
-                                                 GError       **error);
+static gboolean binary_operator_is_valid     (AstNode      *self,
+                                              GError      **error);
 
-static void        binary_operator_get_property (GObject       *object,
-                                                 guint          property_id,
-                                                 GValue        *value,
-                                                 GParamSpec    *pspec);
+static void     binary_operator_get_property (GObject      *object,
+                                              guint         property_id,
+                                              GValue       *value,
+                                              GParamSpec   *pspec);
 
-static void        binary_operator_set_property (GObject       *object,
-                                                 guint          property_id,
-                                                 const GValue  *value,
-                                                 GParamSpec    *pspec);
+static void     binary_operator_set_property (GObject      *object,
+                                              guint         property_id,
+                                              const GValue *value,
+                                              GParamSpec   *pspec);
 
-static void        binary_operator_dispose      (GObject       *object);
+static void     binary_operator_dispose      (GObject      *object);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (BinaryOperator, binary_operator, AST_NODES_TYPE_AST_NODE)
 

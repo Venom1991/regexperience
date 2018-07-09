@@ -5,15 +5,15 @@
 
 typedef struct
 {
-    StateTypeFlags  state_type_flags;
-    GPtrArray      *transitions;
+  StateTypeFlags  state_type_flags;
+  GPtrArray      *transitions;
 } StatePrivate;
 
 enum
 {
-    PROP_TYPE_FLAGS = 1,
-    PROP_TRANSITIONS,
-    N_PROPERTIES
+  PROP_TYPE_FLAGS = 1,
+  PROP_TRANSITIONS,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

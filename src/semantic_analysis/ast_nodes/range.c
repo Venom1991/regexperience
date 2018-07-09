@@ -8,7 +8,7 @@
 
 struct _Range
 {
-    BinaryOperator parent_instance;
+  BinaryOperator parent_instance;
 };
 
 static FsmConvertible *range_build_acceptor (AstNode  *self);

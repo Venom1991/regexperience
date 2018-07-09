@@ -3,19 +3,19 @@
 
 struct _Terminal
 {
-    Symbol parent_instance;
+  Symbol parent_instance;
 };
 
 typedef struct
 {
-    gchar     *concatenated_value;
-    GPtrArray *split_values;
+  gchar     *concatenated_value;
+  GPtrArray *split_values;
 } TerminalPrivate;
 
 enum
 {
-    PROP_VALUE = 1,
-    N_PROPERTIES
+  PROP_VALUE = 1,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

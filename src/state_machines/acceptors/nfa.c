@@ -7,7 +7,7 @@
 
 struct _Nfa
 {
-    Fsm parent_instance;
+  Fsm parent_instance;
 };
 
 static void            nfa_fsm_convertible_interface_init   (FsmConvertibleInterface *iface);

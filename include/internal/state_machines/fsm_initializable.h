@@ -11,7 +11,7 @@ G_DECLARE_INTERFACE (FsmInitializable, fsm_initializable, STATE_MACHINES, FSM_IN
 
 struct _FsmInitializableInterface
 {
-    GTypeInterface parent_iface;
+  GTypeInterface parent_iface;
 };
 
 #define PROP_FSM_INITIALIZABLE_ALL_STATES       "all-states"

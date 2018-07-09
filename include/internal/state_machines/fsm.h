@@ -14,7 +14,7 @@ G_DECLARE_DERIVABLE_TYPE (Fsm, fsm, STATE_MACHINES, FSM, GObject)
 
 struct _FsmClass
 {
-    GObjectClass parent_class;
+  GObjectClass parent_class;
 };
 
 GPtrArray *fsm_fetch_output_states_from_single   (State                          *input_state,

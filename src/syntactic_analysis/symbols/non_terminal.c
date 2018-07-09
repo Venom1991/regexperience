@@ -3,18 +3,18 @@
 
 struct _NonTerminal
 {
-    Symbol parent_instance;
+  Symbol parent_instance;
 };
 
 typedef struct
 {
-    GWeakRef value;
+  GWeakRef value;
 } NonTerminalPrivate;
 
 enum
 {
-    PROP_VALUE = 1,
-    N_PROPERTIES
+  PROP_VALUE = 1,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };

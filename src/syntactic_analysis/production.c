@@ -9,23 +9,23 @@
 
 struct _Production
 {
-    GObject parent_instance;
+  GObject parent_instance;
 };
 
 typedef struct
 {
-    gchar     *caption;
-    GPtrArray *rules;
-    GPtrArray *occurrences;
-    GPtrArray *first_set;
-    GPtrArray *follow_set;
+  gchar     *caption;
+  GPtrArray *rules;
+  GPtrArray *occurrences;
+  GPtrArray *first_set;
+  GPtrArray *follow_set;
 } ProductionPrivate;
 
 enum
 {
-    PROP_CAPTION = 1,
-    PROP_RULES,
-    N_PROPERTIES
+  PROP_CAPTION = 1,
+  PROP_RULES,
+  N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
