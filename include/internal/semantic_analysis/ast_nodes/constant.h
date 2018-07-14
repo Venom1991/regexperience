@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_CONSTANT_H
 #define REGEXPERIENCE_CONSTANT_H
 
-#include <glib-object.h>
-
 #include "ast_node.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

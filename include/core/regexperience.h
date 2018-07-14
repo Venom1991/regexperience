@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_H
 #define REGEXPERIENCE_H
 
-#include <glib-object.h>
-
 #include "errors.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

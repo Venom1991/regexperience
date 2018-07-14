@@ -531,7 +531,6 @@ grammar_mark_non_terminal_occurrences (Production *production,
     {
       Rule *rule = g_ptr_array_index (rules, i);
       DerivationItem *occurrence = NULL;
-
       g_autoptr (GPtrArray) symbols = NULL;
 
       g_object_get (rule,

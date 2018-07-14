@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_ALTERNATION_H
 #define REGEXPERIENCE_ALTERNATION_H
 
-#include <glib-object.h>
-
 #include "binary_operator.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

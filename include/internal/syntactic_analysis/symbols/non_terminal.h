@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_NON_TERMINAL_H
 #define REGEXPERIENCE_NON_TERMINAL_H
 
-#include <glib-object.h>
-
 #include "symbol.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_MEALY_TRANSITION_H
 #define REGEXPERIENCE_MEALY_TRANSITION_H
 
-#include <glib-object.h>
-
 #include "deterministic_transition.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

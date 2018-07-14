@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_QUANTIFICATION_C_H
 #define REGEXPERIENCE_QUANTIFICATION_C_H
 
-#include <glib-object.h>
-
 #include "unary_operator.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

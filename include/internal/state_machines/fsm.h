@@ -1,10 +1,10 @@
 #ifndef REGEXPERIENCE_FSM_H
 #define REGEXPERIENCE_FSM_H
 
-#include <glib-object.h>
-
 #include "state.h"
 #include "composite_state.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

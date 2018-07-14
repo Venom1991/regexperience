@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_NFA_H
 #define REGEXPERIENCE_NFA_H
 
-#include <glib-object.h>
-
 #include "internal/state_machines/fsm.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

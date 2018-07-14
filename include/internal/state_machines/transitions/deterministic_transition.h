@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_DETERMINISTIC_TRANSITION_H
 #define REGEXPERIENCE_DETERMINISTIC_TRANSITION_H
 
-#include <glib-object.h>
-
 #include "transition.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

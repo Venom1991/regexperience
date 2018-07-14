@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_COMPOSITE_STATE_H
 #define REGEXPERIENCE_COMPOSITE_STATE_H
 
-#include <glib-object.h>
-
 #include "state.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

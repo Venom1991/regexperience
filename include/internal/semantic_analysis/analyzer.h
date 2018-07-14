@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_ANALYZER_H
 #define REGEXPERIENCE_ANALYZER_H
 
-#include <glib-object.h>
-
 #include "ast_nodes/ast_node.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

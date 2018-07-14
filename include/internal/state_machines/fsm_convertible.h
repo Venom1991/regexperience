@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_FSM_CONVERTIBLE_H
 #define REGEXPERIENCE_FSM_CONVERTIBLE_H
 
-#include <glib-object.h>
-
 #include "fsm_modifiable.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

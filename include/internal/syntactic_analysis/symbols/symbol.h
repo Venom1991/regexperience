@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_SYMBOL_H
 #define REGEXPERIENCE_SYMBOL_H
 
-#include <glib-object.h>
-
 #include "internal/syntactic_analysis/production.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

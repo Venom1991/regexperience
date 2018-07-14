@@ -608,7 +608,7 @@ void parser_report_error (guint       token_position,
             case TOKEN_CATEGORY_STAR_QUANTIFICATION_OPERATOR:
             case TOKEN_CATEGORY_PLUS_QUANTIFICATION_OPERATOR:
             case TOKEN_CATEGORY_QUESTION_MARK_QUANTIFICATION_OPERATOR:
-              error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_DANGLING_QUANTIFICATION_METACHARACTER;
+              error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_DANGLING_QUANTIFICATION_OPERATOR;
               error_message = "Dangling quantification operator";
               break;
 

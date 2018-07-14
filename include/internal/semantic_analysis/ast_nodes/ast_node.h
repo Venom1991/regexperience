@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_AST_NODE_H
 #define REGEXPERIENCE_AST_NODE_H
 
-#include <glib-object.h>
-
 #include "internal/state_machines/fsm_convertible.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

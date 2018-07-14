@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_RANGE_H
 #define REGEXPERIENCE_RANGE_H
 
-#include <glib-object.h>
-
 #include "binary_operator.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 

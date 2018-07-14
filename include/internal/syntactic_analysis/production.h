@@ -1,9 +1,9 @@
 #ifndef REGEXPERIENCE_PRODUCTION_H
 #define REGEXPERIENCE_PRODUCTION_H
 
-#include <glib-object.h>
-
 #include "derivation_item.h"
+
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
