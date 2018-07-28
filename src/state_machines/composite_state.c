@@ -55,7 +55,7 @@ composite_state_class_init (CompositeStateClass *klass)
                         "Composed from states",
                         "States which serve as a basis for constructing the composite state.",
                         G_TYPE_PTR_ARRAY,
-                        G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
+                        G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
 
   obj_properties[PROP_RESOLVE_TYPE_FLAGS] =
     g_param_spec_uint (PROP_COMPOSITE_STATE_RESOLVE_TYPE_FLAGS,
@@ -64,7 +64,7 @@ composite_state_class_init (CompositeStateClass *klass)
                        0,
                        G_MAXUINT32,
                        COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_ALL,
-                       G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
+                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

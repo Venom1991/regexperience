@@ -56,7 +56,7 @@ constant_class_init (ConstantClass *klass)
                        0,
                        G_MAXINT8,
                        0,
-                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   obj_properties[PROP_POSITION] =
     g_param_spec_uint (PROP_CONSTANT_POSITION,
@@ -65,7 +65,7 @@ constant_class_init (ConstantClass *klass)
                        0,
                        G_MAXUINT32,
                        0,
-                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

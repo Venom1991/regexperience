@@ -50,14 +50,14 @@ derivation_item_class_init (DerivationItemClass *klass)
                          "Left-hand side",
                          "Production representing the left-hand side of the derivation item.",
                          SYNTACTIC_ANALYSIS_TYPE_PRODUCTION,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                         G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   obj_properties[PROP_RIGHT_HAND_SIDE] =
     g_param_spec_object (PROP_DERIVATION_ITEM_RIGHT_HAND_SIDE,
                          "Right-hand side",
                          "Rule representing the right-hand side of the derivation item.",
                          SYNTACTIC_ANALYSIS_TYPE_RULE,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                         G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

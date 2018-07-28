@@ -55,7 +55,7 @@ rule_class_init (RuleClass *klass)
                         "Symbols",
                         "Array of terminal and non-terminal symbols (any combination of the two).",
                         G_TYPE_PTR_ARRAY,
-                        G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                        G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   obj_properties[PROP_FIRST_SET] =
     g_param_spec_boxed (PROP_RULE_FIRST_SET,

@@ -60,7 +60,7 @@ terminal_class_init (TerminalClass *klass)
                          "Value",
                          "Textual content of the terminal symbol, can be a delimited string.",
                          NULL,
-                         G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
+                         G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

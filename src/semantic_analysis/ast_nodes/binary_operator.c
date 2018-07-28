@@ -49,14 +49,14 @@ binary_operator_class_init (BinaryOperatorClass *klass)
                          "Left operand",
                          "Operand representing the left side of the operation.",
                          AST_NODES_TYPE_AST_NODE,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                         G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   obj_properties[PROP_RIGHT_OPERAND] =
     g_param_spec_object (PROP_BINARY_OPERATOR_RIGHT_OPERAND,
                          "Right operand",
                          "Operand representing the right side of the operation.",
                          AST_NODES_TYPE_AST_NODE,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                         G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

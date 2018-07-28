@@ -1,5 +1,3 @@
-#include <math.h>
-
 #include "internal/syntactic_analysis/parser.h"
 #include "internal/syntactic_analysis/grammar.h"
 #include "internal/syntactic_analysis/production.h"
@@ -12,6 +10,8 @@
 #include "internal/lexical_analysis/lexeme.h"
 #include "internal/common/helpers.h"
 #include "core/errors.h"
+
+#include <math.h>
 
 struct _Parser
 {
@@ -659,12 +659,7 @@ parser_token_exists_in_all_tokens (GPtrArray      *all_tokens,
 {
   g_return_val_if_fail (found_token != NULL, FALSE);
 
-  guint i = starting_position;
-
-  if (starting_position == all_tokens->len)
-    i--;
-
-  for (; i != G_MAXUINT; --i)
+  for (guint i = starting_position; i != G_MAXUINT; --i)
     {
       Token *token = g_ptr_array_index (all_tokens, i);
       TokenCategory token_category = TOKEN_CATEGORY_UNDEFINED;

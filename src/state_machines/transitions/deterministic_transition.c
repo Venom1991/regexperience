@@ -49,7 +49,7 @@ deterministic_transition_class_init (DeterministicTransitionClass *klass)
                          "Output state",
                          "Output state in which a DFA could transition itself.",
                          STATE_MACHINES_TYPE_STATE,
-                         G_PARAM_READWRITE);
+                         G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

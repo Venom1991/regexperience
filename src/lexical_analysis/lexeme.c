@@ -50,7 +50,7 @@ lexeme_class_init (LexemeClass *klass)
                         "Content",
                         "Textual content of the lexeme.",
                         G_TYPE_GSTRING,
-                        G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                        G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   obj_properties[PROP_START_POSITION] =
     g_param_spec_uint (PROP_LEXEME_START_POSITION,
@@ -59,7 +59,7 @@ lexeme_class_init (LexemeClass *klass)
                        0,
                        G_MAXUINT32,
                        0,
-                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   obj_properties[PROP_END_POSITION] =
     g_param_spec_uint (PROP_LEXEME_END_POSITION,
@@ -68,7 +68,7 @@ lexeme_class_init (LexemeClass *klass)
                        0,
                        G_MAXUINT32,
                        0,
-                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

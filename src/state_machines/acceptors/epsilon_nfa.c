@@ -462,8 +462,8 @@ mark_input_state_as_final_if_needed (State     *input_state,
               input_state_type_flags &= ~default_flag;
 
               g_object_set (input_state,
-                            PROP_STATE_TYPE_FLAGS,
-                            input_state_type_flags, NULL);
+                            PROP_STATE_TYPE_FLAGS, input_state_type_flags,
+                            NULL);
 
               return;
             }

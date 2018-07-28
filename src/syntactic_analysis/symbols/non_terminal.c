@@ -56,7 +56,7 @@ non_terminal_class_init (NonTerminalClass *klass)
                          "Value",
                          "Production whose rules can be used to rewrite the non-terminal symbol.",
                          SYNTACTIC_ANALYSIS_TYPE_PRODUCTION,
-                         G_PARAM_WRITABLE);
+                         G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

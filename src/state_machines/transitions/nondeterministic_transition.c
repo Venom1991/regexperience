@@ -72,7 +72,7 @@ nondeterministic_transition_class_init (NondeterministicTransitionClass *klass)
                         "Output states",
                         "Output states (one or more) in which an NFA or an epsilon NFA could transition itself.",
                         G_TYPE_PTR_ARRAY,
-                        G_PARAM_READWRITE);
+                        G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

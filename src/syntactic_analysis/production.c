@@ -64,7 +64,7 @@ production_class_init (ProductionClass *klass)
                          "Caption",
                          "Name of the production.",
                          NULL,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                         G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   obj_properties[PROP_RULES] =
     g_param_spec_boxed (PROP_PRODUCTION_RULES,
@@ -111,81 +111,85 @@ production_compute_first_set (Production *self)
 
   if (*production_first_set == NULL)
     {
-      *production_first_set = g_ptr_array_new ();
-
       GPtrArray *rules = priv->rules;
-      GEqualFunc symbol_equal_func = (GEqualFunc) symbol_is_equal;
 
-      for (guint i = 0; i < rules->len; ++i)
+      if (g_ptr_array_has_items (rules))
         {
-          Rule *rule = g_ptr_array_index (rules, i);
-          g_autoptr (GPtrArray) symbols = NULL;
-          g_autoptr (GPtrArray) rule_first_set = g_ptr_array_new_with_free_func (g_object_unref);
-          guint epsilon_derivable_symbols_count = 0;
+          GEqualFunc symbol_equal_func = (GEqualFunc) symbol_is_equal;
 
-          g_object_get (rule,
-                        PROP_RULE_SYMBOLS, &symbols,
-                        NULL);
+          *production_first_set = g_ptr_array_new ();
 
-          g_assert (g_ptr_array_has_items (symbols));
-
-          for (guint j = 0; j < symbols->len; ++j)
+          for (guint i = 0; i < rules->len; ++i)
             {
-              Symbol *symbol = g_ptr_array_index (symbols, j);
-              gboolean symbol_can_derive_epsilon = FALSE;
+              Rule *rule = g_ptr_array_index (rules, i);
+              g_autoptr (GPtrArray) symbols = NULL;
+              g_autoptr (GPtrArray) rule_first_set = g_ptr_array_new_with_free_func (g_object_unref);
+              guint epsilon_derivable_symbols_count = 0;
 
-              if (SYMBOLS_IS_TERMINAL (symbol))
+              g_object_get (rule,
+                            PROP_RULE_SYMBOLS, &symbols,
+                            NULL);
+
+              g_assert (g_ptr_array_has_items (symbols));
+
+              for (guint j = 0; j < symbols->len; ++j)
                 {
-                  /* Simply adding the terminal symbol to the current rule's first set. */
-                  g_ptr_array_add_if_not_exists (rule_first_set,
-                                                 symbol,
-                                                 symbol_equal_func,
-                                                 g_object_ref);
-                }
-              else if (SYMBOLS_IS_NON_TERMINAL (symbol))
-                {
-                  /* Expanding the current rule's first set with all of the members (without epsilon)
-                   * belonging to the non-terminal symbol's underlying production's first set.
+                  Symbol *symbol = g_ptr_array_index (symbols, j);
+                  gboolean symbol_can_derive_epsilon = FALSE;
+
+                  if (SYMBOLS_IS_TERMINAL (symbol))
+                    {
+                      /* Simply adding the terminal symbol to the current rule's first set. */
+                      g_ptr_array_add_if_not_exists (rule_first_set,
+                                                     symbol,
+                                                     symbol_equal_func,
+                                                     g_object_ref);
+                    }
+                  else if (SYMBOLS_IS_NON_TERMINAL (symbol))
+                    {
+                      /* Expanding the current rule's first set with all of the members (without epsilon)
+                       * belonging to the non-terminal symbol's underlying production's first set.
+                       */
+                      g_autoptr (GPtrArray) non_terminal_first_set =
+                          production_fetch_non_terminal_first_set (symbol,
+                                                                   &symbol_can_derive_epsilon);
+
+                      g_ptr_array_add_range_distinct (rule_first_set,
+                                                      non_terminal_first_set,
+                                                      symbol_equal_func,
+                                                      g_object_ref);
+                    }
+
+                  /* Breaking in case epsilon was not found as a member of the
+                   * non-terminal symbol's underlying production's first set.
                    */
-                  g_autoptr (GPtrArray) non_terminal_first_set =
-                    production_fetch_non_terminal_first_set (symbol,
-                                                             &symbol_can_derive_epsilon);
+                  if (!symbol_can_derive_epsilon)
+                    break;
 
-                  g_ptr_array_add_range_distinct (rule_first_set,
-                                                  non_terminal_first_set,
-                                                  symbol_equal_func,
-                                                  g_object_ref);
+                  epsilon_derivable_symbols_count++;
                 }
 
-              /* Breaking in case epsilon was not found as a member of the
-               * non-terminal symbol's underlying production's first set.
+              /* Adding epsilon to the current rule's first if all of its non-terminal
+               * members can derive epsilon. This means that the rule is itself
+               * completely transparent.
                */
-              if (!symbol_can_derive_epsilon)
-                break;
+              if (epsilon_derivable_symbols_count == symbols->len)
+                {
+                  Symbol *epsilon = terminal_new (PROP_SYMBOL_VALUE, EPSILON);
 
-              epsilon_derivable_symbols_count++;
+                  g_ptr_array_add_if_not_exists (rule_first_set,
+                                                 epsilon,
+                                                 symbol_equal_func,
+                                                 NULL);
+                }
+
+              g_object_set (rule,
+                            PROP_RULE_FIRST_SET, rule_first_set,
+                            NULL);
+              g_ptr_array_add_range (*production_first_set,
+                                     rule_first_set,
+                                     NULL);
             }
-
-          /* Adding epsilon to the current rule's first if all of its non-terminal
-           * members can derive epsilon. This means that the rule is itself
-           * completely transparent.
-           */
-          if (epsilon_derivable_symbols_count == symbols->len)
-            {
-              Symbol *epsilon = terminal_new (PROP_SYMBOL_VALUE, EPSILON);
-
-              g_ptr_array_add_if_not_exists (rule_first_set,
-                                             epsilon,
-                                             symbol_equal_func,
-                                             NULL);
-            }
-
-          g_object_set (rule,
-                        PROP_RULE_FIRST_SET, rule_first_set,
-                        NULL);
-          g_ptr_array_add_range (*production_first_set,
-                                 rule_first_set,
-                                 NULL);
         }
     }
 
@@ -202,13 +206,14 @@ production_compute_follow_set (Production *self)
 
   if (*production_follow_set == NULL)
     {
-      *production_follow_set = g_ptr_array_new_with_free_func (g_object_unref);
-
       GPtrArray *occurrences = priv->occurrences;
-      GEqualFunc symbol_equal_func = (GEqualFunc) symbol_is_equal;
 
       if (g_ptr_array_has_items (occurrences))
         {
+          GEqualFunc symbol_equal_func = (GEqualFunc) symbol_is_equal;
+
+          *production_follow_set = g_ptr_array_new_with_free_func (g_object_unref);
+
           for (guint i = 0; i < occurrences->len; ++i)
             {
               DerivationItem *occurrence = g_ptr_array_index (occurrences, i);

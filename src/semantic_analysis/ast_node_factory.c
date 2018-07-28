@@ -50,6 +50,38 @@ create_constant (GNode *cst_context)
                        PROP_CONSTANT_POSITION, (lexeme_start_position + lexeme_end_position) / 2);
 }
 
+void
+initialized_quantification_bounds (OperatorType             operator_type,
+                                   QuantificationBoundType *lower_bound,
+                                   QuantificationBoundType *upper_bound)
+{
+  g_return_if_fail (lower_bound != NULL);
+  g_return_if_fail (upper_bound != NULL);
+
+  switch (operator_type)
+    {
+    case OPERATOR_TYPE_STAR_QUANTIFICATION:
+      *lower_bound = QUANTIFICATION_BOUND_TYPE_ZERO;
+      *upper_bound = QUANTIFICATION_BOUND_TYPE_INFINITY;
+      break;
+
+    case OPERATOR_TYPE_PLUS_QUANTIFICATION:
+      *lower_bound = QUANTIFICATION_BOUND_TYPE_ONE;
+      *upper_bound = QUANTIFICATION_BOUND_TYPE_INFINITY;
+      break;
+
+    case OPERATOR_TYPE_QUESTION_MARK_QUANTIFICATION:
+      *lower_bound = QUANTIFICATION_BOUND_TYPE_ZERO;
+      *upper_bound = QUANTIFICATION_BOUND_TYPE_ONE;
+      break;
+
+    default:
+      *lower_bound = QUANTIFICATION_BOUND_TYPE_UNDEFINED;
+      *upper_bound = QUANTIFICATION_BOUND_TYPE_UNDEFINED;
+      break;
+    }
+}
+
 AstNode *
 create_unary_operator (OperatorType  operator_type,
                        AstNode      *operand)
@@ -59,19 +91,20 @@ create_unary_operator (OperatorType  operator_type,
   switch (operator_type)
     {
     case OPERATOR_TYPE_STAR_QUANTIFICATION:
-      return quantification_new (PROP_UNARY_OPERATOR_OPERAND, operand,
-                                 PROP_QUANTIFICATION_LOWER_BOUND, QUANTIFICATION_BOUND_TYPE_ZERO,
-                                 PROP_QUANTIFICATION_UPPER_BOUND, QUANTIFICATION_BOUND_TYPE_INFINITY);
-
     case OPERATOR_TYPE_PLUS_QUANTIFICATION:
-      return quantification_new (PROP_UNARY_OPERATOR_OPERAND, operand,
-                                 PROP_QUANTIFICATION_LOWER_BOUND, QUANTIFICATION_BOUND_TYPE_ONE,
-                                 PROP_QUANTIFICATION_UPPER_BOUND, QUANTIFICATION_BOUND_TYPE_INFINITY);
-
     case OPERATOR_TYPE_QUESTION_MARK_QUANTIFICATION:
-      return quantification_new (PROP_UNARY_OPERATOR_OPERAND, operand,
-                                 PROP_QUANTIFICATION_LOWER_BOUND, QUANTIFICATION_BOUND_TYPE_ZERO,
-                                 PROP_QUANTIFICATION_UPPER_BOUND, QUANTIFICATION_BOUND_TYPE_ONE);
+      {
+        QuantificationBoundType lower_bound = QUANTIFICATION_BOUND_TYPE_UNDEFINED;
+        QuantificationBoundType upper_bound = QUANTIFICATION_BOUND_TYPE_UNDEFINED;
+
+        initialized_quantification_bounds (operator_type,
+                                           &lower_bound,
+                                           &upper_bound);
+
+        return quantification_new (PROP_UNARY_OPERATOR_OPERAND, operand,
+                                   PROP_QUANTIFICATION_LOWER_BOUND, lower_bound,
+                                   PROP_QUANTIFICATION_UPPER_BOUND, upper_bound);
+      }
 
     default:
       return NULL;

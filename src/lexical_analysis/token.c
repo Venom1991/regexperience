@@ -51,14 +51,14 @@ token_class_init (TokenClass *klass)
                        TOKEN_CATEGORY_UNDEFINED,
                        TOKEN_CATEGORY_N_CATEGORIES - 1,
                        TOKEN_CATEGORY_UNDEFINED,
-                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   obj_properties[PROP_LEXEME] =
     g_param_spec_object (PROP_TOKEN_LEXEME,
                          "Lexeme",
                          "Lexeme associated with the token.",
                          LEXICAL_ANALYSIS_TYPE_LEXEME,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                         G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

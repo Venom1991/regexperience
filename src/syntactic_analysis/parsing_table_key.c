@@ -1,7 +1,7 @@
-#include <internal/syntactic_analysis/symbols/terminal.h>
 #include "internal/syntactic_analysis/parsing_table_key.h"
 #include "internal/syntactic_analysis/production.h"
 #include "internal/syntactic_analysis/symbols/symbol.h"
+#include "internal/syntactic_analysis/symbols/terminal.h"
 
 struct _ParsingTableKey
 {
@@ -49,14 +49,14 @@ parsing_table_key_class_init (ParsingTableKeyClass *klass)
                          "Production",
                          "Production representing the first dimension of any given parsing table entry.",
                          SYNTACTIC_ANALYSIS_TYPE_PRODUCTION,
-                         G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
+                         G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
 
   obj_properties[PROP_TERMINAL] =
     g_param_spec_object (PROP_PARSING_TABLE_KEY_TERMINAL,
                          "Terminal",
                          "Terminal symbol representing the second dimension of any given parsing table entry.",
                          SYMBOLS_TYPE_SYMBOL,
-                         G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
+                         G_PARAM_CONSTRUCT_ONLY | G_PARAM_WRITABLE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

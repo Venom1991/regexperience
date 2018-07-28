@@ -47,7 +47,7 @@ unary_operator_class_init (UnaryOperatorClass *klass)
                            "Operand",
                            "Sole operand of the operation.",
                            AST_NODES_TYPE_AST_NODE,
-                           G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                           G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

@@ -47,7 +47,7 @@ transition_class_init (TransitionClass *klass)
                        0,
                        G_MAXINT8,
                        0,
-                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   obj_properties[PROP_REQUIRES_INPUT] =
     g_param_spec_boolean (PROP_TRANSITION_REQUIRES_INPUT,
@@ -55,7 +55,7 @@ transition_class_init (TransitionClass *klass)
                           "Describes whether or not an actual input is required in order for"
                               "the transition to occur.",
                           TRUE,
-                          G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                          G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   obj_properties[PROP_EQUALITY_CONDITION_TYPE] =
     g_param_spec_uint (PROP_TRANSITION_EQUALITY_CONDITION_TYPE,
@@ -64,7 +64,7 @@ transition_class_init (TransitionClass *klass)
                        EQUALITY_CONDITION_TYPE_UNDEFINED,
                        EQUALITY_CONDITION_TYPE_NOT_EQUAL,
                        EQUALITY_CONDITION_TYPE_EQUAL,
-                       G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
