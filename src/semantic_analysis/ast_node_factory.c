@@ -51,9 +51,9 @@ create_constant (GNode *cst_context)
 }
 
 void
-initialized_quantification_bounds (OperatorType             operator_type,
-                                   QuantificationBoundType *lower_bound,
-                                   QuantificationBoundType *upper_bound)
+initialize_quantification_bounds (OperatorType             operator_type,
+                                  QuantificationBoundType *lower_bound,
+                                  QuantificationBoundType *upper_bound)
 {
   g_return_if_fail (lower_bound != NULL);
   g_return_if_fail (upper_bound != NULL);
@@ -97,9 +97,9 @@ create_unary_operator (OperatorType  operator_type,
         QuantificationBoundType lower_bound = QUANTIFICATION_BOUND_TYPE_UNDEFINED;
         QuantificationBoundType upper_bound = QUANTIFICATION_BOUND_TYPE_UNDEFINED;
 
-        initialized_quantification_bounds (operator_type,
-                                           &lower_bound,
-                                           &upper_bound);
+        initialize_quantification_bounds (operator_type,
+                                          &lower_bound,
+                                          &upper_bound);
 
         return quantification_new (PROP_UNARY_OPERATOR_OPERAND, operand,
                                    PROP_QUANTIFICATION_LOWER_BOUND, lower_bound,
