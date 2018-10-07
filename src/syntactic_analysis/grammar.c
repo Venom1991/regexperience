@@ -252,6 +252,7 @@ grammar_define_productions (GPtrArray **productions,
       (gchar*[]) { ELEMENTARY_EXPRESSION },
       (gchar*[]) { GROUP, NULL                             },
       (gchar*[]) { BRACKET_EXPRESSION, NULL                },
+      (gchar*[]) { EMPTY_EXPRESSION, NULL                  },
       (gchar*[]) { UPPER_CASE_LETTER, NULL                 },
       (gchar*[]) { LOWER_CASE_LETTER, NULL                 },
       (gchar*[]) { DIGIT, NULL                             },
@@ -391,6 +392,12 @@ grammar_define_productions (GPtrArray **productions,
     {
       (gchar *[]) { METACHARACTER_ESCAPE },
       (gchar *[]) { "\\", NULL },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar *[]) { EMPTY_EXPRESSION },
+      (gchar *[]) { EMPTY_INPUT, NULL },
       NULL
     }
   };

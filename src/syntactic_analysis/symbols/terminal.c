@@ -101,12 +101,20 @@ terminal_is_match (Symbol          *self,
       TerminalPrivate *priv = terminal_get_instance_private (SYMBOLS_TERMINAL (self));
       const gchar *value_as_string = (const gchar *) value;
       GPtrArray *self_split_values = priv->split_values;
-      GCompareFunc terminal_compare_func = g_compare_strings;
-      gpointer split_value = g_ptr_array_bsearch (self_split_values,
-                                                  terminal_compare_func,
-                                                  &value_as_string);
 
-      return split_value != NULL;
+      if (g_ptr_array_has_items (self_split_values))
+        {
+          GCompareFunc terminal_compare_func = g_compare_strings;
+          gpointer split_value = g_ptr_array_bsearch (self_split_values,
+                                                      terminal_compare_func,
+                                                      &value_as_string);
+
+          return split_value != NULL;
+        }
+      else
+        {
+          return g_strcmp0 (value_as_string, EMPTY_INPUT) == 0;
+        }
     }
 
   return FALSE;
@@ -146,14 +154,17 @@ terminal_constructed (GObject *object)
   g_auto (GStrv) split_values_as_vector = g_strsplit (concatenated_value, DELIMITER, -1);
   guint split_values_length = g_strv_length (split_values_as_vector);
 
-  for (guint i = 0; i < split_values_length; ++i)
+  if (split_values_length > 0)
     {
-      gchar *current_split_value = g_strdup (split_values_as_vector[i]);
+      for (guint i = 0; i < split_values_length; ++i)
+        {
+          gchar *current_split_value = g_strdup (split_values_as_vector[i]);
 
-      g_ptr_array_add (split_values, current_split_value);
+          g_ptr_array_add (split_values, current_split_value);
+        }
+
+      g_ptr_array_sort (split_values, terminal_compare_func);
     }
-
-  g_ptr_array_sort (split_values, terminal_compare_func);
 
   G_OBJECT_CLASS (terminal_parent_class)->constructed (object);
 }

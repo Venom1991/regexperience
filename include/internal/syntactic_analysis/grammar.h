@@ -50,6 +50,7 @@ G_DECLARE_FINAL_TYPE (Grammar, grammar, SYNTACTIC_ANALYSIS, GRAMMAR, GObject)
 #define BRACKET_EXPRESSION_METACHARACTER "bracket-expression-metacharacter"
 #define ANY_CHARACTER                    "any-character"
 #define METACHARACTER_ESCAPE             "metacharacter-escape"
+#define EMPTY_EXPRESSION                 "empty-expression"
 
 G_END_DECLS
 

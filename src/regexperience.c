@@ -47,7 +47,7 @@ regexperience_init (Regexperience *self)
 }
 
 void regexperience_compile (Regexperience  *self,
-                            const gchar    *regular_expression,
+                            const gchar    *expression,
                             GError        **error)
 {
   g_return_if_fail (CORE_IS_REGEXPERIENCE (self));
@@ -60,7 +60,7 @@ void regexperience_compile (Regexperience  *self,
   GError *temporary_error = NULL;
 
   g_autoptr (GPtrArray) tokens = lexer_tokenize (lexer,
-                                                 regular_expression,
+                                                 expression,
                                                  &temporary_error);
 
   if (temporary_error != NULL)
@@ -123,7 +123,7 @@ gboolean regexperience_match (Regexperience  *self,
 
   if (acceptor == NULL)
     {
-      error_message = "The regular expression must be compiled beforehand";
+      error_message = "The expression must be compiled beforehand";
       error_code = CORE_REGEXPERIENCE_ERROR_REGULAR_EXPRESSION_NOT_COMPILED;
     }
   else if (input == NULL)

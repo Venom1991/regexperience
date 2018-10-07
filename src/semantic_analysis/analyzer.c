@@ -212,6 +212,7 @@ analyzer_is_constant (GNode  *cst_root,
                          BRACKET_EXPRESSION_METACHARACTER,
                          ANY_CHARACTER,
                          METACHARACTER_ESCAPE,
+                         EMPTY_EXPRESSION,
                          NULL))
     {
       g_autoptr (GPtrArray) cst_children =

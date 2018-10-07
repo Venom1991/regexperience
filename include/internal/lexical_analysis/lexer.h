@@ -11,7 +11,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (Lexer, lexer, LEXICAL_ANALYSIS, LEXER, GObject)
 
 GPtrArray *lexer_tokenize (Lexer        *self,
-                           const gchar  *regular_expression,
+                           const gchar  *expression,
                            GError      **error);
 
 G_END_DECLS

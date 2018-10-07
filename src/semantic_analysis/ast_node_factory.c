@@ -1,5 +1,5 @@
 #include "internal/semantic_analysis/ast_node_factory.h"
-#include "internal/semantic_analysis/ast_nodes/constant.h"
+#include "internal/semantic_analysis/ast_nodes/empty.h"
 #include "internal/semantic_analysis/ast_nodes/alternation.h"
 #include "internal/semantic_analysis/ast_nodes/concatenation.h"
 #include "internal/semantic_analysis/ast_nodes/quantification.h"
@@ -15,39 +15,50 @@ create_constant (GNode *cst_context)
 
   Token *token = LEXICAL_ANALYSIS_TOKEN (cst_context->data);
   TokenCategory token_category = TOKEN_CATEGORY_UNDEFINED;
-  g_autoptr (Lexeme) lexeme = NULL;
-  g_autoptr (GString) lexeme_content = NULL;
-  const guint acceptable_lexeme_content_length = 1;
-  guint lexeme_start_position = 0;
-  guint lexeme_end_position = 0;
-  gchar expected_character = 0;
 
   g_object_get (token,
                 PROP_TOKEN_CATEGORY, &token_category,
-                PROP_TOKEN_LEXEME, &lexeme,
-                NULL);
-  g_object_get (lexeme,
-                PROP_LEXEME_CONTENT, &lexeme_content,
-                PROP_LEXEME_START_POSITION, &lexeme_start_position,
-                PROP_LEXEME_END_POSITION, &lexeme_end_position,
                 NULL);
 
-  g_return_val_if_fail (lexeme_content->len == acceptable_lexeme_content_length, NULL);
-
-  switch (token_category)
+  if (token_category == TOKEN_CATEGORY_EMPTY_EXPRESSION_MARKER)
     {
-    case TOKEN_CATEGORY_ANY_CHARACTER:
-      expected_character = ANY;
-      break;
-    case TOKEN_CATEGORY_ORDINARY_CHARACTER:
-      expected_character = lexeme_content->str[0];
-      break;
-    default:
-      g_return_val_if_reached (NULL);
+      return empty_new ();
     }
+  else
+    {
+      g_autoptr (Lexeme) lexeme = NULL;
+      g_autoptr (GString) lexeme_content = NULL;
+      const guint acceptable_lexeme_content_length = 1;
+      guint lexeme_start_position = 0;
+      guint lexeme_end_position = 0;
+      gchar expected_character = 0;
 
-  return constant_new (PROP_CONSTANT_VALUE, expected_character,
-                       PROP_CONSTANT_POSITION, (lexeme_start_position + lexeme_end_position) / 2);
+      g_object_get (token,
+                    PROP_TOKEN_LEXEME, &lexeme,
+                    NULL);
+      g_object_get (lexeme,
+                    PROP_LEXEME_CONTENT, &lexeme_content,
+                    PROP_LEXEME_START_POSITION, &lexeme_start_position,
+                    PROP_LEXEME_END_POSITION, &lexeme_end_position,
+                    NULL);
+
+      g_return_val_if_fail (lexeme_content->len == acceptable_lexeme_content_length, NULL);
+
+      switch (token_category)
+        {
+        case TOKEN_CATEGORY_ANY_CHARACTER:
+          expected_character = ANY;
+          break;
+        case TOKEN_CATEGORY_ORDINARY_CHARACTER:
+          expected_character = lexeme_content->str[0];
+          break;
+        default:
+          g_return_val_if_reached (NULL);
+        }
+
+      return constant_new (PROP_CONSTANT_VALUE, expected_character,
+                           PROP_CONSTANT_POSITION, (lexeme_start_position + lexeme_end_position) / 2);
+    }
 }
 
 void
@@ -107,7 +118,7 @@ create_unary_operator (OperatorType  operator_type,
       }
 
     default:
-      return NULL;
+      g_return_val_if_reached (NULL);
     }
 }
 
@@ -134,6 +145,6 @@ create_binary_operator (OperatorType  operator_type,
                         PROP_BINARY_OPERATOR_RIGHT_OPERAND, right_operand);
 
     default:
-      return NULL;
+      g_return_val_if_reached (NULL);
     }
 }

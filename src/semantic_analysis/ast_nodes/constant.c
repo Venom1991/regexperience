@@ -4,11 +4,6 @@
 #include "internal/state_machines/transitions/transition_factory.h"
 #include "internal/common/helpers.h"
 
-struct _Constant
-{
-  AstNode parent_instance;
-};
-
 typedef struct
 {
   gchar value;

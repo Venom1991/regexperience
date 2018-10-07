@@ -5,6 +5,7 @@
 
 #define DELIMITER    "-|-"
 #define END_OF_INPUT "EOI"
+#define EMPTY_INPUT  ""
 
 typedef gpointer (*GRefFunc) (gpointer data);
 

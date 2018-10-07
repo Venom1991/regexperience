@@ -21,6 +21,7 @@
 <question-mark-quantification>     ::= "?"
 <elementary-expression>            ::= <group>
                                     |  <bracket-expression>
+                                    |  <empty-expression>
                                     |  <upper-case-letter>
                                     |  <lower-case-letter>
                                     |  <digit>
@@ -60,3 +61,4 @@
 <bracket-expression-metacharacter> ::= "-" | "]"
 <any-character>                    ::= "."
 <metacharacter-escape>             ::= "\"
+<empty-expression>                 ::= ""

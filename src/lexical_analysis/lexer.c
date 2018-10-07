@@ -25,16 +25,17 @@ typedef struct
   TokenCategory  token_category;
 } MealyMapping;
 
-static Token            *lexer_create_token            (TokenCategory  category,
+static void              lexer_create_token            (TokenCategory  category,
                                                         gchar         *content,
-                                                        guint         *character_position);
+                                                        guint         *character_position,
+                                                        GPtrArray     *tokens);
 
 static FsmInitializable *lexer_build_transducer        (void);
 
 static GPtrArray        *lexer_create_transitions_from (MealyMapping  *mappings,
                                                         gsize          mappings_size);
 
-static void              lexer_report_error            (const gchar   *regular_expression,
+static void              lexer_report_error            (const gchar   *expression,
                                                         GError       **error);
 
 static void              lexer_dispose                 (GObject       *object);
@@ -66,7 +67,7 @@ lexer_init (Lexer *self)
 
 GPtrArray *
 lexer_tokenize (Lexer        *self,
-                const gchar  *regular_expression,
+                const gchar  *expression,
                 GError      **error)
 {
   g_return_val_if_fail (LEXICAL_ANALYSIS_IS_LEXER (self), NULL);
@@ -78,7 +79,7 @@ lexer_tokenize (Lexer        *self,
   guint character_position = 1;
   GError *temporary_error = NULL;
 
-  lexer_report_error (regular_expression, &temporary_error);
+  lexer_report_error (expression, &temporary_error);
 
   if (temporary_error != NULL)
     {
@@ -89,52 +90,72 @@ lexer_tokenize (Lexer        *self,
 
   tokens = g_ptr_array_new_with_free_func (g_object_unref);
 
-  transducer_runnable_reset (transducer);
-
-  while (TRUE)
+  if (*expression != '\0')
     {
-      gchar current_character = *regular_expression++;
+      transducer_runnable_reset (transducer);
 
-      if (current_character == '\0')
-        break;
+      while (TRUE)
+        {
+          gchar current_character = *expression++;
 
-      TokenCategory category = (TokenCategory) GPOINTER_TO_INT (transducer_runnable_run (transducer,
-                                                                                         current_character));
-      g_autofree gchar *content = g_strdup_printf ("%c", current_character);
-      Token *current_token = lexer_create_token (category,
-                                                 content,
-                                                 &character_position);
+          if (current_character == '\0')
+            break;
 
-      g_ptr_array_add (tokens, current_token);
+          TokenCategory category = (TokenCategory) GPOINTER_TO_INT (transducer_runnable_run (transducer,
+                                                                                             current_character));
+          g_autofree gchar *content = g_strdup_printf ("%c", current_character);
+          lexer_create_token (category,
+                              content,
+                              &character_position,
+                              tokens);
+        }
+    }
+  else
+    {
+      lexer_create_token (TOKEN_CATEGORY_EMPTY_EXPRESSION_MARKER,
+                          EMPTY_INPUT,
+                          NULL,
+                          tokens);
     }
 
   /* Appending the end of input marker. */
-  Token *end_of_input_marker = lexer_create_token (TOKEN_CATEGORY_END_OF_INPUT_MARKER,
-                                                   END_OF_INPUT,
-                                                   &character_position);
-
-  g_ptr_array_add (tokens, end_of_input_marker);
+  lexer_create_token (TOKEN_CATEGORY_END_OF_INPUT_MARKER,
+                      END_OF_INPUT,
+                      &character_position,
+                      tokens);
 
   return tokens;
 }
 
-static Token *
+static void
 lexer_create_token (TokenCategory  category,
                     gchar         *content,
-                    guint         *character_position)
+                    guint         *character_position,
+                    GPtrArray     *tokens)
 {
+  g_return_if_fail (tokens != NULL);
+
   g_autoptr (Lexeme) lexeme = NULL;
   g_autoptr (GString) lexeme_content = g_string_new (content);
+  guint lexeme_start_position = 0;
+  guint lexeme_end_position = 0;
   gsize lexeme_content_length = lexeme_content->len;
 
+  if (lexeme_content_length > 0)
+    {
+      lexeme_start_position = *character_position;
+      lexeme_end_position = (guint) (*character_position + (lexeme_content_length - 1));
+      *character_position += lexeme_content_length;
+    }
+
   lexeme = lexeme_new (PROP_LEXEME_CONTENT, lexeme_content,
-                       PROP_LEXEME_START_POSITION, *character_position,
-                       PROP_LEXEME_END_POSITION, *character_position + (lexeme_content_length - 1));
+                       PROP_LEXEME_START_POSITION, lexeme_start_position,
+                       PROP_LEXEME_END_POSITION, lexeme_end_position);
 
-  *character_position += lexeme_content_length;
+  Token *token = token_new (PROP_TOKEN_CATEGORY, category,
+                            PROP_TOKEN_LEXEME, lexeme);
 
-  return token_new (PROP_TOKEN_CATEGORY, category,
-                    PROP_TOKEN_LEXEME, lexeme);
+  g_ptr_array_add (tokens, token);
 }
 
 static FsmInitializable *
@@ -233,26 +254,21 @@ lexer_create_transitions_from (MealyMapping *mappings,
 }
 
 static void
-lexer_report_error (const gchar  *regular_expression,
+lexer_report_error (const gchar  *expression,
                     GError      **error)
 {
   LexicalAnalysisLexerError error_code = LEXICAL_ANALYSIS_LEXER_ERROR_UNDEFINED;
   const gchar *error_message = NULL;
 
-  if (regular_expression == NULL)
+  if (expression == NULL)
     {
       error_code = LEXICAL_ANALYSIS_LEXER_ERROR_INPUT_NULL;
-      error_message = "The regular expression must not be NULL";
+      error_message = "The expression must not be NULL";
     }
-  else if (*regular_expression == '\0')
-    {
-      error_code = LEXICAL_ANALYSIS_LEXER_ERROR_INPUT_EMPTY;
-      error_message = "The regular expression must not be an empty string";
-    }
-  else if (!g_str_is_ascii (regular_expression))
+  else if (!g_str_is_ascii (expression))
     {
       error_code = LEXICAL_ANALYSIS_LEXER_ERROR_INPUT_NOT_ASCII;
-      error_message = "The regular expression must be an ASCII string";
+      error_message = "The expression must be an ASCII string";
     }
 
   if (error_message != NULL)

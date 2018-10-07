@@ -21,6 +21,7 @@ set(SOURCE_FILES
     include/internal/semantic_analysis/ast_nodes/binary_operator.h
     include/internal/semantic_analysis/ast_nodes/concatenation.h
     include/internal/semantic_analysis/ast_nodes/constant.h
+    include/internal/semantic_analysis/ast_nodes/empty.h
     include/internal/semantic_analysis/ast_nodes/quantification.h
     include/internal/semantic_analysis/ast_nodes/range.h
     include/internal/semantic_analysis/ast_nodes/unary_operator.h
@@ -64,6 +65,7 @@ set(SOURCE_FILES
     src/semantic_analysis/ast_nodes/binary_operator.c
     src/semantic_analysis/ast_nodes/concatenation.c
     src/semantic_analysis/ast_nodes/constant.c
+    src/semantic_analysis/ast_nodes/empty.c
     src/semantic_analysis/ast_nodes/quantification.c
     src/semantic_analysis/ast_nodes/range.c
     src/semantic_analysis/ast_nodes/unary_operator.c
