@@ -89,7 +89,7 @@ static void
 nondeterministic_transition_supplement_states_array_with_output (Transition *self,
                                                                  GPtrArray  *states_array)
 {
-  g_return_if_fail (TRANSITIONS_IS_NONDETERMINISTIC_TRANSITION (self) != NULL);
+  g_return_if_fail (TRANSITIONS_IS_NONDETERMINISTIC_TRANSITION (self));
   g_return_if_fail (states_array != NULL);
 
   g_autoptr (GPtrArray) output_states = NULL;

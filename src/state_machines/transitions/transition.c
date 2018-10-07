@@ -53,7 +53,7 @@ transition_class_init (TransitionClass *klass)
     g_param_spec_boolean (PROP_TRANSITION_REQUIRES_INPUT,
                           "Requires input",
                           "Describes whether or not an actual input is required in order for"
-                              "the transition to occur.",
+                            "the transition to occur.",
                           TRUE,
                           G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 

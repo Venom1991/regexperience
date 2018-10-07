@@ -1,7 +1,7 @@
 #include "internal/syntactic_analysis/production.h"
 #include "internal/syntactic_analysis/grammar.h"
 #include "internal/syntactic_analysis/rule.h"
-#include "internal/syntactic_analysis/derivation_item.h"
+#include "internal/syntactic_analysis/occurrence.h"
 #include "internal/syntactic_analysis/symbols/symbol.h"
 #include "internal/syntactic_analysis/symbols/terminal.h"
 #include "internal/syntactic_analysis/symbols/non_terminal.h"
@@ -70,7 +70,7 @@ production_class_init (ProductionClass *klass)
     g_param_spec_boxed (PROP_PRODUCTION_RULES,
                         "Rules",
                         "Array of rules that describe possible ways of rewriting the production"
-                            "where it appears on the right-hand-side as a non-terminal symbol.",
+                          "where it appears on the right-hand-side as a non-terminal symbol.",
                         G_TYPE_PTR_ARRAY,
                         G_PARAM_READWRITE);
 
@@ -86,11 +86,14 @@ production_init (Production *self)
 }
 
 void
-production_mark_occurrence (Production     *self,
-                            DerivationItem *occurrence)
+production_mark_occurrence (Production *self,
+                            Production *left_hand_side,
+                            Rule       *right_hand_side,
+                            guint       position)
 {
   g_return_if_fail (SYNTACTIC_ANALYSIS_IS_PRODUCTION (self));
-  g_return_if_fail (occurrence != NULL);
+  g_return_if_fail (left_hand_side != NULL);
+  g_return_if_fail (right_hand_side != NULL);
 
   ProductionPrivate *priv = production_get_instance_private (self);
   GPtrArray **occurrences = &priv->occurrences;
@@ -98,6 +101,9 @@ production_mark_occurrence (Production     *self,
   if (*occurrences == NULL)
     *occurrences = g_ptr_array_new_with_free_func (g_object_unref);
 
+  Occurrence *occurrence = occurrence_new (PROP_DERIVATION_ITEM_LEFT_HAND_SIDE, left_hand_side,
+                                           PROP_DERIVATION_ITEM_RIGHT_HAND_SIDE, right_hand_side,
+                                           PROP_OCCURRENCE_POSITION, position);
   g_ptr_array_add (*occurrences, occurrence);
 }
 
@@ -219,92 +225,85 @@ production_compute_follow_set (Production *self)
               DerivationItem *occurrence = g_ptr_array_index (occurrences, i);
               g_autoptr (Production) left_hand_side = NULL;
               g_autoptr (Rule) right_hand_side = NULL;
+              guint position = 0;
               g_autoptr (GPtrArray) symbols = NULL;
 
               g_object_get (occurrence,
                             PROP_DERIVATION_ITEM_LEFT_HAND_SIDE, &left_hand_side,
                             PROP_DERIVATION_ITEM_RIGHT_HAND_SIDE, &right_hand_side,
+                            PROP_OCCURRENCE_POSITION, &position,
                             NULL);
               g_object_get (right_hand_side,
                             PROP_RULE_SYMBOLS, &symbols,
                             NULL);
 
-              for (guint j = 0; j < symbols->len; ++j)
+              Symbol *symbol = g_ptr_array_index (symbols, position);
+              guint j = position + 1;
+              gboolean should_add_left_hand_side_follow_set = FALSE;
+
+              g_assert (symbol_is_match (symbol, self));
+
+              /* Iterating over the symbols that appear after the current production
+               * in case it is not the very last member of the current right hand side,
+               * setting the left hand side follow set addition flag otherwise.
+               */
+              if (j < symbols->len)
+                do
+                  {
+                    Symbol *following_symbol = g_ptr_array_index (symbols, j);
+
+                    if (SYMBOLS_IS_TERMINAL (following_symbol))
+                      {
+                        /* Simply adding the terminal symbol appearing right after
+                         * the current production to its follow set.
+                         */
+                        g_ptr_array_add_if_not_exists (*production_follow_set,
+                                                       following_symbol,
+                                                       symbol_equal_func,
+                                                       g_object_ref);
+                      }
+                    else if (SYMBOLS_IS_NON_TERMINAL (following_symbol))
+                      {
+                        gboolean symbol_can_derive_epsilon = FALSE;
+
+                        /* Expanding the production's follow set with all of the members (without epsilon)
+                         * belonging to the non-terminal symbol's underlying production's first set.
+                         */
+                        g_autoptr (GPtrArray) non_terminal_first_set =
+                          production_fetch_non_terminal_first_set (following_symbol,
+                                                                   &symbol_can_derive_epsilon);
+
+                        g_ptr_array_add_range_distinct (*production_follow_set,
+                                                        non_terminal_first_set,
+                                                        symbol_equal_func,
+                                                        g_object_ref);
+
+                        /* Setting the left hand side follow set addition flag in case
+                         * the current non-terminal symbol can derive epsilon, breaking otherwise.
+                         */
+                        if (symbol_can_derive_epsilon)
+                          should_add_left_hand_side_follow_set = TRUE;
+                        else
+                          break;
+                      }
+
+                    j++;
+                  }
+                while (j < symbols->len);
+              else
+                should_add_left_hand_side_follow_set = TRUE;
+
+              /* Adding the left hand side's follow set
+               * members to the current production's follow set.
+               */
+              if (should_add_left_hand_side_follow_set)
                 {
-                  Symbol *symbol = g_ptr_array_index (symbols, j);
+                  GPtrArray *left_hand_side_follow_set = production_compute_follow_set (left_hand_side);
 
-                  /* Searching for the exact index in which the production appears
-                   * as the current non-terminal symbol's underlying value.
-                   */
-                  if (symbol_is_match (symbol, self))
-                    {
-                      guint k = j + 1;
-                      gboolean should_add_left_hand_side_follow_set = FALSE;
-
-                      /* Iterating over the symbols that appear after the current production
-                       * in case it is not the very last member of the current right hand side,
-                       * setting the left hand side follow set addition flag otherwise.
-                       */
-                      if (k < symbols->len)
-                        do
-                          {
-                            Symbol *following_symbol = g_ptr_array_index (symbols, k);
-
-                            if (SYMBOLS_IS_TERMINAL (following_symbol))
-                              {
-                                /* Simply adding the terminal symbol appearing right after
-                                 * the current production to its follow set.
-                                 */
-                                g_ptr_array_add_if_not_exists (*production_follow_set,
-                                                               following_symbol,
-                                                               symbol_equal_func,
-                                                               g_object_ref);
-                              }
-                            else if (SYMBOLS_IS_NON_TERMINAL (following_symbol))
-                              {
-                                gboolean symbol_can_derive_epsilon = FALSE;
-
-                                /* Expanding the production's follow set with all of the members (without epsilon)
-                                 * belonging to the non-terminal symbol's underlying production's first set.
-                                 */
-                                g_autoptr (GPtrArray) non_terminal_first_set =
-                                  production_fetch_non_terminal_first_set (following_symbol,
-                                                                           &symbol_can_derive_epsilon);
-
-                                g_ptr_array_add_range_distinct (*production_follow_set,
-                                                                non_terminal_first_set,
-                                                                symbol_equal_func,
-                                                                g_object_ref);
-
-                                /* Setting the left hand side follow set addition flag in case
-                                 * the current non-terminal symbol can derive epsilon, breaking otherwise.
-                                 */
-                                if (symbol_can_derive_epsilon)
-                                  should_add_left_hand_side_follow_set = TRUE;
-                                else
-                                  break;
-                              }
-
-                            k++;
-                          }
-                        while (k < symbols->len);
-                      else
-                        should_add_left_hand_side_follow_set = TRUE;
-
-                      /* Adding the left hand side's follow set
-                       * members to the current production's follow set.
-                       */
-                      if (should_add_left_hand_side_follow_set)
-                        {
-                          GPtrArray *left_hand_side_follow_set =
-                            production_compute_follow_set (left_hand_side);
-
-                          g_ptr_array_add_range_distinct (*production_follow_set,
-                                                          left_hand_side_follow_set,
-                                                          symbol_equal_func,
-                                                          g_object_ref);
-                        }
-                    }
+                  g_ptr_array_add_range_distinct (*production_follow_set,
+                                                  left_hand_side_follow_set,
+                                                  symbol_equal_func,
+                                                  g_object_ref);
                 }
             }
         }

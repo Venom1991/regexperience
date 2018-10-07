@@ -69,7 +69,7 @@ static void
 deterministic_transition_supplement_states_array_with_output (Transition *self,
                                                               GPtrArray  *states_array)
 {
-  g_return_if_fail (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (self) != NULL);
+  g_return_if_fail (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (self));
   g_return_if_fail (states_array != NULL);
 
   g_autoptr (State) output_state = NULL;

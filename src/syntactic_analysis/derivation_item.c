@@ -2,11 +2,6 @@
 #include "internal/syntactic_analysis/production.h"
 #include "internal/syntactic_analysis/rule.h"
 
-struct _DerivationItem
-{
-  GObject parent_instance;
-};
-
 typedef struct
 {
   GWeakRef left_hand_side;

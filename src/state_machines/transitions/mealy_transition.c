@@ -42,7 +42,7 @@ mealy_transition_class_init (MealyTransitionClass *klass)
     g_param_spec_pointer (PROP_MEALY_TRANSITION_OUTPUT_DATA,
                          "Output data",
                          "Arbitrary output data mapped to both the expected character as well as the output state.",
-                          G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+                          G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,

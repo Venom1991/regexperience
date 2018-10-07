@@ -1,7 +1,7 @@
 #include "internal/syntactic_analysis/grammar.h"
 #include "internal/syntactic_analysis/production.h"
 #include "internal/syntactic_analysis/rule.h"
-#include "internal/syntactic_analysis/derivation_item.h"
+#include "internal/syntactic_analysis/occurrence.h"
 #include "internal/syntactic_analysis/parsing_table_key.h"
 #include "internal/syntactic_analysis/symbols/symbol.h"
 #include "internal/syntactic_analysis/symbols/non_terminal.h"
@@ -530,7 +530,6 @@ grammar_mark_non_terminal_occurrences (Production *production,
   for (guint i = 0; i < rules->len; ++i)
     {
       Rule *rule = g_ptr_array_index (rules, i);
-      DerivationItem *occurrence = NULL;
       g_autoptr (GPtrArray) symbols = NULL;
 
       g_object_get (rule,
@@ -550,17 +549,10 @@ grammar_mark_non_terminal_occurrences (Production *production,
 
               underlying_production = g_value_get_object (&value);
 
-              if (occurrence == NULL)
-                {
-                  occurrence = derivation_item_new (PROP_DERIVATION_ITEM_LEFT_HAND_SIDE, production,
-                                                    PROP_DERIVATION_ITEM_RIGHT_HAND_SIDE, rule);
-
-                  production_mark_occurrence (underlying_production, occurrence);
-                }
-              else
-                {
-                  production_mark_occurrence (underlying_production, g_object_ref (occurrence));
-                }
+              production_mark_occurrence (underlying_production,
+                                          production,
+                                          rule,
+                                          j);
             }
         }
     }

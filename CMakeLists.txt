@@ -44,6 +44,7 @@ set(SOURCE_FILES
     include/internal/state_machines/transitions/transition_factory.h
     include/internal/syntactic_analysis/derivation_item.h
     include/internal/syntactic_analysis/grammar.h
+    include/internal/syntactic_analysis/occurrence.h
     include/internal/syntactic_analysis/parser.h
     include/internal/syntactic_analysis/parsing_table_key.h
     include/internal/syntactic_analysis/production.h
@@ -86,6 +87,7 @@ set(SOURCE_FILES
     src/state_machines/transitions/transition_factory.c
     src/syntactic_analysis/derivation_item.c
     src/syntactic_analysis/grammar.c
+    src/syntactic_analysis/occurrence.c
     src/syntactic_analysis/parser.c
     src/syntactic_analysis/parsing_table_key.c
     src/syntactic_analysis/production.c

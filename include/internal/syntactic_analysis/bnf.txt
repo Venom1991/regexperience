@@ -1,4 +1,4 @@
-<start_production>                 ::= <expression> "EOI"
+<start>                            ::= <expression> "EOI"
 <expression>                       ::= <simple-expression> <expression-prime>
 <expression-prime>                 ::= <alternation>
                                     |  ε
