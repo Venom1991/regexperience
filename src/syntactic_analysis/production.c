@@ -104,6 +104,7 @@ production_mark_occurrence (Production *self,
   Occurrence *occurrence = occurrence_new (PROP_DERIVATION_ITEM_LEFT_HAND_SIDE, left_hand_side,
                                            PROP_DERIVATION_ITEM_RIGHT_HAND_SIDE, right_hand_side,
                                            PROP_OCCURRENCE_POSITION, position);
+
   g_ptr_array_add (*occurrences, occurrence);
 }
 
@@ -176,7 +177,7 @@ production_compute_first_set (Production *self)
                 }
 
               /* Adding epsilon to the current rule's first if all of its non-terminal
-               * members can derive epsilon. This means that the rule is itself
+               * members can derive epsilon. This means that the rule itself is
                * completely transparent.
                */
               if (epsilon_derivable_symbols_count == symbols->len)

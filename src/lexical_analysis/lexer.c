@@ -112,6 +112,9 @@ lexer_tokenize (Lexer        *self,
     }
   else
     {
+      /* Nothing to iterate over in case of the empty string thus
+       * simply creating the special empty expression marker.
+       */
       lexer_create_token (TOKEN_CATEGORY_EMPTY_EXPRESSION_MARKER,
                           EMPTY_INPUT,
                           NULL,
