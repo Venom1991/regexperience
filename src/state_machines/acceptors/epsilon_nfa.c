@@ -314,7 +314,7 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                   g_ptr_array_add (current_iteration_output_states, input_state);
 
                   /* Keeping track of previously visited states so as to break transition cycles and
-                   * consequently avoid infinite recursion.
+                   * to consequently avoid infinite recursion.
                    */
                   if (g_ptr_array_find_with_equal_func (visited_states,
                                                         input_state,

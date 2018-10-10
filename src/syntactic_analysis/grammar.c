@@ -149,7 +149,7 @@ grammar_define_productions (GPtrArray **productions,
    * the corresponding left-hand side's identifier which is used to
    * establish a relation with its own right-hand side.
    * "NULL" is used as a sentinel value in the rest of the nested arrays.
-   * Also, some of the right hand sides (such as letters or digits) are
+   * Also, some of the right-hand sides (such as letters or digits) are
    * represented using delimited strings instead of multiple
    * single-character strings. This approach significantly reduces
    * the number of terminal symbols without changing the behavior.
@@ -414,7 +414,7 @@ grammar_define_productions (GPtrArray **productions,
       g_hash_table_insert (productions_table, left_hand_side, production);
     }
 
-  /* Defining the right-hand-sides for previously initialized productions. */
+  /* Defining the right-hand sides for previously initialized productions. */
   for (guint i = 0; i < grammar_size; ++i)
     {
       gchar ***grammar_item = grammar[i];

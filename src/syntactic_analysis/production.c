@@ -223,7 +223,7 @@ production_compute_follow_set (Production *self)
 
           for (guint i = 0; i < occurrences->len; ++i)
             {
-              DerivationItem *occurrence = g_ptr_array_index (occurrences, i);
+              Occurrence *occurrence = g_ptr_array_index (occurrences, i);
               g_autoptr (Production) left_hand_side = NULL;
               g_autoptr (Rule) right_hand_side = NULL;
               guint position = 0;
@@ -245,8 +245,8 @@ production_compute_follow_set (Production *self)
               g_assert (symbol_is_match (symbol, self));
 
               /* Iterating over the symbols that appear after the current production
-               * in case it is not the very last member of the current right hand side,
-               * setting the left hand side follow set addition flag otherwise.
+               * in case it is not the very last member of the current right-hand side,
+               * setting the left-hand side follow set addition flag otherwise.
                */
               if (j < symbols->len)
                 do
@@ -279,7 +279,7 @@ production_compute_follow_set (Production *self)
                                                         symbol_equal_func,
                                                         g_object_ref);
 
-                        /* Setting the left hand side follow set addition flag in case
+                        /* Setting the left-hand side follow set addition flag in case
                          * the current non-terminal symbol can derive epsilon, breaking otherwise.
                          */
                         if (symbol_can_derive_epsilon)
@@ -294,7 +294,7 @@ production_compute_follow_set (Production *self)
               else
                 should_add_left_hand_side_follow_set = TRUE;
 
-              /* Adding the left hand side's follow set
+              /* Adding the left-hand side's follow set
                * members to the current production's follow set.
                */
               if (should_add_left_hand_side_follow_set)
