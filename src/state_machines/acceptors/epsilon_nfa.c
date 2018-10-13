@@ -113,7 +113,6 @@ epsilon_nfa_get_property (GObject    *object,
 
         g_value_set_object (value, g_ptr_array_index (final_states, 0));
       }
-
       break;
 
     default:
@@ -272,13 +271,16 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
     case INITIALIZE_OUTPUT_STATES_MODE_EPSILON_INITIAL:
       is_epsilon_step = TRUE;
       break;
+
     case INITIALIZE_OUTPUT_STATES_MODE_EXPLICIT_CHARACTER:
       is_explicit_character_step = TRUE;
       break;
+
     case INITIALIZE_OUTPUT_STATES_MODE_EPSILON_SUBSEQUENT:
       is_epsilon_step = TRUE;
       is_final_step = TRUE;
       break;
+
     default:
       g_return_if_reached ();
     }

@@ -16,10 +16,12 @@ initialize_transition_properties (gchar                  expected_character,
       *condition_type = EQUALITY_CONDITION_TYPE_ANY;
       *requires_input = FALSE;
       break;
+
     case ANY:
       *condition_type = EQUALITY_CONDITION_TYPE_ANY;
       *requires_input = TRUE;
       break;
+
     default:
       *condition_type = EQUALITY_CONDITION_TYPE_EQUAL;
       *requires_input = TRUE;

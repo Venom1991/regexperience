@@ -49,9 +49,11 @@ create_constant (GNode *cst_context)
         case TOKEN_CATEGORY_ANY_CHARACTER:
           expected_character = ANY;
           break;
+
         case TOKEN_CATEGORY_ORDINARY_CHARACTER:
           expected_character = lexeme_content->str[0];
           break;
+
         default:
           g_return_val_if_reached (NULL);
         }
