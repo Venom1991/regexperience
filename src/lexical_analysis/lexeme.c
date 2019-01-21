@@ -55,7 +55,7 @@ lexeme_class_init (LexemeClass *klass)
   obj_properties[PROP_START_POSITION] =
     g_param_spec_uint (PROP_LEXEME_START_POSITION,
                        "Start position",
-                       "Start of the position in which the lexeme appears in the input.",
+                       "Start of the position in which the lexeme appears in the expression.",
                        0,
                        G_MAXUINT32,
                        0,
@@ -64,7 +64,7 @@ lexeme_class_init (LexemeClass *klass)
   obj_properties[PROP_END_POSITION] =
     g_param_spec_uint (PROP_LEXEME_END_POSITION,
                        "End position",
-                       "End of the position in which the lexeme appears in the input.",
+                       "End of the position in which the lexeme appears in the expression.",
                        0,
                        G_MAXUINT32,
                        0,

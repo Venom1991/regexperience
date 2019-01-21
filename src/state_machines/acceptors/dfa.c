@@ -1,3 +1,4 @@
+#include "core/match.h"
 #include "internal/state_machines/acceptors/dfa.h"
 #include "internal/state_machines/acceptors/acceptor_runnable.h"
 #include "internal/state_machines/fsm_modifiable.h"
@@ -25,14 +26,14 @@ static void       dfa_minimize                                        (FsmModifi
 
 static void       dfa_complement                                      (FsmModifiable             *self);
 
-static void       dfa_run                                             (AcceptorRunnable          *self,
+static GPtrArray *dfa_run                                             (AcceptorRunnable          *self,
                                                                        const gchar               *input);
 
 static gboolean   dfa_can_accept                                      (AcceptorRunnable          *self);
 
-static void       dfa_prepare_for_run                                 (Dfa                       *self);
+static void       dfa_reset                                           (Dfa                       *self);
 
-static gboolean   dfa_transition_to_next_state                        (Dfa                       *self,
+static State     *dfa_transition_to_next_state                        (Dfa                       *self,
                                                                        gchar                      input_character);
 
 static void       dfa_remove_unreachable_states_if_needed             (Dfa                       *self);
@@ -159,35 +160,100 @@ dfa_complement (FsmModifiable *self)
     }
 }
 
-static void
+static GPtrArray *
 dfa_run (AcceptorRunnable *self,
          const gchar      *input)
 {
-  g_return_if_fail (ACCEPTORS_IS_DFA (self));
-  g_return_if_fail (input != NULL);
+  g_return_val_if_fail (ACCEPTORS_IS_DFA (self), NULL);
+  g_return_val_if_fail (input != NULL, NULL);
 
   Dfa *dfa = ACCEPTORS_DFA (self);
   DfaPrivate *priv = dfa_get_instance_private (dfa);
-  gchar current_character = *input;
 
-  dfa_prepare_for_run (dfa);
-  g_return_if_fail (priv->current_state != NULL);
+  dfa_reset (dfa);
+  g_return_val_if_fail (priv->current_state != NULL, NULL);
+
+  guint begin = 0, end = 0;
+  GPtrArray *matches = NULL;
 
   while (TRUE)
     {
-      if (current_character == '\0')
+      if (end != 0)
         {
-          priv->is_input_exhausted = TRUE;
+          gchar previous_character = input[end - 1];
 
-          break;
+          if (previous_character == END_OF_STRING)
+            {
+              priv->is_input_exhausted = TRUE;
+
+              break;
+            }
         }
 
-      /* Halting execution in case the transition was unsuccessful. */
-      if (!dfa_transition_to_next_state (dfa, current_character))
-        break;
+      gchar current_character = input[end];
+      State *current_state = priv->current_state;
+      State *next_state = dfa_transition_to_next_state (dfa, current_character);
+      gboolean next_state_is_dead = FALSE;
 
-      current_character = *(++input);
+      g_object_get (next_state,
+                    PROP_STATE_IS_DEAD, &next_state_is_dead,
+                    NULL);
+
+      if (next_state_is_dead)
+        {
+          /* Discerning the current run's result in case the DFA transitioned to the dead state. */
+          guint distance = end - begin;
+          g_autofree gchar *match_value = NULL;
+          StateTypeFlags state_type_flags = STATE_TYPE_UNDEFINED;
+
+          g_object_get (current_state,
+                        PROP_STATE_TYPE_FLAGS, &state_type_flags,
+                        NULL);
+
+          gboolean current_state_is_start = (state_type_flags & STATE_TYPE_START);
+          gboolean current_state_is_final = (state_type_flags & STATE_TYPE_FINAL);
+
+          /* Initializing the matched value found in the input (empty or otherwise). */
+          if (current_state_is_final)
+            {
+              if (distance == 0)
+                match_value = g_strdup (EMPTY_STRING);
+              else
+                match_value = g_strndup (input + begin, distance);
+            }
+
+          /* Moving onto the next character in the input in case an empty match was found. */
+          if (current_state_is_start && distance == 0)
+            end++;
+
+          if (match_value != NULL)
+            {
+              g_autoptr (GString) value = g_string_new (match_value);
+              guint range_begin = begin;
+              guint range_end = end - 1;
+              Match *match = match_new (PROP_MATCH_VALUE, value,
+                                        PROP_MATCH_RANGE_BEGIN, range_begin,
+                                        PROP_MATCH_RANGE_END, range_end);
+
+              if (matches == NULL)
+                matches = g_ptr_array_new_with_free_func (g_object_unref);
+
+              g_ptr_array_add (matches, match);
+            }
+
+          /* Preparing for a new run. */
+          begin = end;
+
+          dfa_reset (dfa);
+        }
+      else
+        {
+          /* Moving onto the next character in the input in case the DFA can continue with the current run. */
+          end++;
+        }
     }
+
+  return matches;
 }
 
 static gboolean
@@ -197,19 +263,12 @@ dfa_can_accept (AcceptorRunnable *self)
 
   Dfa *dfa = ACCEPTORS_DFA (self);
   DfaPrivate *priv = dfa_get_instance_private (dfa);
-  State *current_state = priv->current_state;
-  gboolean is_input_exhausted = priv->is_input_exhausted;
-  StateTypeFlags state_type_flags = STATE_TYPE_UNDEFINED;
 
-  g_object_get (current_state,
-                PROP_STATE_TYPE_FLAGS, &state_type_flags,
-                NULL);
-
-  return (state_type_flags & STATE_TYPE_FINAL) && is_input_exhausted;
+  return priv->is_input_exhausted;
 }
 
 static void
-dfa_prepare_for_run (Dfa *self)
+dfa_reset (Dfa *self)
 {
   DfaPrivate *priv = dfa_get_instance_private (self);
 
@@ -226,7 +285,7 @@ dfa_prepare_for_run (Dfa *self)
   priv->is_input_exhausted = FALSE;
 }
 
-static gboolean
+static State *
 dfa_transition_to_next_state (Dfa   *self,
                               gchar  input_character)
 {
@@ -258,7 +317,7 @@ dfa_transition_to_next_state (Dfa   *self,
 
           priv->current_state = next_state;
 
-          return TRUE;
+          return next_state;
         }
     }
 
@@ -275,7 +334,7 @@ dfa_transition_to_next_state (Dfa   *self,
 
   priv->current_state = g_object_ref (dead_state);
 
-  return FALSE;
+  return dead_state;
 }
 
 static void
@@ -578,7 +637,7 @@ dfa_fetch_equivalence_classes_from (GPtrArray *input_equivalence_classes,
 
   /* Returning the current call's result in case it is equal to the previous call's result. */
   if (are_current_and_input_classes_equal)
-      return current_equivalence_classes;
+    return current_equivalence_classes;
 
   return dfa_fetch_equivalence_classes_from (current_equivalence_classes,
                                              alphabet);

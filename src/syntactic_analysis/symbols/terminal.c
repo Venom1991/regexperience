@@ -113,7 +113,7 @@ terminal_is_match (Symbol          *self,
         }
       else
         {
-          return g_strcmp0 (value_as_string, EMPTY_INPUT) == 0;
+          return g_strcmp0 (value_as_string, EMPTY_STRING) == 0;
         }
     }
 

@@ -31,13 +31,12 @@ struct _StateClass
 gboolean state_is_composed_from (State           *self,
                                  const GPtrArray *states);
 
-gboolean state_is_dead          (State           *self);
-
 gint     state_compare_deadness (State           *a,
                                  State           *b);
 
 #define PROP_STATE_TYPE_FLAGS  "type-flags"
 #define PROP_STATE_TRANSITIONS "transitions"
+#define PROP_STATE_IS_DEAD     "is-dead"
 
 G_END_DECLS
 

@@ -111,9 +111,11 @@ void regexperience_compile (Regexperience  *self,
 
 gboolean regexperience_match (Regexperience  *self,
                               const gchar    *input,
+                              GPtrArray     **matches,
                               GError        **error)
 {
   g_return_val_if_fail (CORE_IS_REGEXPERIENCE (self), FALSE);
+  g_return_val_if_fail (matches == NULL || *matches == NULL, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   RegexperiencePrivate *priv = regexperience_get_instance_private (self);
@@ -147,9 +149,10 @@ gboolean regexperience_match (Regexperience  *self,
       return FALSE;
     }
 
-  acceptor_runnable_run (acceptor, input);
+  *matches = acceptor_runnable_run (acceptor, input);
 
-  return acceptor_runnable_can_accept (acceptor);
+  return g_ptr_array_has_items (*matches)
+      && acceptor_runnable_can_accept (acceptor);
 }
 
 static void

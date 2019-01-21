@@ -397,7 +397,7 @@ grammar_define_productions (GPtrArray **productions,
     (gchar**[])
     {
       (gchar *[]) { EMPTY_EXPRESSION },
-      (gchar *[]) { EMPTY_INPUT, NULL },
+      (gchar *[]) { EMPTY_STRING, NULL },
       NULL
     }
   };

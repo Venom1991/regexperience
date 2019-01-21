@@ -25,7 +25,7 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static void rule_discern_epsilon_derivability (RulePrivate  *priv);
+static void rule_discern_epsilon_derivability (Rule         *self);
 
 static void rule_get_property                 (GObject      *object,
                                                guint         property_id,
@@ -83,8 +83,11 @@ rule_init (Rule *self)
 }
 
 static void
-rule_discern_epsilon_derivability (RulePrivate *priv)
+rule_discern_epsilon_derivability (Rule *self)
 {
+  g_return_if_fail (SYNTACTIC_ANALYSIS_IS_RULE (self));
+
+  RulePrivate *priv = rule_get_instance_private (self);
   GPtrArray *first_set = priv->first_set;
 
   if (g_ptr_array_has_items (first_set))
@@ -154,7 +157,7 @@ rule_set_property (GObject      *object,
 
       priv->first_set = g_value_dup_boxed (value);
 
-      rule_discern_epsilon_derivability (priv);
+      rule_discern_epsilon_derivability (SYNTACTIC_ANALYSIS_RULE (object));
       break;
 
     default:

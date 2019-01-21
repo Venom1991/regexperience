@@ -7,12 +7,14 @@ typedef struct
 {
   StateTypeFlags  state_type_flags;
   GPtrArray      *transitions;
+  gboolean        is_dead;
 } StatePrivate;
 
 enum
 {
   PROP_TYPE_FLAGS = 1,
   PROP_TRANSITIONS,
+  PROP_IS_DEAD,
   N_PROPERTIES
 };
 
@@ -62,6 +64,13 @@ state_class_init (StateClass *klass)
                         G_TYPE_PTR_ARRAY,
                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
+  obj_properties[PROP_IS_DEAD] =
+    g_param_spec_boolean (PROP_STATE_IS_DEAD,
+                          "Is dead",
+                          "Describes whether or not the state has a single transition to itself on any input.",
+                          FALSE,
+                          G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
                                      obj_properties);
@@ -71,13 +80,6 @@ static void
 state_init (State *self)
 {
   /* NOP */
-}
-
-static gboolean
-state_default_is_composed_from (State           *self,
-                                const GPtrArray *states)
-{
-  return FALSE;
 }
 
 gboolean
@@ -95,42 +97,6 @@ state_is_composed_from (State           *self,
   return klass->is_composed_from (self, states);
 }
 
-gboolean
-state_is_dead (State *self)
-{
-  g_return_val_if_fail (STATE_MACHINES_IS_STATE (self), FALSE);
-
-  StatePrivate *priv = state_get_instance_private (self);
-  GPtrArray *transitions = priv->transitions;
-  GEqualFunc state_equal_func = g_direct_equal;
-
-  if (g_ptr_array_has_items (transitions))
-    {
-      const guint dead_state_transitions_count = 1;
-
-      if (transitions->len == dead_state_transitions_count)
-        {
-          Transition *transition = g_ptr_array_index (transitions, 0);
-
-          if (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (transition))
-            {
-              EqualityConditionType condition_type = EQUALITY_CONDITION_TYPE_UNDEFINED;
-              g_autoptr (State) output_state = NULL;
-
-              g_object_get (transition,
-                            PROP_TRANSITION_EQUALITY_CONDITION_TYPE, &condition_type,
-                            PROP_DETERMINISTIC_TRANSITION_OUTPUT_STATE, &output_state,
-                            NULL);
-
-              return condition_type == EQUALITY_CONDITION_TYPE_ANY &&
-                     state_equal_func (self, output_state);
-            }
-        }
-    }
-
-  return FALSE;
-}
-
 gint
 state_compare_deadness (State *a,
                         State *b)
@@ -141,10 +107,20 @@ state_compare_deadness (State *a,
   g_return_val_if_fail (STATE_MACHINES_IS_STATE (*a_ptr), 0);
   g_return_val_if_fail (STATE_MACHINES_IS_STATE (*b_ptr), 0);
 
-  gboolean a_is_dead = state_is_dead (STATE_MACHINES_STATE (*a_ptr));
-  gboolean b_is_dead = state_is_dead (STATE_MACHINES_STATE (*b_ptr));
+  StatePrivate *a_priv = state_get_instance_private (STATE_MACHINES_STATE (*a_ptr));
+  StatePrivate *b_priv = state_get_instance_private (STATE_MACHINES_STATE (*b_ptr));
+
+  gboolean a_is_dead = a_priv->is_dead;
+  gboolean b_is_dead = b_priv->is_dead;
 
   return -((a_is_dead > b_is_dead) - (a_is_dead < b_is_dead));
+}
+
+static gboolean
+state_default_is_composed_from (State           *self,
+                                const GPtrArray *states)
+{
+  return FALSE;
 }
 
 static void
@@ -163,6 +139,10 @@ state_get_property (GObject    *object,
 
     case PROP_TRANSITIONS:
       g_value_set_boxed (value, priv->transitions);
+      break;
+
+    case PROP_IS_DEAD:
+      g_value_set_boolean (value, priv->is_dead);
       break;
 
     default:
@@ -197,6 +177,10 @@ state_set_property (GObject      *object,
 
         priv->transitions = transitions;
       }
+      break;
+
+    case PROP_IS_DEAD:
+      priv->is_dead = g_value_get_boolean (value);
       break;
 
     default:

@@ -3,9 +3,10 @@
 
 #include <glib.h>
 
-#define DELIMITER    "-|-"
-#define END_OF_INPUT "EOI"
-#define EMPTY_INPUT  ""
+#define DELIMITER     "-|-"
+#define END_OF_INPUT  "EOI"
+#define EMPTY_STRING  ""
+#define END_OF_STRING '\0'
 
 typedef gpointer (*GRefFunc) (gpointer data);
 
@@ -62,6 +63,9 @@ GPtrArray *g_hash_table_values_to_ptr_array  (GHashTable     *hash_table,
                                               GDestroyNotify  free_func);
 
 void       g_queue_unref_g_objects           (GQueue         *queue);
+
+gboolean   g_node_unref_g_object             (GNode          *node,
+                                              gpointer        data);
 
 void       g_node_unref_g_objects            (GNode          *node);
 

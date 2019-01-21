@@ -9,6 +9,7 @@ set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
 set(SOURCE_FILES
     include/core/errors.h
+    include/core/match.h
     include/core/regexperience.h
     include/internal/common/helpers.h
     include/internal/lexical_analysis/lexeme.h
@@ -57,6 +58,7 @@ set(SOURCE_FILES
     src/lexical_analysis/lexeme.c
     src/lexical_analysis/lexer.c
     src/lexical_analysis/token.c
+    src/match.c
     src/regexperience.c
     src/semantic_analysis/analyzer.c
     src/semantic_analysis/ast_node_factory.c

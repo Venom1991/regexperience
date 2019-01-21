@@ -90,7 +90,7 @@ lexer_tokenize (Lexer        *self,
 
   tokens = g_ptr_array_new_with_free_func (g_object_unref);
 
-  if (*expression != '\0')
+  if (*expression != END_OF_STRING)
     {
       transducer_runnable_reset (transducer);
 
@@ -98,7 +98,7 @@ lexer_tokenize (Lexer        *self,
         {
           gchar current_character = *expression++;
 
-          if (current_character == '\0')
+          if (current_character == END_OF_STRING)
             break;
 
           TokenCategory category = (TokenCategory) GPOINTER_TO_INT (transducer_runnable_run (transducer,
@@ -116,7 +116,7 @@ lexer_tokenize (Lexer        *self,
        * simply creating the special empty expression marker.
        */
       lexer_create_token (TOKEN_CATEGORY_EMPTY_EXPRESSION_MARKER,
-                          EMPTY_INPUT,
+                          EMPTY_STRING,
                           NULL,
                           tokens);
     }
@@ -165,70 +165,70 @@ static FsmInitializable *
 lexer_build_transducer (void)
 {
   g_autoptr (GPtrArray) all_states = g_ptr_array_new_with_free_func (g_object_unref);
-  State *regular_character = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_START);
-  State *regular_escape = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
-  State *bracket_expression_character = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
-  State *bracket_expression_escape = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
+  State *regular_context = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_START);
+  State *regular_context_escape = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
+  State *bracket_context = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
+  State *bracket_context_escape = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
 
-  MealyMapping regular_metacharacter_mappings[] =
+  MealyMapping regular_context_mappings[] =
   {
-    { '[',  bracket_expression_character, TOKEN_CATEGORY_OPEN_BRACKET,                         },
-    { '(',  regular_character,            TOKEN_CATEGORY_OPEN_PARENTHESIS                      },
-    { ')',  regular_character,            TOKEN_CATEGORY_CLOSE_PARENTHESIS                     },
-    { '*',  regular_character,            TOKEN_CATEGORY_STAR_QUANTIFICATION_OPERATOR          },
-    { '+',  regular_character,            TOKEN_CATEGORY_PLUS_QUANTIFICATION_OPERATOR          },
-    { '?',  regular_character,            TOKEN_CATEGORY_QUESTION_MARK_QUANTIFICATION_OPERATOR },
-    { '|',  regular_character,            TOKEN_CATEGORY_ALTERNATION_OPERATOR                  },
-    { '\\', regular_escape,               TOKEN_CATEGORY_METACHARACTER_ESCAPE                  },
-    { '.',  regular_character,            TOKEN_CATEGORY_ANY_CHARACTER                         },
-    { ANY,  regular_character,            TOKEN_CATEGORY_ORDINARY_CHARACTER                    }
+    { '[',  bracket_context,        TOKEN_CATEGORY_OPEN_BRACKET,                         },
+    { '(',  regular_context,        TOKEN_CATEGORY_OPEN_PARENTHESIS                      },
+    { ')',  regular_context,        TOKEN_CATEGORY_CLOSE_PARENTHESIS                     },
+    { '*',  regular_context,        TOKEN_CATEGORY_STAR_QUANTIFICATION_OPERATOR          },
+    { '+',  regular_context,        TOKEN_CATEGORY_PLUS_QUANTIFICATION_OPERATOR          },
+    { '?',  regular_context,        TOKEN_CATEGORY_QUESTION_MARK_QUANTIFICATION_OPERATOR },
+    { '|',  regular_context,        TOKEN_CATEGORY_ALTERNATION_OPERATOR                  },
+    { '\\', regular_context_escape, TOKEN_CATEGORY_METACHARACTER_ESCAPE                  },
+    { '.',  regular_context,        TOKEN_CATEGORY_ANY_CHARACTER                         },
+    { ANY,  regular_context,        TOKEN_CATEGORY_ORDINARY_CHARACTER                    }
   };
-  g_autoptr (GPtrArray) regular_transitions =
-    lexer_create_transitions_from (regular_metacharacter_mappings,
-                                   G_N_ELEMENTS (regular_metacharacter_mappings));
+  g_autoptr (GPtrArray) regular_context_transitions =
+    lexer_create_transitions_from (regular_context_mappings,
+                                   G_N_ELEMENTS (regular_context_mappings));
 
-  MealyMapping regular_escape_mappings[] =
+  MealyMapping regular_context_escape_mappings[] =
   {
-    { ANY, regular_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
+    { ANY, regular_context, TOKEN_CATEGORY_ORDINARY_CHARACTER }
   };
-  g_autoptr (GPtrArray) regular_escape_transitions =
-    lexer_create_transitions_from (regular_escape_mappings,
-                                   G_N_ELEMENTS (regular_escape_mappings));
+  g_autoptr (GPtrArray) regular_context_escape_transitions =
+    lexer_create_transitions_from (regular_context_escape_mappings,
+                                   G_N_ELEMENTS (regular_context_escape_mappings));
 
-  MealyMapping bracket_expression_mappings[] =
+  MealyMapping bracket_context_mappings[] =
   {
-    { '-',  bracket_expression_character, TOKEN_CATEGORY_RANGE_OPERATOR       },
-    { ']',  regular_character,            TOKEN_CATEGORY_CLOSE_BRACKET        },
-    { '\\', bracket_expression_escape,    TOKEN_CATEGORY_METACHARACTER_ESCAPE },
-    { ANY,  bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER   }
+    { '-',  bracket_context,        TOKEN_CATEGORY_RANGE_OPERATOR       },
+    { ']',  regular_context,        TOKEN_CATEGORY_CLOSE_BRACKET        },
+    { '\\', bracket_context_escape, TOKEN_CATEGORY_METACHARACTER_ESCAPE },
+    { ANY,  bracket_context,        TOKEN_CATEGORY_ORDINARY_CHARACTER   }
   };
-  g_autoptr (GPtrArray) bracket_expression_transitions =
-    lexer_create_transitions_from (bracket_expression_mappings,
-                                   G_N_ELEMENTS (bracket_expression_mappings));
+  g_autoptr (GPtrArray) bracket_context_transitions =
+    lexer_create_transitions_from (bracket_context_mappings,
+                                   G_N_ELEMENTS (bracket_context_mappings));
 
-  MealyMapping bracket_expression_escape_mappings[] =
+  MealyMapping bracket_context_escape_mappings[] =
   {
-    { ANY, bracket_expression_character, TOKEN_CATEGORY_ORDINARY_CHARACTER }
+    { ANY, bracket_context, TOKEN_CATEGORY_ORDINARY_CHARACTER }
   };
-  g_autoptr (GPtrArray) bracket_expression_escape_transitions =
-    lexer_create_transitions_from (bracket_expression_escape_mappings,
-                                   G_N_ELEMENTS (bracket_expression_escape_mappings));
+  g_autoptr (GPtrArray) bracket_context_escape_transitions =
+    lexer_create_transitions_from (bracket_context_escape_mappings,
+                                   G_N_ELEMENTS (bracket_context_escape_mappings));
 
-  g_object_set (regular_character,
-                PROP_STATE_TRANSITIONS, regular_transitions,
+  g_object_set (regular_context,
+                PROP_STATE_TRANSITIONS, regular_context_transitions,
                 NULL);
-  g_object_set (regular_escape,
-                PROP_STATE_TRANSITIONS, regular_escape_transitions,
+  g_object_set (regular_context_escape,
+                PROP_STATE_TRANSITIONS, regular_context_escape_transitions,
                 NULL);
-  g_object_set (bracket_expression_character,
-                PROP_STATE_TRANSITIONS, bracket_expression_transitions,
+  g_object_set (bracket_context,
+                PROP_STATE_TRANSITIONS, bracket_context_transitions,
                 NULL);
-  g_object_set (bracket_expression_escape,
-                PROP_STATE_TRANSITIONS, bracket_expression_escape_transitions,
+  g_object_set (bracket_context_escape,
+                PROP_STATE_TRANSITIONS, bracket_context_escape_transitions,
                 NULL);
 
   g_ptr_array_add_multiple (all_states,
-                            regular_character, regular_escape, bracket_expression_character, bracket_expression_escape,
+                            regular_context, regular_context_escape, bracket_context, bracket_context_escape,
                             NULL);
 
   return mealy_new (PROP_FSM_INITIALIZABLE_ALL_STATES, all_states);

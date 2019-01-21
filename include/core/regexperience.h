@@ -18,6 +18,7 @@ void     regexperience_compile (Regexperience  *self,
 
 gboolean regexperience_match   (Regexperience  *self,
                                 const gchar    *input,
+                                GPtrArray     **matches,
                                 GError        **error);
 
 G_END_DECLS

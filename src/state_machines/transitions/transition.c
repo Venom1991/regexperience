@@ -96,18 +96,20 @@ transition_is_possible (Transition *self,
 {
   g_return_val_if_fail (TRANSITIONS_IS_TRANSITION (self), FALSE);
 
-  if (transition_is_epsilon (self))
-    return FALSE;
+  if (!transition_is_epsilon (self) && input_character != END_OF_STRING)
+    {
+      TransitionPrivate *priv = transition_get_instance_private (self);
+      gchar expected_character = priv->expected_character;
+      EqualityConditionType condition_type = priv->condition_type;
+      GEqualFunc equality_function = transition_discern_equality_function (condition_type);
 
-  TransitionPrivate *priv = transition_get_instance_private (self);
-  gchar expected_character = priv->expected_character;
-  EqualityConditionType condition_type = priv->condition_type;
-  GEqualFunc equality_function = transition_discern_equality_function (condition_type);
+      g_return_val_if_fail (equality_function != NULL, FALSE);
 
-  g_return_val_if_fail (equality_function != NULL, FALSE);
+      return equality_function (GINT_TO_POINTER (expected_character),
+                                GINT_TO_POINTER (input_character));
+    }
 
-  return equality_function (GINT_TO_POINTER (expected_character),
-                            GINT_TO_POINTER (input_character));
+  return FALSE;
 }
 
 gboolean

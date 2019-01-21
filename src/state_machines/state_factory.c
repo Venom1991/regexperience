@@ -15,7 +15,8 @@ State *create_composite_state (GPtrArray                      *composed_from_sta
 
 State *create_dead_state (void)
 {
-  State *dead_state = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
+  State *dead_state = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT,
+                                 PROP_STATE_IS_DEAD, TRUE);
   g_autoptr (GPtrArray) transitions = g_ptr_array_new_with_free_func (g_object_unref);
   Transition *transition = create_deterministic_transition (ANY, dead_state);
 

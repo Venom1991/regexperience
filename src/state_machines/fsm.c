@@ -172,8 +172,13 @@ fsm_get_or_create_dead_state (GPtrArray *all_states)
       for (guint i = 0; i < all_states->len; ++i)
         {
           State *current_state = g_ptr_array_index (all_states, i);
+          gboolean current_state_is_dead = FALSE;
 
-          if (state_is_dead (current_state))
+          g_object_get (current_state,
+                        PROP_STATE_IS_DEAD, &current_state_is_dead,
+                        NULL);
+
+          if (current_state_is_dead)
             {
               dead_state = current_state;
 
