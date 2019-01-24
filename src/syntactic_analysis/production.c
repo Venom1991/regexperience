@@ -335,7 +335,7 @@ production_fetch_non_terminal_first_set (Symbol   *non_terminal,
       Symbol *symbol = g_ptr_array_index (non_terminal_first_set, i);
 
       /* Skipping the addition of epsilon to the filtered first set. */
-      if (symbol_is_match (symbol, EPSILON))
+      if (symbol_is_epsilon (symbol))
         {
           *can_derive_epsilon = TRUE;
 

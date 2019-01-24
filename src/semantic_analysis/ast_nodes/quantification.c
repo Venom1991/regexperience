@@ -151,7 +151,7 @@ quantification_build_acceptor (AstNode *self)
       break;
 
     case QUANTIFICATION_BOUND_TYPE_ONE:
-      final_on_epsilon = create_deterministic_transition (EPSILON ,quantification_final);
+      final_on_epsilon = create_deterministic_transition (EPSILON, quantification_final);
       break;
 
     default:

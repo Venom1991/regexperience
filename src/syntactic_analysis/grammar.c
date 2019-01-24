@@ -159,7 +159,27 @@ grammar_define_productions (GPtrArray **productions,
     (gchar**[])
     {
       (gchar*[]) { START },
-      (gchar*[]) { EXPRESSION, END_OF_INPUT, NULL },
+      (gchar*[]) { ANCHORED_EXPRESSION, END_OF_INPUT, NULL },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { ANCHORED_EXPRESSION },
+      (gchar*[]) { START_ANCHOR, EXPRESSION, END_ANCHOR, NULL },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { START_ANCHOR },
+      (gchar*[]) { "^", NULL     },
+      (gchar*[]) { EPSILON, NULL },
+      NULL
+    },
+    (gchar**[])
+    {
+      (gchar*[]) { END_ANCHOR },
+      (gchar*[]) { "$", NULL     },
+      (gchar*[]) { EPSILON, NULL },
       NULL
     },
     (gchar**[])
@@ -272,7 +292,7 @@ grammar_define_productions (GPtrArray **productions,
     (gchar**[])
     {
       (gchar*[]) { GROUP },
-      (gchar*[]) {"(", EXPRESSION, ")", NULL },
+      (gchar*[]) {"(", ANCHORED_EXPRESSION, ")", NULL },
       NULL
     },
     (gchar**[])
@@ -363,17 +383,17 @@ grammar_define_productions (GPtrArray **productions,
     (gchar**[])
     {
       (gchar*[]) { SPECIAL_CHARACTER },
-      (gchar*[]) { "!" DELIMITER "#" DELIMITER "$" DELIMITER "%" DELIMITER "&" DELIMITER "," DELIMITER
-                   "/" DELIMITER ":" DELIMITER ";" DELIMITER ">" DELIMITER "=" DELIMITER "<" DELIMITER
-                   "@" DELIMITER "^" DELIMITER "_" DELIMITER "`" DELIMITER "{" DELIMITER "}" DELIMITER
-                   " " DELIMITER "\n" DELIMITER "\t", NULL },
+      (gchar*[]) { "!" DELIMITER "#" DELIMITER "%" DELIMITER "&" DELIMITER "," DELIMITER "/" DELIMITER
+                   ":" DELIMITER ";" DELIMITER ">" DELIMITER "=" DELIMITER "<" DELIMITER "@" DELIMITER
+                   "_" DELIMITER "`" DELIMITER "{" DELIMITER "}" DELIMITER " " DELIMITER "\n" DELIMITER
+                   "\t", NULL },
       NULL
     },
     (gchar**[])
     {
       (gchar*[]) { REGULAR_METACHARACTER },
-      (gchar*[]) { "[" DELIMITER "(" DELIMITER ")" DELIMITER "*" DELIMITER "+" DELIMITER "?" DELIMITER
-                   "|" DELIMITER ".", NULL },
+      (gchar*[]) { "^" DELIMITER "$" DELIMITER "[" DELIMITER "(" DELIMITER ")" DELIMITER "*" DELIMITER
+                   "+" DELIMITER "?" DELIMITER "|" DELIMITER ".", NULL },
       NULL
     },
     (gchar**[])
@@ -640,7 +660,7 @@ grammar_insert_parsing_table_entries (GHashTable *parsing_table,
         Symbol *terminal = g_ptr_array_index (terminals, i);
 
         /* Epsilon should not appear as the second dimension of a parsing table entry. */
-        if (!symbol_is_match (terminal, EPSILON))
+        if (!symbol_is_epsilon (terminal))
           {
             ParsingTableKey *parsing_table_key = parsing_table_key_new (PROP_PARSING_TABLE_KEY_PRODUCTION, production,
                                                                         PROP_PARSING_TABLE_KEY_TERMINAL, terminal);

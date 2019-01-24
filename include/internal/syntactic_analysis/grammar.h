@@ -18,6 +18,9 @@ G_DECLARE_FINAL_TYPE (Grammar, grammar, SYNTACTIC_ANALYSIS, GRAMMAR, GObject)
 #define EPSILON                          "ε"
 
 #define START                            "start"
+#define ANCHORED_EXPRESSION              "anchored-expression"
+#define START_ANCHOR                     "start-anchor"
+#define END_ANCHOR                       "end-anchor"
 #define EXPRESSION                       "expression"
 #define EXPRESSION_PRIME                 "expression-prime"
 #define ALTERNATION                      "alternation"

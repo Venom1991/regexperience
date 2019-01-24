@@ -175,6 +175,8 @@ lexer_build_transducer (void)
     { '[',  bracket_context,        TOKEN_CATEGORY_OPEN_BRACKET,                         },
     { '(',  regular_context,        TOKEN_CATEGORY_OPEN_PARENTHESIS                      },
     { ')',  regular_context,        TOKEN_CATEGORY_CLOSE_PARENTHESIS                     },
+    { '^',  regular_context,        TOKEN_CATEGORY_BEGIN_ANCHOR,                         },
+    { '$',  regular_context,        TOKEN_CATEGORY_END_ANCHOR,                           },
     { '*',  regular_context,        TOKEN_CATEGORY_STAR_QUANTIFICATION_OPERATOR          },
     { '+',  regular_context,        TOKEN_CATEGORY_PLUS_QUANTIFICATION_OPERATOR          },
     { '?',  regular_context,        TOKEN_CATEGORY_QUESTION_MARK_QUANTIFICATION_OPERATOR },

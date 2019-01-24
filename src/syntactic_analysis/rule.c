@@ -1,5 +1,4 @@
 #include "internal/syntactic_analysis/rule.h"
-#include "internal/syntactic_analysis/grammar.h"
 #include "internal/syntactic_analysis/symbols/symbol.h"
 #include "internal/common/helpers.h"
 
@@ -96,7 +95,7 @@ rule_discern_epsilon_derivability (Rule *self)
         {
           Symbol *symbol = g_ptr_array_index (first_set, i);
 
-          if (symbol_is_match (symbol, EPSILON))
+          if (symbol_is_epsilon (symbol))
             {
               priv->derives_epsilon = TRUE;
 

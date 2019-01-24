@@ -38,6 +38,8 @@ void     symbol_extract_value       (Symbol     *self,
 gboolean symbol_is_equal            (Symbol     *self,
                                      Symbol     *other);
 
+gboolean symbol_is_epsilon          (Symbol     *self);
+
 gboolean symbol_is_string_match     (Symbol     *self,
                                      gchar      *value);
 

@@ -34,6 +34,9 @@ static GHashTable   *analyzer_define_operator_types          (void);
 static gboolean      analyzer_is_constant                    (GNode                  *cst_root,
                                                               GNode                 **first_cst_child);
 
+static gboolean      analyzer_is_anchor                      (GNode                  *cst_root,
+                                                              GNode                 **second_cst_child);
+
 static gboolean      analyzer_is_unary_operator              (GNode                  *cst_root,
                                                               GNode                 **first_cst_child,
                                                               GNode                 **operator_type_discerning_node);
@@ -117,6 +120,13 @@ analyzer_transform_concrete_syntax_tree (GNode      *cst_root,
                             &first_cst_child))
     {
       ast_node = create_constant (first_cst_child);
+    }
+  else if (analyzer_is_anchor (cst_root, &second_cst_child))
+    {
+      g_autoptr (AstNode) anchored_node = analyzer_transform_concrete_syntax_tree (second_cst_child,
+                                                                                   operator_types);
+
+      ast_node = create_anchor (cst_root, anchored_node);
     }
   else if (analyzer_is_unary_operator (cst_root,
                                        &first_cst_child,
@@ -222,6 +232,34 @@ analyzer_is_constant (GNode  *cst_root,
       *first_cst_child = g_ptr_array_index (cst_children, 0);
 
       return TRUE;
+    }
+
+  return FALSE;
+}
+
+static gboolean
+analyzer_is_anchor (GNode  *cst_root,
+                    GNode **second_cst_child)
+{
+  if (analyzer_is_match (cst_root,
+                         ANCHORED_EXPRESSION,
+                         NULL))
+    {
+      g_autoptr (GPtrArray) cst_children =
+          analyzer_fetch_cst_children (cst_root,
+                                       FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_ALL);
+
+      if (g_ptr_array_has_items (cst_children))
+        {
+          const guint anchor_node_children_count = 3;
+
+          if (cst_children->len == anchor_node_children_count)
+            {
+              *second_cst_child = g_ptr_array_index (cst_children, 1);
+
+              return TRUE;
+            }
+        }
     }
 
   return FALSE;
@@ -352,7 +390,7 @@ analyzer_is_empty (GNode *cst_root)
           GNode *cst_child = g_ptr_array_index (cst_children, 0);
           Symbol *terminal = SYMBOLS_SYMBOL (cst_child->data);
 
-          return symbol_is_match (terminal, EPSILON);
+          return symbol_is_epsilon (terminal);
         }
     }
 
@@ -474,8 +512,11 @@ analyzer_discern_operator_type (GNode      *cst_root,
   g_autofree const gchar *cst_root_caption = analyzer_fetch_node_caption (cst_root);
   OperatorType operator_type = OPERATOR_TYPE_UNDEFINED;
 
-  operator_type = (OperatorType) GPOINTER_TO_INT (g_hash_table_lookup (operator_types,
-                                                                       cst_root_caption));
+  if (g_hash_table_contains (operator_types, cst_root_caption))
+    {
+      operator_type = (OperatorType) GPOINTER_TO_INT (g_hash_table_lookup (operator_types,
+                                                                           cst_root_caption));
+    }
 
   return operator_type;
 }

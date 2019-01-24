@@ -43,6 +43,8 @@ gint     transition_compare_equality_condition_type     (Transition *a,
 #define PROP_TRANSITION_EQUALITY_CONDITION_TYPE "equality-condition-type"
 
 #define EPSILON                                 0x00 /* ASCII "NUL" */
+#define START                                   0x02 /* ASCII "STX" */
+#define END                                     0x03 /* ASCII "ETX" */
 #define ANY                                     0x1A /* ASCII "SUB" */
 
 G_END_DECLS

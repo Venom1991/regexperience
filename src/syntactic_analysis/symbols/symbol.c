@@ -1,4 +1,5 @@
 #include "internal/syntactic_analysis/symbols/symbol.h"
+#include "internal/syntactic_analysis/grammar.h"
 
 static gboolean symbol_default_is_match (Symbol          *self,
                                          gconstpointer    value,
@@ -62,6 +63,14 @@ symbol_is_equal (Symbol *self,
   g_assert (klass->is_equal != NULL);
 
   return klass->is_equal (self, other);
+}
+
+gboolean
+symbol_is_epsilon (Symbol *self)
+{
+  g_return_val_if_fail (SYMBOLS_IS_SYMBOL (self), FALSE);
+
+  return symbol_is_match (self, EPSILON);
 }
 
 gboolean symbol_is_string_match (Symbol *self,

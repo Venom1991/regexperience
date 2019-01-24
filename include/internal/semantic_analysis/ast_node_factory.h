@@ -5,6 +5,9 @@
 
 AstNode *create_constant        (GNode        *cst_context);
 
+AstNode *create_anchor          (GNode        *cst_context,
+                                 AstNode      *anchored_node);
+
 AstNode *create_unary_operator  (OperatorType  operator_type,
                                  AstNode      *operand);
 

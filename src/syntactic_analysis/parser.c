@@ -123,7 +123,7 @@ parser_build_concrete_syntax_tree (Parser     *self,
       if (SYMBOLS_IS_TERMINAL (prediction_head))
         {
           /* Skipping the epsilon symbol. */
-          if (!symbol_is_match (prediction_head, EPSILON))
+          if (!symbol_is_epsilon (prediction_head))
             {
               g_queue_push_tail (analysis_queue, g_object_ref (token));
 
@@ -407,7 +407,7 @@ parser_insert_children (GNode  *root,
        */
       if (SYMBOLS_IS_TERMINAL (symbol))
         {
-          if (!symbol_is_match (symbol, EPSILON))
+          if (!symbol_is_epsilon (symbol))
             {
               Token *token = g_queue_pop_tail (analysis_queue);
 

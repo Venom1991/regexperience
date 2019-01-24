@@ -1,4 +1,3 @@
-#include "core/match.h"
 #include "internal/state_machines/acceptors/dfa.h"
 #include "internal/state_machines/acceptors/acceptor_runnable.h"
 #include "internal/state_machines/fsm_modifiable.h"
@@ -6,6 +5,7 @@
 #include "internal/state_machines/transitions/deterministic_transition.h"
 #include "internal/state_machines/transitions/transition_factory.h"
 #include "internal/common/helpers.h"
+#include "core/match.h"
 
 struct _Dfa
 {
@@ -173,6 +173,12 @@ dfa_run (AcceptorRunnable *self,
   dfa_reset (dfa);
   g_return_val_if_fail (priv->current_state != NULL, NULL);
 
+  gchar start_of_text[] = { START, END_OF_STRING };
+  gchar end_of_text[] = { END, END_OF_STRING };
+  g_autofree gchar *adjusted_input = g_strconcat (start_of_text,
+                                                  input,
+                                                  end_of_text,
+                                                  NULL);
   guint begin = 0, end = 0;
   GPtrArray *matches = NULL;
 
@@ -180,7 +186,7 @@ dfa_run (AcceptorRunnable *self,
     {
       if (end != 0)
         {
-          gchar previous_character = input[end - 1];
+          gchar previous_character = adjusted_input[end - 1];
 
           if (previous_character == END_OF_STRING)
             {
@@ -190,7 +196,7 @@ dfa_run (AcceptorRunnable *self,
             }
         }
 
-      gchar current_character = input[end];
+      gchar current_character = adjusted_input[end];
       State *current_state = priv->current_state;
       State *next_state = dfa_transition_to_next_state (dfa, current_character);
       gboolean next_state_is_dead = FALSE;
@@ -219,10 +225,12 @@ dfa_run (AcceptorRunnable *self,
               if (distance == 0)
                 match_value = g_strdup (EMPTY_STRING);
               else
-                match_value = g_strndup (input + begin, distance);
+                match_value = g_strndup (adjusted_input + begin, distance);
             }
 
-          /* Moving onto the next character in the input in case an empty match was found. */
+          /* Moving onto the next character in the input in case the dead state was reached
+           * straight from the start state without consuming a single character.
+           */
           if (current_state_is_start && distance == 0)
             end++;
 
