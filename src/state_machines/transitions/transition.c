@@ -96,7 +96,7 @@ transition_is_possible (Transition *self,
 {
   g_return_val_if_fail (TRANSITIONS_IS_TRANSITION (self), FALSE);
 
-  if (!transition_is_epsilon (self) && input_character != END_OF_STRING)
+  if (!transition_is_epsilon (self))
     {
       TransitionPrivate *priv = transition_get_instance_private (self);
       gchar expected_character = priv->expected_character;
@@ -122,6 +122,21 @@ transition_is_epsilon (Transition *self)
   return priv->expected_character == EPSILON &&
          priv->requires_input == FALSE &&
          priv->condition_type == EQUALITY_CONDITION_TYPE_ANY;
+}
+
+void
+transition_convert_to_epsilon (Transition *self)
+{
+  g_return_if_fail (TRANSITIONS_IS_TRANSITION (self));
+
+  TransitionPrivate *priv = transition_get_instance_private (self);
+
+  if (!transition_is_epsilon (self))
+    {
+      priv->expected_character = EPSILON;
+      priv->requires_input = FALSE;
+      priv->condition_type = EQUALITY_CONDITION_TYPE_ANY;
+    }
 }
 
 gint

@@ -10,6 +10,7 @@ GCC or Clang are required to compile the source code due to the usage of GLib's 
 * bracket expressions: [ ]
     * value ranges: -
 * dot metacharacter: .
+* anchors: ^, $
 
 Metacharacters are escaped the usual way - using the backslash character.
 

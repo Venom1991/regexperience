@@ -184,9 +184,11 @@ dfa_run (AcceptorRunnable *self,
 
   while (TRUE)
     {
+      gchar previous_character = 0;
+
       if (end != 0)
         {
-          gchar previous_character = adjusted_input[end - 1];
+          previous_character = adjusted_input[end - 1];
 
           if (previous_character == END_OF_STRING)
             {
@@ -198,34 +200,58 @@ dfa_run (AcceptorRunnable *self,
 
       gchar current_character = adjusted_input[end];
       State *current_state = priv->current_state;
+      StateTypeFlags current_state_type_flags = STATE_TYPE_UNDEFINED;
       State *next_state = dfa_transition_to_next_state (dfa, current_character);
       gboolean next_state_is_dead = FALSE;
+
+      g_object_get (current_state,
+                    PROP_STATE_TYPE_FLAGS, &current_state_type_flags,
+                    NULL);
+
+      gboolean current_state_is_start = (current_state_type_flags & STATE_TYPE_START);
+      gboolean current_state_is_final = (current_state_type_flags & STATE_TYPE_FINAL);
 
       g_object_get (next_state,
                     PROP_STATE_IS_DEAD, &next_state_is_dead,
                     NULL);
 
+      guint distance = end - begin;
+      g_autoptr (GString) match_value = NULL;
+      guint match_range_begin = 0, match_range_end = 0;
+
+      /* Handling empty matches. */
+      if (current_state_is_final)
+        {
+          /* Ignoring empty matches that are a result of the start and end of text special characters. */
+          gboolean is_valid_empty_match =
+            (distance == 0 &&
+             (current_character != START && previous_character != END));
+
+          if (is_valid_empty_match)
+            {
+              g_autofree gchar *value = g_strdup (EMPTY_STRING);
+
+              match_value = g_string_new (value);
+              match_range_begin = match_range_end = end - 1;
+            }
+        }
+
+      /* Handling non-empty matches. */
       if (next_state_is_dead)
         {
-          /* Discerning the current run's result in case the DFA transitioned to the dead state. */
-          guint distance = end - begin;
-          g_autofree gchar *match_value = NULL;
-          StateTypeFlags state_type_flags = STATE_TYPE_UNDEFINED;
+          /* Discerning the current run's result in case the DFA transitioned
+           * to the dead state from a final state.
+           */
+          gboolean is_valid_non_empty_match =
+            (distance != 0 && current_state_is_final);
 
-          g_object_get (current_state,
-                        PROP_STATE_TYPE_FLAGS, &state_type_flags,
-                        NULL);
-
-          gboolean current_state_is_start = (state_type_flags & STATE_TYPE_START);
-          gboolean current_state_is_final = (state_type_flags & STATE_TYPE_FINAL);
-
-          /* Initializing the matched value found in the input (empty or otherwise). */
-          if (current_state_is_final)
+          if (is_valid_non_empty_match)
             {
-              if (distance == 0)
-                match_value = g_strdup (EMPTY_STRING);
-              else
-                match_value = g_strndup (adjusted_input + begin, distance);
+              g_autofree gchar *value = g_strndup (adjusted_input + begin, distance);
+
+              match_value = g_string_new (value);
+              match_range_begin = begin - 1;
+              match_range_end = end - 1;
             }
 
           /* Moving onto the next character in the input in case the dead state was reached
@@ -233,21 +259,6 @@ dfa_run (AcceptorRunnable *self,
            */
           if (current_state_is_start && distance == 0)
             end++;
-
-          if (match_value != NULL)
-            {
-              g_autoptr (GString) value = g_string_new (match_value);
-              guint range_begin = begin;
-              guint range_end = end - 1;
-              Match *match = match_new (PROP_MATCH_VALUE, value,
-                                        PROP_MATCH_RANGE_BEGIN, range_begin,
-                                        PROP_MATCH_RANGE_END, range_end);
-
-              if (matches == NULL)
-                matches = g_ptr_array_new_with_free_func (g_object_unref);
-
-              g_ptr_array_add (matches, match);
-            }
 
           /* Preparing for a new run. */
           begin = end;
@@ -258,6 +269,35 @@ dfa_run (AcceptorRunnable *self,
         {
           /* Moving onto the next character in the input in case the DFA can continue with the current run. */
           end++;
+        }
+
+      /* Adding a new match if possible. */
+      if (match_value != NULL)
+        {
+          gchar *value = match_value->str;
+
+          if (g_strrstr (value, start_of_text) != NULL)
+            {
+              match_range_begin++;
+
+              g_string_erase (match_value, 0, 1);
+            }
+
+          if (g_strrstr (value, end_of_text) != NULL)
+            {
+              match_range_end--;
+
+              g_string_erase (match_value, match_value->len - 1, 1);
+            }
+
+          if (matches == NULL)
+            matches = g_ptr_array_new_with_free_func (g_object_unref);
+
+          Match *match = match_new (PROP_MATCH_VALUE, match_value,
+                                    PROP_MATCH_RANGE_BEGIN, match_range_begin,
+                                    PROP_MATCH_RANGE_END, match_range_end);
+
+          g_ptr_array_add (matches, match);
         }
     }
 
@@ -308,24 +348,28 @@ dfa_transition_to_next_state (Dfa   *self,
   g_return_val_if_fail (g_ptr_array_has_items (transitions), FALSE);
   g_object_unref (current_state);
 
-  /* Trying to find an eligible transition found among the current state's transitions. */
-  for (guint i = 0; i < transitions->len; ++i)
+  /* Ignoring the null terminator. */
+  if (input_character != END_OF_STRING)
     {
-      Transition *transition = g_ptr_array_index (transitions, i);
-
-      g_return_val_if_fail (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (transition), FALSE);
-
-      if (transition_is_possible (transition, input_character))
+      /* Trying to find an eligible transition found among the current state's transitions. */
+      for (guint i = 0; i < transitions->len; ++i)
         {
-          State *next_state = NULL;
+          Transition *transition = g_ptr_array_index (transitions, i);
 
-          g_object_get (transition,
-                        PROP_DETERMINISTIC_TRANSITION_OUTPUT_STATE, &next_state,
-                        NULL);
+          g_return_val_if_fail (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (transition), FALSE);
 
-          priv->current_state = next_state;
+          if (transition_is_possible (transition, input_character))
+            {
+              State *next_state = NULL;
 
-          return next_state;
+              g_object_get (transition,
+                            PROP_DETERMINISTIC_TRANSITION_OUTPUT_STATE, &next_state,
+                            NULL);
+
+              priv->current_state = next_state;
+
+              return next_state;
+            }
         }
     }
 

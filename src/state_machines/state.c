@@ -7,6 +7,8 @@ typedef struct
 {
   StateTypeFlags  state_type_flags;
   GPtrArray      *transitions;
+  gboolean        is_start_anchor;
+  gboolean        is_end_anchor;
   gboolean        is_dead;
 } StatePrivate;
 
@@ -14,6 +16,8 @@ enum
 {
   PROP_TYPE_FLAGS = 1,
   PROP_TRANSITIONS,
+  PROP_IS_START_ANCHOR,
+  PROP_IS_END_ANCHOR,
   PROP_IS_DEAD,
   N_PROPERTIES
 };
@@ -63,6 +67,20 @@ state_class_init (StateClass *klass)
                         "Transitions that are possible once a state machine reaches the state.",
                         G_TYPE_PTR_ARRAY,
                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+
+  obj_properties[PROP_IS_START_ANCHOR] =
+    g_param_spec_boolean (PROP_STATE_IS_START_ANCHOR,
+                          "Is start anchor",
+                          "Describes whether or not the state is intended to represent the start anchor.",
+                          FALSE,
+                          G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+
+  obj_properties[PROP_IS_END_ANCHOR] =
+    g_param_spec_boolean (PROP_STATE_IS_END_ANCHOR,
+                          "Is end anchor",
+                          "Describes whether or not the state is intended to represent the end anchor.",
+                          FALSE,
+                          G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
   obj_properties[PROP_IS_DEAD] =
     g_param_spec_boolean (PROP_STATE_IS_DEAD,
@@ -141,6 +159,14 @@ state_get_property (GObject    *object,
       g_value_set_boxed (value, priv->transitions);
       break;
 
+    case PROP_IS_START_ANCHOR:
+      g_value_set_boolean (value, priv->is_start_anchor);
+      break;
+
+    case PROP_IS_END_ANCHOR:
+      g_value_set_boolean (value, priv->is_end_anchor);
+      break;
+
     case PROP_IS_DEAD:
       g_value_set_boolean (value, priv->is_dead);
       break;
@@ -177,6 +203,14 @@ state_set_property (GObject      *object,
 
         priv->transitions = transitions;
       }
+      break;
+
+    case PROP_IS_START_ANCHOR:
+      priv->is_start_anchor = g_value_get_boolean (value);
+      break;
+
+    case PROP_IS_END_ANCHOR:
+      priv->is_end_anchor = g_value_get_boolean (value);
       break;
 
     case PROP_IS_DEAD:

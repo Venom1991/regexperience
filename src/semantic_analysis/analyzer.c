@@ -420,6 +420,7 @@ analyzer_is_match (GNode *cst_root,
               if (g_strcmp0 (cst_root_caption, current) == 0)
                 {
                   result = TRUE;
+
                   break;
                 }
             }

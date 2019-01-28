@@ -2,6 +2,7 @@
 #define REGEXPERIENCE_H
 
 #include "errors.h"
+#include "match.h"
 
 #include <glib-object.h>
 

@@ -1,4 +1,9 @@
-<start>                            ::= <expression> "EOI"
+<start>                            ::= <anchored-expression> "EOI"
+<anchored-expression>              ::= <start-anchor> <expression> <end-anchor>
+<start-anchor>                     ::= "^"
+                                    |  ε
+<end-anchor>                       ::= "$"
+                                    |  ε
 <expression>                       ::= <simple-expression> <expression-prime>
 <expression-prime>                 ::= <alternation>
                                     |  ε
@@ -31,7 +36,7 @@
                                     |  "\" <elementary-expression-prime>
 <elementary-expression-prime>      ::= <regular-metacharacter>
                                     |  <metacharacter-escape>
-<group>                            ::= "(" <expression> ")"
+<group>                            ::= "(" <anchored-expression> ")"
 <bracket-expression>               ::= "[" <bracket-expression-items> "]"
 <bracket-expression-items>         ::= <bracket-expression-item> <bracket-expression-items-prime>
 <bracket-expression-items-prime>   ::= <bracket-expression-items>
@@ -55,9 +60,9 @@
 <lower-case-letter>                ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m"
                                     |  "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 <digit>                            ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
-<special-character>                ::= "!" | "#" | "$" | "%" | "&" | "," | "/" | ":" | ";" | ">" | "=" | "<" | "@"
-                                    |  "^" | "_" | "`" | "{" | "}" | "~" | " " | "\n" | "\t"
-<regular-metacharacter>            ::= "[" | "(" | ")" | "*" | "+" | "?" | "|" | "."
+<special-character>                ::= "!" | "#" | "%" | "&" | "," | "/" | ":" | ";" | ">" | "=" | "<" | "@" | "_"
+                                    |  "`" | "{" | "}" | "~" | " " | "\n" | "\t"
+<regular-metacharacter>            ::= "^" | "$" | "[" | "(" | ")" | "*" | "+" | "?" | "|" | "."
 <bracket-expression-metacharacter> ::= "-" | "]"
 <any-character>                    ::= "."
 <metacharacter-escape>             ::= "\"

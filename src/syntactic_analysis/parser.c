@@ -11,8 +11,6 @@
 #include "internal/common/helpers.h"
 #include "core/errors.h"
 
-#include <math.h>
-
 struct _Parser
 {
   GObject parent_instance;
@@ -432,12 +430,12 @@ parser_insert_children (GNode  *root,
     }
 }
 
-static
-void parser_report_error (guint       token_position,
-                          GPtrArray  *all_tokens,
-                          gboolean    parsing_table_entry_found,
-                          Symbol     *prediction_head,
-                          GError    **error)
+static void
+parser_report_error (guint       token_position,
+                     GPtrArray  *all_tokens,
+                     gboolean    parsing_table_entry_found,
+                     Symbol     *prediction_head,
+                     GError    **error)
 {
   Token *current_token = NULL;
   gboolean is_last_token = (token_position == all_tokens->len);
@@ -457,85 +455,28 @@ void parser_report_error (guint       token_position,
    */
   if (!parsing_table_entry_found || prediction_head == NULL || is_last_token)
     {
+      g_autoptr (GArray) additional_categories = g_array_new (FALSE, FALSE, sizeof (TokenCategory));
+
       g_object_get (current_token,
                     PROP_TOKEN_CATEGORY, &token_category,
                     NULL);
 
       if (token_category == TOKEN_CATEGORY_END_OF_INPUT_MARKER)
         {
-          Token *found_token = NULL;
+          TokenCategory categories[] = { TOKEN_CATEGORY_OPEN_PARENTHESIS,
+                                         TOKEN_CATEGORY_CLOSE_PARENTHESIS,
+                                         TOKEN_CATEGORY_OPEN_BRACKET,
+                                         TOKEN_CATEGORY_ALTERNATION_OPERATOR,
+                                         TOKEN_CATEGORY_METACHARACTER_ESCAPE,
+                                         TOKEN_CATEGORY_END_ANCHOR };
 
-          if (parser_token_exists_in_all_tokens (all_tokens,
-                                                 TOKEN_CATEGORY_OPEN_PARENTHESIS,
-                                                 starting_position,
-                                                 &found_token,
-                                                 NULL))
-            {
-              invalid_token = found_token;
-
-              goto unmatched_open_parenthesis;
-            }
-          else if (parser_token_exists_in_all_tokens (all_tokens,
-                                                      TOKEN_CATEGORY_OPEN_BRACKET,
-                                                      starting_position,
-                                                      &found_token,
-                                                      NULL))
-            {
-              invalid_token = found_token;
-
-              goto unmatched_open_bracket;
-            }
-          else if (parser_token_exists_in_all_tokens (all_tokens,
-                                                      TOKEN_CATEGORY_ALTERNATION_OPERATOR,
-                                                      starting_position,
-                                                      &found_token,
-                                                      NULL))
-            {
-              invalid_token = found_token;
-
-              goto dangling_alternation_operator;
-            }
-          else if (parser_token_exists_in_all_tokens (all_tokens,
-                                                      TOKEN_CATEGORY_METACHARACTER_ESCAPE,
-                                                      starting_position,
-                                                      &found_token,
-                                                      NULL))
-            {
-              invalid_token = found_token;
-
-              goto dangling_metacharacter_escape;
-            }
+          g_array_append_vals (additional_categories, categories, G_N_ELEMENTS (categories));
         }
       else if (token_category == TOKEN_CATEGORY_CLOSE_PARENTHESIS)
         {
-          Token *found_token = NULL;
-          guint found_token_position = 0;
+          TokenCategory categories[] = { TOKEN_CATEGORY_ALTERNATION_OPERATOR };
 
-          if (parser_token_exists_in_all_tokens (all_tokens,
-                                                 TOKEN_CATEGORY_ALTERNATION_OPERATOR,
-                                                 starting_position,
-                                                 &found_token,
-                                                 NULL))
-            {
-              invalid_token = found_token;
-
-              goto dangling_alternation_operator;
-            }
-          else if (parser_token_exists_in_all_tokens (all_tokens,
-                                                      TOKEN_CATEGORY_OPEN_PARENTHESIS,
-                                                      starting_position,
-                                                      &found_token,
-                                                      &found_token_position))
-            {
-              gint token_distance = abs (token_position - found_token_position);
-
-              if (token_distance == 1)
-                {
-                  invalid_token = found_token;
-                  error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_EMPTY_GROUP;
-                  error_message = "Empty groups are not allowed";
-                }
-            }
+          g_array_append_vals (additional_categories, categories, G_N_ELEMENTS (categories));
         }
       else if (token_category == TOKEN_CATEGORY_CLOSE_BRACKET)
         {
@@ -543,22 +484,12 @@ void parser_report_error (guint       token_position,
           guint found_token_position = 0;
 
           if (parser_token_exists_in_all_tokens (all_tokens,
-                                                 TOKEN_CATEGORY_RANGE_OPERATOR,
+                                                 TOKEN_CATEGORY_OPEN_BRACKET,
                                                  starting_position,
                                                  &found_token,
-                                                 NULL))
+                                                 &found_token_position))
             {
-              invalid_token = found_token;
-
-              goto dangling_range_operator;
-            }
-          else if (parser_token_exists_in_all_tokens (all_tokens,
-                                                      TOKEN_CATEGORY_OPEN_BRACKET,
-                                                      starting_position,
-                                                      &found_token,
-                                                      &found_token_position))
-            {
-              gint token_distance = abs (token_position - found_token_position);
+              guint token_distance = token_position - found_token_position;
 
               if (token_distance == 1)
                 {
@@ -567,11 +498,72 @@ void parser_report_error (guint       token_position,
                   error_message = "Empty bracket expressions are not allowed";
                 }
             }
+
+          if (invalid_token == NULL)
+            {
+              TokenCategory categories[] = { TOKEN_CATEGORY_RANGE_OPERATOR };
+
+              g_array_append_vals (additional_categories, categories, G_N_ELEMENTS (categories));
+            }
+        }
+      else if (token_category == TOKEN_CATEGORY_ORDINARY_CHARACTER)
+        {
+          TokenCategory categories[] = { TOKEN_CATEGORY_CLOSE_PARENTHESIS,
+                                         TOKEN_CATEGORY_END_ANCHOR };
+
+          g_array_append_vals (additional_categories, categories, G_N_ELEMENTS (categories));
         }
 
       if (invalid_token == NULL)
         {
-          invalid_token = current_token;
+          if (g_array_has_items (additional_categories))
+            {
+              Token *found_token = NULL;
+
+              for (guint i = 0; i < additional_categories->len; ++i)
+                {
+                  TokenCategory current_category = g_array_index (additional_categories, TokenCategory, i);
+
+                  if (parser_token_exists_in_all_tokens (all_tokens,
+                                                         current_category,
+                                                         starting_position,
+                                                         &found_token,
+                                                         NULL))
+                    {
+                      invalid_token = found_token;
+
+                      switch (current_category)
+                        {
+                        case TOKEN_CATEGORY_ALTERNATION_OPERATOR:
+                          goto dangling_alternation_operator;
+
+                        case TOKEN_CATEGORY_RANGE_OPERATOR:
+                          goto dangling_range_operator;
+
+                        case TOKEN_CATEGORY_METACHARACTER_ESCAPE:
+                          goto dangling_metacharacter_escape;
+
+                        case TOKEN_CATEGORY_OPEN_PARENTHESIS:
+                          goto unmatched_open_parenthesis;
+
+                        case TOKEN_CATEGORY_CLOSE_PARENTHESIS:
+                          goto unmatched_close_parenthesis;
+
+                        case TOKEN_CATEGORY_OPEN_BRACKET:
+                          goto unmatched_open_bracket;
+
+                        case TOKEN_CATEGORY_END_ANCHOR:
+                          goto unexpected_end_anchor_position;
+
+                        default:
+                          break;
+                        }
+                    }
+                }
+            }
+
+          if (invalid_token == NULL)
+            invalid_token = current_token;
 
           switch (token_category)
             {
@@ -599,10 +591,32 @@ void parser_report_error (guint       token_position,
               error_message = "Unmatched open parenthesis";
               break;
 
+            case TOKEN_CATEGORY_CLOSE_PARENTHESIS:
+            unmatched_close_parenthesis:
+              error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_UNMATCHED_CLOSE_PARENTHESIS;
+              error_message = "Unmatched close parenthesis";
+              break;
+
             case TOKEN_CATEGORY_OPEN_BRACKET:
             unmatched_open_bracket:
               error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_UNMATCHED_OPEN_BRACKET;
               error_message = "Unmatched open bracket";
+              break;
+
+            case TOKEN_CATEGORY_END_ANCHOR:
+            unexpected_end_anchor_position:
+              error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_UNEXPECTED_END_ANCHOR;
+              error_message = "Unexpected end anchor";
+              break;
+
+            case TOKEN_CATEGORY_START_ANCHOR:
+              error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_UNEXPECTED_START_ANCHOR;
+              error_message = "Unexpected start anchor";
+              break;
+
+            case TOKEN_CATEGORY_EMPTY_EXPRESSION_MARKER:
+              error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_UNEXPECTED_EMPTY_EXPRESSION;
+              error_message = "Unexpected empty expression";
               break;
 
             case TOKEN_CATEGORY_STAR_QUANTIFICATION_OPERATOR:
@@ -610,11 +624,6 @@ void parser_report_error (guint       token_position,
             case TOKEN_CATEGORY_QUESTION_MARK_QUANTIFICATION_OPERATOR:
               error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_DANGLING_QUANTIFICATION_OPERATOR;
               error_message = "Dangling quantification operator";
-              break;
-
-            case TOKEN_CATEGORY_CLOSE_PARENTHESIS:
-              error_code = SYNTACTIC_ANALYSIS_PARSER_ERROR_UNMATCHED_CLOSE_PARENTHESIS;
-              error_message = "Unmatched close parenthesis";
               break;
 
             default:

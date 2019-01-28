@@ -35,6 +35,8 @@ gboolean transition_is_possible                         (Transition *self,
 
 gboolean transition_is_epsilon                          (Transition *self);
 
+void     transition_convert_to_epsilon                  (Transition *self);
+
 gint     transition_compare_equality_condition_type     (Transition *a,
                                                          Transition *b);
 
@@ -46,6 +48,7 @@ gint     transition_compare_equality_condition_type     (Transition *a,
 #define START                                   0x02 /* ASCII "STX" */
 #define END                                     0x03 /* ASCII "ETX" */
 #define ANY                                     0x1A /* ASCII "SUB" */
+#define EMPTY                                   0x1B /* ASCII "ESC" */
 
 G_END_DECLS
 

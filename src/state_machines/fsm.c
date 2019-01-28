@@ -358,7 +358,6 @@ fsm_set_property (GObject      *object,
 
       fsm_prepare_states (priv);
       fsm_prepare_alphabet (priv);
-
       break;
 
     default:

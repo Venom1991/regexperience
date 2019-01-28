@@ -81,7 +81,7 @@ discern_anchor_type (GNode *anchor_cst_node)
                     PROP_TOKEN_CATEGORY, &token_category,
                     NULL);
 
-      if (token_category == TOKEN_CATEGORY_BEGIN_ANCHOR ||
+      if (token_category == TOKEN_CATEGORY_START_ANCHOR ||
           token_category == TOKEN_CATEGORY_END_ANCHOR)
         anchor_type = ANCHOR_TYPE_ANCHORED;
     }

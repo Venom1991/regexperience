@@ -25,6 +25,13 @@ typedef struct
   TokenCategory  token_category;
 } MealyMapping;
 
+typedef struct
+{
+  gchar *original_substring;
+  guint  original_length;
+  gchar *replacement_substring;
+} ExpressionNormalizer;
+
 static void              lexer_create_token            (TokenCategory  category,
                                                         gchar         *content,
                                                         guint         *character_position,
@@ -33,10 +40,12 @@ static void              lexer_create_token            (TokenCategory  category,
 static FsmInitializable *lexer_build_transducer        (void);
 
 static GPtrArray        *lexer_create_transitions_from (MealyMapping  *mappings,
-                                                        gsize          mappings_size);
+                                                        gsize          mappings_count);
 
 static void              lexer_report_error            (const gchar   *expression,
                                                         GError       **error);
+
+static GString *         lexer_normalize_expression    (const gchar   *expression);
 
 static void              lexer_dispose                 (GObject       *object);
 
@@ -94,20 +103,33 @@ lexer_tokenize (Lexer        *self,
     {
       transducer_runnable_reset (transducer);
 
+      g_autoptr (GString) normalized_expression_string = lexer_normalize_expression (expression);
+      gchar *normalized_expression = normalized_expression_string->str;
+
       while (TRUE)
         {
-          gchar current_character = *expression++;
+          gchar current_character = *normalized_expression++;
 
           if (current_character == END_OF_STRING)
             break;
 
           TokenCategory category = (TokenCategory) GPOINTER_TO_INT (transducer_runnable_run (transducer,
                                                                                              current_character));
-          g_autofree gchar *content = g_strdup_printf ("%c", current_character);
-          lexer_create_token (category,
-                              content,
-                              &character_position,
-                              tokens);
+
+          if (category != TOKEN_CATEGORY_UNDEFINED)
+            {
+              g_autofree gchar *content = NULL;
+
+              if (category == TOKEN_CATEGORY_EMPTY_EXPRESSION_MARKER)
+                content = g_strdup (EMPTY_STRING);
+              else
+                content = g_strdup_printf ("%c", current_character);
+
+              lexer_create_token (category,
+                                  content,
+                                  &character_position,
+                                  tokens);
+            }
         }
     }
   else
@@ -144,10 +166,15 @@ lexer_create_token (TokenCategory  category,
   guint lexeme_end_position = 0;
   gsize lexeme_content_length = lexeme_content->len;
 
-  if (lexeme_content_length > 0)
+  if (character_position != NULL)
     {
+      guint position_offset = 0;
+
+      if (lexeme_content_length > 0)
+        position_offset = (guint) lexeme_content_length - 1;
+
       lexeme_start_position = *character_position;
-      lexeme_end_position = (guint) (*character_position + (lexeme_content_length - 1));
+      lexeme_end_position = (*character_position + position_offset);
       *character_position += lexeme_content_length;
     }
 
@@ -171,47 +198,49 @@ lexer_build_transducer (void)
   State *bracket_context_escape = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT);
 
   MealyMapping regular_context_mappings[] =
-  {
-    { '[',  bracket_context,        TOKEN_CATEGORY_OPEN_BRACKET,                         },
-    { '(',  regular_context,        TOKEN_CATEGORY_OPEN_PARENTHESIS                      },
-    { ')',  regular_context,        TOKEN_CATEGORY_CLOSE_PARENTHESIS                     },
-    { '^',  regular_context,        TOKEN_CATEGORY_BEGIN_ANCHOR,                         },
-    { '$',  regular_context,        TOKEN_CATEGORY_END_ANCHOR,                           },
-    { '*',  regular_context,        TOKEN_CATEGORY_STAR_QUANTIFICATION_OPERATOR          },
-    { '+',  regular_context,        TOKEN_CATEGORY_PLUS_QUANTIFICATION_OPERATOR          },
-    { '?',  regular_context,        TOKEN_CATEGORY_QUESTION_MARK_QUANTIFICATION_OPERATOR },
-    { '|',  regular_context,        TOKEN_CATEGORY_ALTERNATION_OPERATOR                  },
-    { '\\', regular_context_escape, TOKEN_CATEGORY_METACHARACTER_ESCAPE                  },
-    { '.',  regular_context,        TOKEN_CATEGORY_ANY_CHARACTER                         },
-    { ANY,  regular_context,        TOKEN_CATEGORY_ORDINARY_CHARACTER                    }
-  };
+    {
+      { '[',   bracket_context,        TOKEN_CATEGORY_OPEN_BRACKET,                         },
+      { '(',   regular_context,        TOKEN_CATEGORY_OPEN_PARENTHESIS                      },
+      { ')',   regular_context,        TOKEN_CATEGORY_CLOSE_PARENTHESIS                     },
+      { '^',   regular_context,        TOKEN_CATEGORY_START_ANCHOR,                         },
+      { '$',   regular_context,        TOKEN_CATEGORY_END_ANCHOR,                           },
+      { '*',   regular_context,        TOKEN_CATEGORY_STAR_QUANTIFICATION_OPERATOR          },
+      { '+',   regular_context,        TOKEN_CATEGORY_PLUS_QUANTIFICATION_OPERATOR          },
+      { '?',   regular_context,        TOKEN_CATEGORY_QUESTION_MARK_QUANTIFICATION_OPERATOR },
+      { '|',   regular_context,        TOKEN_CATEGORY_ALTERNATION_OPERATOR                  },
+      { '.',   regular_context,        TOKEN_CATEGORY_ANY_CHARACTER                         },
+      { '\\',  regular_context_escape, TOKEN_CATEGORY_METACHARACTER_ESCAPE                  },
+      { EMPTY, regular_context,        TOKEN_CATEGORY_EMPTY_EXPRESSION_MARKER               },
+      { ANY,   regular_context,        TOKEN_CATEGORY_ORDINARY_CHARACTER                    }
+    };
   g_autoptr (GPtrArray) regular_context_transitions =
     lexer_create_transitions_from (regular_context_mappings,
                                    G_N_ELEMENTS (regular_context_mappings));
 
   MealyMapping regular_context_escape_mappings[] =
-  {
-    { ANY, regular_context, TOKEN_CATEGORY_ORDINARY_CHARACTER }
-  };
+    {
+      { ANY, regular_context, TOKEN_CATEGORY_ORDINARY_CHARACTER }
+    };
   g_autoptr (GPtrArray) regular_context_escape_transitions =
     lexer_create_transitions_from (regular_context_escape_mappings,
                                    G_N_ELEMENTS (regular_context_escape_mappings));
 
   MealyMapping bracket_context_mappings[] =
-  {
-    { '-',  bracket_context,        TOKEN_CATEGORY_RANGE_OPERATOR       },
-    { ']',  regular_context,        TOKEN_CATEGORY_CLOSE_BRACKET        },
-    { '\\', bracket_context_escape, TOKEN_CATEGORY_METACHARACTER_ESCAPE },
-    { ANY,  bracket_context,        TOKEN_CATEGORY_ORDINARY_CHARACTER   }
-  };
+    {
+      { '-',   bracket_context,        TOKEN_CATEGORY_RANGE_OPERATOR       },
+      { ']',   regular_context,        TOKEN_CATEGORY_CLOSE_BRACKET        },
+      { '\\',  bracket_context_escape, TOKEN_CATEGORY_METACHARACTER_ESCAPE },
+      { EMPTY, bracket_context,        TOKEN_CATEGORY_UNDEFINED            },
+      { ANY,   bracket_context,        TOKEN_CATEGORY_ORDINARY_CHARACTER   }
+    };
   g_autoptr (GPtrArray) bracket_context_transitions =
     lexer_create_transitions_from (bracket_context_mappings,
                                    G_N_ELEMENTS (bracket_context_mappings));
 
   MealyMapping bracket_context_escape_mappings[] =
-  {
-    { ANY, bracket_context, TOKEN_CATEGORY_ORDINARY_CHARACTER }
-  };
+    {
+      { ANY, bracket_context, TOKEN_CATEGORY_ORDINARY_CHARACTER }
+    };
   g_autoptr (GPtrArray) bracket_context_escape_transitions =
     lexer_create_transitions_from (bracket_context_escape_mappings,
                                    G_N_ELEMENTS (bracket_context_escape_mappings));
@@ -238,11 +267,11 @@ lexer_build_transducer (void)
 
 static GPtrArray *
 lexer_create_transitions_from (MealyMapping *mappings,
-                               gsize         mappings_size)
+                               gsize         mappings_count)
 {
-  GPtrArray *transitions = g_ptr_array_new_full ((guint) mappings_size, g_object_unref);
+  GPtrArray *transitions = g_ptr_array_new_full ((guint) mappings_count, g_object_unref);
 
-  for (guint i = 0; i < mappings_size; ++i)
+  for (guint i = 0; i < mappings_count; ++i)
     {
       MealyMapping mapping = mappings[i];
       gchar expected_character = mapping.character;
@@ -282,6 +311,57 @@ lexer_report_error (const gchar  *expression,
                    LEXICAL_ANALYSIS_LEXER_ERROR,
                    error_code,
                    error_message);
+    }
+}
+
+static GString *
+lexer_normalize_expression (const gchar *expression)
+{
+  if (g_strcmp0 (expression, "^") == 0)
+    {
+      g_autofree gchar *normalized_expression = g_strdup_printf ("^%c", EMPTY);
+
+      return g_string_new (normalized_expression);
+    }
+  else if (g_strcmp0 (expression, "$") == 0)
+    {
+      g_autofree gchar *normalized_expression = g_strdup_printf ("%c$", EMPTY);
+
+      return g_string_new (normalized_expression);
+    }
+  else
+    {
+      GString *expression_string = g_string_new (expression);
+      ExpressionNormalizer normalizers[] =
+        {
+          { "^$",  G_N_ELEMENTS ("^$") - 1,  g_strdup_printf ("^%c$", EMPTY)  },
+          { "()",  G_N_ELEMENTS ("()") - 1,  g_strdup_printf ("(%c)", EMPTY)  },
+          { "(^)", G_N_ELEMENTS ("(^)") - 1, g_strdup_printf ("(^%c)", EMPTY) },
+          { "($)", G_N_ELEMENTS ("($)") - 1, g_strdup_printf ("(%c$)", EMPTY) }
+        };
+      gsize normalizers_count = G_N_ELEMENTS (normalizers);
+
+      for (guint i = 0; i < normalizers_count; ++i)
+        {
+          ExpressionNormalizer normalizer = normalizers[i];
+          gchar *search_result = NULL;
+
+          while ((search_result = g_strrstr (expression_string->str, normalizer.original_substring)) != NULL)
+            {
+              gulong position = search_result - expression_string->str;
+
+              g_string_erase (expression_string,
+                              position,
+                              normalizer.original_length);
+              g_string_insert (expression_string,
+                               position,
+                               normalizer.replacement_substring);
+            }
+
+          g_free (normalizer.replacement_substring);
+        }
+
+      return expression_string;
     }
 }
 

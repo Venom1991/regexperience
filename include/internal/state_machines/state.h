@@ -34,9 +34,11 @@ gboolean state_is_composed_from (State           *self,
 gint     state_compare_deadness (State           *a,
                                  State           *b);
 
-#define PROP_STATE_TYPE_FLAGS  "type-flags"
-#define PROP_STATE_TRANSITIONS "transitions"
-#define PROP_STATE_IS_DEAD     "is-dead"
+#define PROP_STATE_TYPE_FLAGS      "type-flags"
+#define PROP_STATE_TRANSITIONS     "transitions"
+#define PROP_STATE_IS_DEAD         "is-dead"
+#define PROP_STATE_IS_START_ANCHOR "is-start-anchor"
+#define PROP_STATE_IS_END_ANCHOR   "is-end-anchor"
 
 G_END_DECLS
 

@@ -80,6 +80,7 @@ anchor_build_acceptor (AstNode *self)
   AnchorPrivate *priv = anchor_get_instance_private (AST_NODES_ANCHOR (self));
   AnchorType start_type = priv->start_type;
   AnchorType end_type = priv->end_type;
+  gboolean should_convert_inner_anchors = FALSE;
 
   g_autoptr (AstNode) operand = NULL;
 
@@ -92,15 +93,19 @@ anchor_build_acceptor (AstNode *self)
   g_autoptr (GPtrArray) all_states = NULL;
   g_autoptr (State) start = NULL;
   g_autoptr (State) final = NULL;
+  g_autoptr (GPtrArray) final_transitions = NULL;
 
   g_autoptr (GPtrArray) anchor_all_states = g_ptr_array_new_with_free_func (g_object_unref);
-  State *start_anchor_start = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_START);;
+  State *start_anchor_start = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_START);
   State *end_anchor_final = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_FINAL);
 
   g_object_get (operand_acceptor,
                 PROP_FSM_INITIALIZABLE_ALL_STATES, &all_states,
                 PROP_FSM_INITIALIZABLE_START_STATE, &start,
                 PROP_EPSILON_NFA_FINAL_STATE, &final,
+                NULL);
+  g_object_get (final,
+                PROP_STATE_TRANSITIONS, &final_transitions,
                 NULL);
 
   g_autoptr (GPtrArray) start_anchor_transitions = g_ptr_array_new_with_free_func (g_object_unref);
@@ -111,6 +116,11 @@ anchor_build_acceptor (AstNode *self)
   switch (start_type)
     {
     case ANCHOR_TYPE_ANCHORED:
+      g_object_set (start_anchor_start,
+                    PROP_STATE_IS_START_ANCHOR, TRUE,
+                    NULL);
+
+      should_convert_inner_anchors = TRUE;
       start_anchor_start_transition = create_deterministic_transition (START, start);
       break;
     case ANCHOR_TYPE_UNANCHORED:
@@ -125,6 +135,11 @@ anchor_build_acceptor (AstNode *self)
   switch (end_type)
     {
     case ANCHOR_TYPE_ANCHORED:
+      g_object_set (final,
+                    PROP_STATE_IS_END_ANCHOR, TRUE,
+                    NULL);
+
+      should_convert_inner_anchors = TRUE;
       end_anchor_final_transition = create_deterministic_transition (END, end_anchor_final);
       break;
     case ANCHOR_TYPE_UNANCHORED:
@@ -134,7 +149,52 @@ anchor_build_acceptor (AstNode *self)
       g_return_val_if_reached (NULL);
     }
 
+  /* Converting previously initialized START and END transitions (if they exists)
+   * to epsilon ones as they were made redundant by the newly initialized ones.
+   */
+  if (should_convert_inner_anchors)
+    {
+      for (guint i = 0; i < all_states->len; ++i)
+        {
+          State *state = g_ptr_array_index (all_states, i);
+          gboolean state_is_anchor = FALSE;
+
+          if (start_type == ANCHOR_TYPE_ANCHORED)
+            g_object_get (state,
+                          PROP_STATE_IS_START_ANCHOR, &state_is_anchor,
+                          NULL);
+          else if (end_type == ANCHOR_TYPE_ANCHORED)
+            g_object_get (state,
+                          PROP_STATE_IS_END_ANCHOR, &state_is_anchor,
+                          NULL);
+
+          if (state_is_anchor)
+            {
+              g_autoptr (GPtrArray) transitions = NULL;
+
+              g_object_get (state,
+                            PROP_STATE_TRANSITIONS, &transitions,
+                            NULL);
+
+              if (g_ptr_array_has_items (transitions))
+                {
+                  for (guint j = 0; j < transitions->len; ++j)
+                    {
+                      Transition *transition = g_ptr_array_index (transitions, j);
+
+                      transition_convert_to_epsilon (transition);
+                    }
+                }
+            }
+        }
+    }
+
   g_ptr_array_add (end_anchor_transitions, end_anchor_final_transition);
+
+  if (g_ptr_array_has_items (final_transitions))
+    g_ptr_array_add_range (end_anchor_transitions,
+                           final_transitions,
+                           g_object_ref);
 
   g_object_set (start_anchor_start,
                 PROP_STATE_TRANSITIONS, start_anchor_transitions,

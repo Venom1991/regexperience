@@ -155,272 +155,272 @@ grammar_define_productions (GPtrArray **productions,
    * the number of terminal symbols without changing the behavior.
    */
   gchar ***grammar[] =
-  {
-    (gchar**[])
     {
-      (gchar*[]) { START },
-      (gchar*[]) { ANCHORED_EXPRESSION, END_OF_INPUT, NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { ANCHORED_EXPRESSION },
-      (gchar*[]) { START_ANCHOR, EXPRESSION, END_ANCHOR, NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { START_ANCHOR },
-      (gchar*[]) { "^", NULL     },
-      (gchar*[]) { EPSILON, NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { END_ANCHOR },
-      (gchar*[]) { "$", NULL     },
-      (gchar*[]) { EPSILON, NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { EXPRESSION },
-      (gchar*[]) { SIMPLE_EXPRESSION, EXPRESSION_PRIME, NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { EXPRESSION_PRIME },
-      (gchar*[]) { ALTERNATION, NULL },
-      (gchar*[]) { EPSILON, NULL     },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { ALTERNATION },
-      (gchar*[]) { "|", SIMPLE_EXPRESSION, ALTERNATION_PRIME, NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { ALTERNATION_PRIME },
-      (gchar*[]) { ALTERNATION, NULL },
-      (gchar*[]) { EPSILON, NULL     },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { SIMPLE_EXPRESSION },
-      (gchar*[]) { BASIC_EXPRESSION, SIMPLE_EXPRESSION_PRIME, NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { SIMPLE_EXPRESSION_PRIME },
-      (gchar*[]) { CONCATENATION, NULL     },
-      (gchar*[]) { EPSILON, NULL           },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { CONCATENATION },
-      (gchar*[]) { BASIC_EXPRESSION, CONCATENATION_PRIME, NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { CONCATENATION_PRIME },
-      (gchar*[]) { CONCATENATION, NULL },
-      (gchar*[]) { EPSILON, NULL       },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { BASIC_EXPRESSION },
-      (gchar*[]) { ELEMENTARY_EXPRESSION, BASIC_EXPRESSION_PRIME, NULL  },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { BASIC_EXPRESSION_PRIME },
-      (gchar*[]) { STAR_QUANTIFICATION, NULL          },
-      (gchar*[]) { PLUS_QUANTIFICATION, NULL          },
-      (gchar*[]) { QUESTION_MARK_QUANTIFICATION, NULL },
-      (gchar*[]) { EPSILON, NULL                      },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { STAR_QUANTIFICATION },
-      (gchar*[]) { "*", NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { PLUS_QUANTIFICATION },
-      (gchar*[]) { "+", NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { QUESTION_MARK_QUANTIFICATION },
-      (gchar*[]) { "?", NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { ELEMENTARY_EXPRESSION },
-      (gchar*[]) { GROUP, NULL                             },
-      (gchar*[]) { BRACKET_EXPRESSION, NULL                },
-      (gchar*[]) { EMPTY_EXPRESSION, NULL                  },
-      (gchar*[]) { UPPER_CASE_LETTER, NULL                 },
-      (gchar*[]) { LOWER_CASE_LETTER, NULL                 },
-      (gchar*[]) { DIGIT, NULL                             },
-      (gchar*[]) { SPECIAL_CHARACTER, NULL                 },
-      (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER, NULL  },
-      (gchar*[]) { ANY_CHARACTER, NULL                     },
-      (gchar*[]) { "\\", ELEMENTARY_EXPRESSION_PRIME, NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { ELEMENTARY_EXPRESSION_PRIME },
-      (gchar*[]) { REGULAR_METACHARACTER, NULL },
-      (gchar*[]) { METACHARACTER_ESCAPE, NULL  },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { GROUP },
-      (gchar*[]) {"(", ANCHORED_EXPRESSION, ")", NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { BRACKET_EXPRESSION },
-      (gchar*[]) {"[", BRACKET_EXPRESSION_ITEMS, "]", NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { BRACKET_EXPRESSION_ITEMS },
-      (gchar*[]) { BRACKET_EXPRESSION_ITEM, BRACKET_EXPRESSION_ITEMS_PRIME, NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { BRACKET_EXPRESSION_ITEMS_PRIME },
-      (gchar*[]) { BRACKET_EXPRESSION_ITEMS, NULL },
-      (gchar*[]) { EPSILON, NULL                  },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { BRACKET_EXPRESSION_ITEM },
-      (gchar*[]) { UPPER_CASE_LETTER, UPPER_CASE_LETTER_RANGE, NULL },
-      (gchar*[]) { LOWER_CASE_LETTER, LOWER_CASE_LETTER_RANGE, NULL },
-      (gchar*[]) { DIGIT, DIGIT_RANGE, NULL                         },
-      (gchar*[]) { SPECIAL_CHARACTER, NULL                          },
-      (gchar*[]) { REGULAR_METACHARACTER, NULL                      },
-      (gchar*[]) { "\\", BRACKET_EXPRESSION_ITEM_PRIME, NULL        },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { BRACKET_EXPRESSION_ITEM_PRIME },
-      (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER, NULL },
-      (gchar*[]) { METACHARACTER_ESCAPE, NULL             },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { UPPER_CASE_LETTER_RANGE },
-      (gchar*[]) { "-", UPPER_CASE_LETTER, NULL },
-      (gchar*[]) { EPSILON, NULL                },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { LOWER_CASE_LETTER_RANGE },
-      (gchar*[]) { "-", LOWER_CASE_LETTER, NULL },
-      (gchar*[]) { EPSILON, NULL                },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { DIGIT_RANGE },
-      (gchar*[]) { "-", DIGIT, NULL },
-      (gchar*[]) { EPSILON, NULL    },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { UPPER_CASE_LETTER },
-      (gchar*[]) { "A" DELIMITER "B" DELIMITER "C" DELIMITER "D" DELIMITER "E" DELIMITER "F" DELIMITER
-                   "G" DELIMITER "H" DELIMITER "I" DELIMITER "J" DELIMITER "K" DELIMITER "L" DELIMITER
-                   "M" DELIMITER "N" DELIMITER "O" DELIMITER "P" DELIMITER "Q" DELIMITER "R" DELIMITER
-                   "S" DELIMITER "T" DELIMITER "U" DELIMITER "V" DELIMITER "W" DELIMITER "X" DELIMITER
-                   "Y" DELIMITER "Z", NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { LOWER_CASE_LETTER },
-      (gchar*[]) { "a" DELIMITER "b" DELIMITER "c" DELIMITER "d" DELIMITER "e" DELIMITER "f" DELIMITER
-                   "g" DELIMITER "h" DELIMITER "i" DELIMITER "j" DELIMITER "k" DELIMITER "l" DELIMITER
-                   "m" DELIMITER "n" DELIMITER "o" DELIMITER "p" DELIMITER "q" DELIMITER "r" DELIMITER
-                   "s" DELIMITER "t" DELIMITER "u" DELIMITER "v" DELIMITER "w" DELIMITER "x" DELIMITER
-                   "y" DELIMITER "z", NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { DIGIT },
-      (gchar*[]) { "0" DELIMITER "1" DELIMITER "2" DELIMITER "3" DELIMITER "4" DELIMITER "5" DELIMITER
-                   "6" DELIMITER "7" DELIMITER "8" DELIMITER "9", NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { SPECIAL_CHARACTER },
-      (gchar*[]) { "!" DELIMITER "#" DELIMITER "%" DELIMITER "&" DELIMITER "," DELIMITER "/" DELIMITER
-                   ":" DELIMITER ";" DELIMITER ">" DELIMITER "=" DELIMITER "<" DELIMITER "@" DELIMITER
-                   "_" DELIMITER "`" DELIMITER "{" DELIMITER "}" DELIMITER " " DELIMITER "\n" DELIMITER
-                   "\t", NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { REGULAR_METACHARACTER },
-      (gchar*[]) { "^" DELIMITER "$" DELIMITER "[" DELIMITER "(" DELIMITER ")" DELIMITER "*" DELIMITER
-                   "+" DELIMITER "?" DELIMITER "|" DELIMITER ".", NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER },
-      (gchar*[]) { "-" DELIMITER "]", NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar*[]) { ANY_CHARACTER },
-      (gchar*[]) { ".", NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar *[]) { METACHARACTER_ESCAPE },
-      (gchar *[]) { "\\", NULL },
-      NULL
-    },
-    (gchar**[])
-    {
-      (gchar *[]) { EMPTY_EXPRESSION },
-      (gchar *[]) { EMPTY_STRING, NULL },
-      NULL
-    }
-  };
+      (gchar**[])
+        {
+          (gchar*[]) { START },
+          (gchar*[]) { ANCHORED_EXPRESSION, END_OF_INPUT, NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { ANCHORED_EXPRESSION },
+          (gchar*[]) { START_ANCHOR, EXPRESSION, END_ANCHOR, NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { START_ANCHOR },
+          (gchar*[]) { "^", NULL     },
+          (gchar*[]) { EPSILON, NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { END_ANCHOR },
+          (gchar*[]) { "$", NULL     },
+          (gchar*[]) { EPSILON, NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { EXPRESSION },
+          (gchar*[]) { SIMPLE_EXPRESSION, EXPRESSION_PRIME, NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { EXPRESSION_PRIME },
+          (gchar*[]) { ALTERNATION, NULL },
+          (gchar*[]) { EPSILON, NULL     },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { ALTERNATION },
+          (gchar*[]) { "|", SIMPLE_EXPRESSION, ALTERNATION_PRIME, NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { ALTERNATION_PRIME },
+          (gchar*[]) { ALTERNATION, NULL },
+          (gchar*[]) { EPSILON, NULL     },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { SIMPLE_EXPRESSION },
+          (gchar*[]) { BASIC_EXPRESSION, SIMPLE_EXPRESSION_PRIME, NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { SIMPLE_EXPRESSION_PRIME },
+          (gchar*[]) { CONCATENATION, NULL     },
+          (gchar*[]) { EPSILON, NULL           },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { CONCATENATION },
+          (gchar*[]) { BASIC_EXPRESSION, CONCATENATION_PRIME, NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { CONCATENATION_PRIME },
+          (gchar*[]) { CONCATENATION, NULL },
+          (gchar*[]) { EPSILON, NULL       },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { BASIC_EXPRESSION },
+          (gchar*[]) { ELEMENTARY_EXPRESSION, BASIC_EXPRESSION_PRIME, NULL  },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { BASIC_EXPRESSION_PRIME },
+          (gchar*[]) { STAR_QUANTIFICATION, NULL          },
+          (gchar*[]) { PLUS_QUANTIFICATION, NULL          },
+          (gchar*[]) { QUESTION_MARK_QUANTIFICATION, NULL },
+          (gchar*[]) { EPSILON, NULL                      },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { STAR_QUANTIFICATION },
+          (gchar*[]) { "*", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { PLUS_QUANTIFICATION },
+          (gchar*[]) { "+", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { QUESTION_MARK_QUANTIFICATION },
+          (gchar*[]) { "?", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { ELEMENTARY_EXPRESSION },
+          (gchar*[]) { GROUP, NULL                             },
+          (gchar*[]) { BRACKET_EXPRESSION, NULL                },
+          (gchar*[]) { EMPTY_EXPRESSION, NULL                  },
+          (gchar*[]) { UPPER_CASE_LETTER, NULL                 },
+          (gchar*[]) { LOWER_CASE_LETTER, NULL                 },
+          (gchar*[]) { DIGIT, NULL                             },
+          (gchar*[]) { SPECIAL_CHARACTER, NULL                 },
+          (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER, NULL  },
+          (gchar*[]) { ANY_CHARACTER, NULL                     },
+          (gchar*[]) { "\\", ELEMENTARY_EXPRESSION_PRIME, NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { ELEMENTARY_EXPRESSION_PRIME },
+          (gchar*[]) { REGULAR_METACHARACTER, NULL },
+          (gchar*[]) { METACHARACTER_ESCAPE, NULL  },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { GROUP },
+          (gchar*[]) {"(", ANCHORED_EXPRESSION, ")", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { BRACKET_EXPRESSION },
+          (gchar*[]) {"[", BRACKET_EXPRESSION_ITEMS, "]", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { BRACKET_EXPRESSION_ITEMS },
+          (gchar*[]) { BRACKET_EXPRESSION_ITEM, BRACKET_EXPRESSION_ITEMS_PRIME, NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { BRACKET_EXPRESSION_ITEMS_PRIME },
+          (gchar*[]) { BRACKET_EXPRESSION_ITEMS, NULL },
+          (gchar*[]) { EPSILON, NULL                  },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { BRACKET_EXPRESSION_ITEM },
+          (gchar*[]) { UPPER_CASE_LETTER, UPPER_CASE_LETTER_RANGE, NULL },
+          (gchar*[]) { LOWER_CASE_LETTER, LOWER_CASE_LETTER_RANGE, NULL },
+          (gchar*[]) { DIGIT, DIGIT_RANGE, NULL                         },
+          (gchar*[]) { SPECIAL_CHARACTER, NULL                          },
+          (gchar*[]) { REGULAR_METACHARACTER, NULL                      },
+          (gchar*[]) { "\\", BRACKET_EXPRESSION_ITEM_PRIME, NULL        },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { BRACKET_EXPRESSION_ITEM_PRIME },
+          (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER, NULL },
+          (gchar*[]) { METACHARACTER_ESCAPE, NULL             },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { UPPER_CASE_LETTER_RANGE },
+          (gchar*[]) { "-", UPPER_CASE_LETTER, NULL },
+          (gchar*[]) { EPSILON, NULL                },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { LOWER_CASE_LETTER_RANGE },
+          (gchar*[]) { "-", LOWER_CASE_LETTER, NULL },
+          (gchar*[]) { EPSILON, NULL                },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { DIGIT_RANGE },
+          (gchar*[]) { "-", DIGIT, NULL },
+          (gchar*[]) { EPSILON, NULL    },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { UPPER_CASE_LETTER },
+          (gchar*[]) { "A" DELIMITER "B" DELIMITER "C" DELIMITER "D" DELIMITER "E" DELIMITER "F" DELIMITER
+                       "G" DELIMITER "H" DELIMITER "I" DELIMITER "J" DELIMITER "K" DELIMITER "L" DELIMITER
+                       "M" DELIMITER "N" DELIMITER "O" DELIMITER "P" DELIMITER "Q" DELIMITER "R" DELIMITER
+                       "S" DELIMITER "T" DELIMITER "U" DELIMITER "V" DELIMITER "W" DELIMITER "X" DELIMITER
+                       "Y" DELIMITER "Z", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { LOWER_CASE_LETTER },
+          (gchar*[]) { "a" DELIMITER "b" DELIMITER "c" DELIMITER "d" DELIMITER "e" DELIMITER "f" DELIMITER
+                       "g" DELIMITER "h" DELIMITER "i" DELIMITER "j" DELIMITER "k" DELIMITER "l" DELIMITER
+                       "m" DELIMITER "n" DELIMITER "o" DELIMITER "p" DELIMITER "q" DELIMITER "r" DELIMITER
+                       "s" DELIMITER "t" DELIMITER "u" DELIMITER "v" DELIMITER "w" DELIMITER "x" DELIMITER
+                       "y" DELIMITER "z", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { DIGIT },
+          (gchar*[]) { "0" DELIMITER "1" DELIMITER "2" DELIMITER "3" DELIMITER "4" DELIMITER "5" DELIMITER
+                       "6" DELIMITER "7" DELIMITER "8" DELIMITER "9", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { SPECIAL_CHARACTER },
+          (gchar*[]) { "!" DELIMITER "#" DELIMITER "%" DELIMITER "&" DELIMITER "," DELIMITER "/" DELIMITER
+                       ":" DELIMITER ";" DELIMITER ">" DELIMITER "=" DELIMITER "<" DELIMITER "@" DELIMITER
+                       "_" DELIMITER "`" DELIMITER "{" DELIMITER "}" DELIMITER " " DELIMITER "\n" DELIMITER
+                       "\t", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { REGULAR_METACHARACTER },
+          (gchar*[]) { "^" DELIMITER "$" DELIMITER "[" DELIMITER "(" DELIMITER ")" DELIMITER "*" DELIMITER
+                       "+" DELIMITER "?" DELIMITER "|" DELIMITER ".", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { BRACKET_EXPRESSION_METACHARACTER },
+          (gchar*[]) { "-" DELIMITER "]", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { ANY_CHARACTER },
+          (gchar*[]) { ".", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar *[]) { METACHARACTER_ESCAPE },
+          (gchar *[]) { "\\", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar *[]) { EMPTY_EXPRESSION },
+          (gchar *[]) { EMPTY_STRING, NULL },
+          NULL
+        }
+    };
 
   gsize grammar_size = G_N_ELEMENTS (grammar);
 
