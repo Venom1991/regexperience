@@ -136,7 +136,7 @@ grammar_init (Grammar *self)
   singleton = self;
 }
 
-static Production*
+static Production *
 grammar_define_productions (GPtrArray **productions,
                             GPtrArray **terminals)
 {

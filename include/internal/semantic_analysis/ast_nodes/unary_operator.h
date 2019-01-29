@@ -14,6 +14,11 @@ G_DECLARE_DERIVABLE_TYPE (UnaryOperator, unary_operator, AST_NODES, UNARY_OPERAT
 struct _UnaryOperatorClass
 {
   AstNodeClass parent_class;
+
+  FsmConvertible * (*build_acceptor) (AstNode        *self,
+                                      FsmConvertible *operand_acceptor);
+
+  gpointer     padding[8];
 };
 
 #define PROP_UNARY_OPERATOR_OPERAND "operand"

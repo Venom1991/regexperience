@@ -46,9 +46,10 @@ regexperience_init (Regexperience *self)
   priv->analyzer = analyzer_new ();
 }
 
-void regexperience_compile (Regexperience  *self,
-                            const gchar    *expression,
-                            GError        **error)
+void
+regexperience_compile (Regexperience  *self,
+                       const gchar    *expression,
+                       GError        **error)
 {
   g_return_if_fail (CORE_IS_REGEXPERIENCE (self));
   g_return_if_fail (error == NULL || *error == NULL);
@@ -109,10 +110,11 @@ void regexperience_compile (Regexperience  *self,
   priv->acceptor = ACCEPTORS_ACCEPTOR_RUNNABLE (dfa);
 }
 
-gboolean regexperience_match (Regexperience  *self,
-                              const gchar    *input,
-                              GPtrArray     **matches,
-                              GError        **error)
+gboolean
+regexperience_match (Regexperience  *self,
+                     const gchar    *input,
+                     GPtrArray     **matches,
+                     GError        **error)
 {
   g_return_val_if_fail (CORE_IS_REGEXPERIENCE (self), FALSE);
   g_return_val_if_fail (matches == NULL || *matches == NULL, FALSE);

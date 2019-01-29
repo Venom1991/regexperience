@@ -2,8 +2,9 @@
 #include "internal/state_machines/transitions/transition_factory.h"
 #include "internal/common/helpers.h"
 
-State *create_composite_state (GPtrArray                      *composed_from_states,
-                               CompositeStateResolveTypeFlags  resolve_type_flags_mode)
+State *
+create_composite_state (GPtrArray                      *composed_from_states,
+                        CompositeStateResolveTypeFlags  resolve_type_flags_mode)
 {
   g_return_val_if_fail (g_ptr_array_has_items (composed_from_states), NULL);
 
@@ -13,7 +14,8 @@ State *create_composite_state (GPtrArray                      *composed_from_sta
   return composite_state;
 }
 
-State *create_dead_state (void)
+State *
+create_dead_state (void)
 {
   State *dead_state = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_DEFAULT,
                                  PROP_STATE_IS_DEAD, TRUE);

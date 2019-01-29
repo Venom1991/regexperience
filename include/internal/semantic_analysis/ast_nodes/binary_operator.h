@@ -14,6 +14,12 @@ G_DECLARE_DERIVABLE_TYPE (BinaryOperator, binary_operator, AST_NODES, BINARY_OPE
 struct _BinaryOperatorClass
 {
   AstNodeClass parent_class;
+
+  FsmConvertible * (*build_acceptor) (AstNode        *self,
+                                      FsmConvertible *left_operand_acceptor,
+                                      FsmConvertible *right_operand_acceptor);
+
+  gpointer     padding[8];
 };
 
 #define PROP_BINARY_OPERATOR_LEFT_OPERAND  "left-operand"

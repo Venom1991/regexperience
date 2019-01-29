@@ -9,16 +9,18 @@ struct _Concatenation
   BinaryOperator parent_instance;
 };
 
-static FsmConvertible *concatenation_build_acceptor (AstNode *self);
+static FsmConvertible *concatenation_build_acceptor (AstNode        *self,
+                                                     FsmConvertible *left_operand_acceptor,
+                                                     FsmConvertible *right_operand_acceptor);
 
 G_DEFINE_TYPE (Concatenation, concatenation, AST_NODES_TYPE_BINARY_OPERATOR)
 
 static void
 concatenation_class_init (ConcatenationClass *klass)
 {
-  AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
+  BinaryOperatorClass *binary_operator_class = AST_NODES_BINARY_OPERATOR_CLASS (klass);
 
-  ast_node_class->build_acceptor = concatenation_build_acceptor;
+  binary_operator_class->build_acceptor = concatenation_build_acceptor;
 }
 
 static void
@@ -28,20 +30,13 @@ concatenation_init (Concatenation *self)
 }
 
 static FsmConvertible *
-concatenation_build_acceptor (AstNode *self)
+concatenation_build_acceptor (AstNode        *self,
+                              FsmConvertible *left_operand_acceptor,
+                              FsmConvertible *right_operand_acceptor)
 {
   g_return_val_if_fail (AST_NODES_IS_CONCATENATION (self), NULL);
-
-  g_autoptr (AstNode) left_operand = NULL;
-  g_autoptr (AstNode) right_operand = NULL;
-
-  g_object_get (self,
-                PROP_BINARY_OPERATOR_LEFT_OPERAND, &left_operand,
-                PROP_BINARY_OPERATOR_RIGHT_OPERAND, &right_operand,
-                NULL);
-
-  g_autoptr (FsmConvertible) left_operand_acceptor = ast_node_build_acceptor (left_operand);
-  g_autoptr (FsmConvertible) right_operand_acceptor = ast_node_build_acceptor (right_operand);
+  g_return_val_if_fail (left_operand_acceptor != NULL, NULL);
+  g_return_val_if_fail (right_operand_acceptor != NULL, NULL);
 
   g_autoptr (GPtrArray) left_all_states = NULL;
   g_autoptr (GPtrArray) right_all_states = NULL;

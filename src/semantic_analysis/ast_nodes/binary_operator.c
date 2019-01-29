@@ -15,20 +15,22 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static gboolean binary_operator_is_valid     (AstNode      *self,
-                                              GError      **error);
+static FsmConvertible *binary_operator_build_acceptor (AstNode       *self);
 
-static void     binary_operator_get_property (GObject      *object,
-                                              guint         property_id,
-                                              GValue       *value,
-                                              GParamSpec   *pspec);
+static gboolean        binary_operator_is_valid       (AstNode       *self,
+                                                       GError       **error);
 
-static void     binary_operator_set_property (GObject      *object,
-                                              guint         property_id,
-                                              const GValue *value,
-                                              GParamSpec   *pspec);
+static void            binary_operator_get_property   (GObject       *object,
+                                                       guint          property_id,
+                                                       GValue        *value,
+                                                       GParamSpec    *pspec);
 
-static void     binary_operator_dispose      (GObject      *object);
+static void            binary_operator_set_property   (GObject       *object,
+                                                       guint          property_id,
+                                                       const GValue  *value,
+                                                       GParamSpec    *pspec);
+
+static void            binary_operator_dispose        (GObject       *object);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (BinaryOperator, binary_operator, AST_NODES_TYPE_AST_NODE)
 
@@ -38,6 +40,7 @@ binary_operator_class_init (BinaryOperatorClass *klass)
   AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+  ast_node_class->build_acceptor = binary_operator_build_acceptor;
   ast_node_class->is_valid = binary_operator_is_valid;
 
   object_class->get_property = binary_operator_get_property;
@@ -69,9 +72,29 @@ binary_operator_init (BinaryOperator *self)
   /* NOP */
 }
 
-static
-gboolean binary_operator_is_valid (AstNode  *self,
-                                   GError  **error)
+static FsmConvertible *
+binary_operator_build_acceptor (AstNode *self)
+{
+  g_return_val_if_fail (AST_NODES_IS_BINARY_OPERATOR (self), NULL);
+
+  BinaryOperatorClass *klass = AST_NODES_BINARY_OPERATOR_GET_CLASS (self);
+
+  g_return_val_if_fail (klass->build_acceptor != NULL, NULL);
+
+  BinaryOperatorPrivate *priv = binary_operator_get_instance_private (AST_NODES_BINARY_OPERATOR (self));
+  AstNode *left_operand = priv->left_operand;
+  AstNode *right_operand = priv->right_operand;
+  g_autoptr (FsmConvertible) left_operand_acceptor = ast_node_build_acceptor (left_operand);
+  g_autoptr (FsmConvertible) right_operand_acceptor = ast_node_build_acceptor (right_operand);
+
+  return klass->build_acceptor (self,
+                                left_operand_acceptor,
+                                right_operand_acceptor);
+}
+
+static gboolean
+binary_operator_is_valid (AstNode  *self,
+                          GError  **error)
 {
   g_return_val_if_fail (AST_NODES_IS_BINARY_OPERATOR (self), FALSE);
 

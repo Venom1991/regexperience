@@ -106,10 +106,8 @@ range_is_valid (AstNode  *self,
   Constant *left_constant = AST_NODES_CONSTANT (left_operand);
   Constant *right_constant = AST_NODES_CONSTANT (right_operand);
 
-  gchar left_value = 0;
-  gchar right_value = 0;
-  guint left_position = 0;
-  guint right_position = 0;
+  gchar left_value = 0, right_value = 0;
+  guint left_position = 0, right_position = 0;
 
   g_object_get (left_constant,
                 PROP_CONSTANT_VALUE, &left_value,

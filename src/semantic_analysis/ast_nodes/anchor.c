@@ -24,22 +24,23 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static FsmConvertible *anchor_build_acceptor (AstNode      *self);
+static FsmConvertible *anchor_build_acceptor (AstNode        *self,
+                                              FsmConvertible *operand_acceptor);
 
-static void            anchor_set_property   (GObject      *object,
-                                              guint         property_id,
-                                              const GValue *value,
-                                              GParamSpec   *pspec);
+static void            anchor_set_property   (GObject        *object,
+                                              guint           property_id,
+                                              const GValue   *value,
+                                              GParamSpec     *pspec);
 
 G_DEFINE_TYPE_WITH_PRIVATE (Anchor, anchor, AST_NODES_TYPE_UNARY_OPERATOR)
 
 static void
 anchor_class_init (AnchorClass *klass)
 {
-  AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
+  UnaryOperatorClass *unary_operator_class = AST_NODES_UNARY_OPERATOR_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  ast_node_class->build_acceptor = anchor_build_acceptor;
+  unary_operator_class->build_acceptor = anchor_build_acceptor;
 
   object_class->set_property = anchor_set_property;
 
@@ -73,22 +74,16 @@ anchor_init (Anchor *self)
 }
 
 static FsmConvertible *
-anchor_build_acceptor (AstNode *self)
+anchor_build_acceptor (AstNode        *self,
+                       FsmConvertible *operand_acceptor)
 {
   g_return_val_if_fail (AST_NODES_IS_ANCHOR (self), NULL);
+  g_return_val_if_fail (operand_acceptor != NULL, NULL);
 
   AnchorPrivate *priv = anchor_get_instance_private (AST_NODES_ANCHOR (self));
   AnchorType start_type = priv->start_type;
   AnchorType end_type = priv->end_type;
   gboolean should_convert_inner_anchors = FALSE;
-
-  g_autoptr (AstNode) operand = NULL;
-
-  g_object_get (self,
-                PROP_UNARY_OPERATOR_OPERAND, &operand,
-                NULL);
-
-  g_autoptr (FsmConvertible) operand_acceptor = ast_node_build_acceptor (operand);
 
   g_autoptr (GPtrArray) all_states = NULL;
   g_autoptr (State) start = NULL;

@@ -73,8 +73,9 @@ symbol_is_epsilon (Symbol *self)
   return symbol_is_match (self, EPSILON);
 }
 
-gboolean symbol_is_string_match (Symbol *self,
-                                 gchar  *value)
+gboolean
+symbol_is_string_match (Symbol *self,
+                        gchar  *value)
 {
   g_return_val_if_fail (SYMBOLS_IS_SYMBOL (self), FALSE);
 
@@ -87,8 +88,9 @@ gboolean symbol_is_string_match (Symbol *self,
                           SYMBOL_VALUE_TYPE_POINTER_TO_GCHAR);
 }
 
-gboolean symbol_is_production_match (Symbol     *self,
-                                     Production *value)
+gboolean
+symbol_is_production_match (Symbol     *self,
+                            Production *value)
 {
   g_return_val_if_fail (SYMBOLS_IS_SYMBOL (self), FALSE);
 

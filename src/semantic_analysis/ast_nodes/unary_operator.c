@@ -13,20 +13,22 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static gboolean unary_operator_is_valid     (AstNode       *self,
-                                             GError       **error);
+static FsmConvertible *unary_operator_build_acceptor (AstNode       *self);
 
-static void     unary_operator_get_property (GObject       *object,
-                                             guint          property_id,
-                                             GValue        *value,
-                                             GParamSpec    *pspec);
+static gboolean        unary_operator_is_valid       (AstNode       *self,
+                                                      GError       **error);
 
-static void     unary_operator_set_property (GObject       *object,
-                                             guint          property_id,
-                                             const GValue  *value,
-                                             GParamSpec    *pspec);
+static void            unary_operator_get_property   (GObject       *object,
+                                                      guint          property_id,
+                                                      GValue        *value,
+                                                      GParamSpec    *pspec);
 
-static void     unary_operator_dispose      (GObject       *object);
+static void            unary_operator_set_property   (GObject       *object,
+                                                      guint          property_id,
+                                                      const GValue  *value,
+                                                      GParamSpec    *pspec);
+
+static void            unary_operator_dispose        (GObject       *object);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (UnaryOperator, unary_operator, AST_NODES_TYPE_AST_NODE)
 
@@ -36,6 +38,7 @@ unary_operator_class_init (UnaryOperatorClass *klass)
   AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+  ast_node_class->build_acceptor = unary_operator_build_acceptor;
   ast_node_class->is_valid = unary_operator_is_valid;
 
   object_class->get_property = unary_operator_get_property;
@@ -60,9 +63,25 @@ unary_operator_init (UnaryOperator *self)
   /* NOP */
 }
 
-static
-gboolean unary_operator_is_valid (AstNode  *self,
-                                  GError  **error)
+static FsmConvertible *
+unary_operator_build_acceptor (AstNode *self)
+{
+  g_return_val_if_fail (AST_NODES_IS_UNARY_OPERATOR (self), NULL);
+
+  UnaryOperatorClass *klass = AST_NODES_UNARY_OPERATOR_GET_CLASS (self);
+
+  g_return_val_if_fail (klass->build_acceptor != NULL, NULL);
+
+  UnaryOperatorPrivate *priv = unary_operator_get_instance_private (AST_NODES_UNARY_OPERATOR (self));
+  AstNode *operand = priv->operand;
+  g_autoptr (FsmConvertible) operand_acceptor = ast_node_build_acceptor (operand);
+
+  return klass->build_acceptor (self, operand_acceptor);
+}
+
+static gboolean
+unary_operator_is_valid (AstNode  *self,
+                         GError  **error)
 {
   g_return_val_if_fail (AST_NODES_IS_UNARY_OPERATOR (self), FALSE);
 

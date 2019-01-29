@@ -365,7 +365,8 @@ lexer_normalize_expression (const gchar *expression)
     }
 }
 
-static void lexer_dispose (GObject *object)
+static void
+lexer_dispose (GObject *object)
 {
   LexerPrivate *priv = lexer_get_instance_private (LEXICAL_ANALYSIS_LEXER (object));
 

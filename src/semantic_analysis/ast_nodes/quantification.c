@@ -24,22 +24,23 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
-static FsmConvertible *quantification_build_acceptor (AstNode      *self);
+static FsmConvertible *quantification_build_acceptor (AstNode        *self,
+                                                      FsmConvertible *operand_acceptor);
 
-static void            quantification_set_property   (GObject      *object,
-                                                      guint         property_id,
-                                                      const GValue *value,
-                                                      GParamSpec   *pspec);
+static void            quantification_set_property   (GObject        *object,
+                                                      guint           property_id,
+                                                      const GValue   *value,
+                                                      GParamSpec     *pspec);
 
 G_DEFINE_TYPE_WITH_PRIVATE (Quantification, quantification, AST_NODES_TYPE_UNARY_OPERATOR)
 
 static void
 quantification_class_init (QuantificationClass *klass)
 {
-  AstNodeClass *ast_node_class = AST_NODES_AST_NODE_CLASS (klass);
+  UnaryOperatorClass *unary_operator_class = AST_NODES_UNARY_OPERATOR_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  ast_node_class->build_acceptor = quantification_build_acceptor;
+  unary_operator_class->build_acceptor = quantification_build_acceptor;
 
   object_class->set_property = quantification_set_property;
 
@@ -73,21 +74,15 @@ quantification_init (Quantification *self)
 }
 
 static FsmConvertible *
-quantification_build_acceptor (AstNode *self)
+quantification_build_acceptor (AstNode        *self,
+                               FsmConvertible *operand_acceptor)
 {
   g_return_val_if_fail (AST_NODES_IS_QUANTIFICATION (self), NULL);
+  g_return_val_if_fail (operand_acceptor != NULL, NULL);
 
   QuantificationPrivate *priv = quantification_get_instance_private (AST_NODES_QUANTIFICATION (self));
   QuantificationBoundType lower_bound = priv->lower_bound;
   QuantificationBoundType upper_bound = priv->upper_bound;
-
-  g_autoptr (AstNode) operand = NULL;
-
-  g_object_get (self,
-                PROP_UNARY_OPERATOR_OPERAND, &operand,
-                NULL);
-
-  g_autoptr (FsmConvertible) operand_acceptor = ast_node_build_acceptor (operand);
 
   g_autoptr (GPtrArray) all_states = NULL;
   g_autoptr (State) start = NULL;
