@@ -3,33 +3,6 @@
 #include <glib-object.h>
 
 gboolean
-g_char_any (gconstpointer a,
-            gconstpointer b)
-{
-  return TRUE;
-}
-
-gboolean
-g_char_equal (gconstpointer a,
-              gconstpointer b)
-{
-  const gchar a_char = (const gchar) GPOINTER_TO_INT (a);
-  const gchar b_char = (const gchar) GPOINTER_TO_INT (b);
-
-  return a_char == b_char;
-}
-
-gboolean
-g_char_not_equal (gconstpointer a,
-                  gconstpointer b)
-{
-  const gchar a_char = (const gchar) GPOINTER_TO_INT (a);
-  const gchar b_char = (const gchar) GPOINTER_TO_INT (b);
-
-  return a_char != b_char;
-}
-
-gboolean
 g_ptr_array_equal (gconstpointer a,
                    gconstpointer b)
 {

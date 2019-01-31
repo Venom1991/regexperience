@@ -20,6 +20,15 @@ static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
 static GEqualFunc transition_discern_equality_function (EqualityConditionType  condition_type);
 
+static gboolean   transition_char_any                  (gconstpointer          a,
+                                                        gconstpointer          b);
+
+static gboolean   transition_char_equal                (gconstpointer          a,
+                                                        gconstpointer          b);
+
+static gboolean   transition_char_not_equal            (gconstpointer          a,
+                                                        gconstpointer          b);
+
 static void       transition_get_property              (GObject               *object,
                                                         guint                  property_id,
                                                         GValue                *value,
@@ -164,17 +173,59 @@ transition_discern_equality_function (EqualityConditionType condition_type)
   switch (condition_type)
     {
     case EQUALITY_CONDITION_TYPE_ANY:
-      return g_char_any;
+      return transition_char_any;
 
     case EQUALITY_CONDITION_TYPE_EQUAL:
-      return g_char_equal;
+      return transition_char_equal;
 
     case EQUALITY_CONDITION_TYPE_NOT_EQUAL:
-      return g_char_not_equal;
+      return transition_char_not_equal;
 
     default:
       return NULL;
     }
+}
+
+static gboolean
+transition_char_any (gconstpointer a,
+                     gconstpointer b)
+{
+  /* Ignoring the start and end of text special characters
+   * as they shouldn't be covered by this type of equality.
+   */
+  gchar ignored_chars[] = { START, END };
+  gsize ignored_chars_count = G_N_ELEMENTS (ignored_chars);
+  const gchar b_char = (const gchar) GPOINTER_TO_INT (b);
+
+  for (guint i = 0; i < ignored_chars_count; ++i)
+    {
+      gchar ignored_char = ignored_chars[i];
+
+      if (b_char == ignored_char)
+        return FALSE;
+    }
+
+  return TRUE;
+}
+
+static gboolean
+transition_char_equal (gconstpointer a,
+                       gconstpointer b)
+{
+  const gchar a_char = (const gchar) GPOINTER_TO_INT (a);
+  const gchar b_char = (const gchar) GPOINTER_TO_INT (b);
+
+  return a_char == b_char;
+}
+
+static gboolean
+transition_char_not_equal (gconstpointer a,
+                           gconstpointer b)
+{
+  const gchar a_char = (const gchar) GPOINTER_TO_INT (a);
+  const gchar b_char = (const gchar) GPOINTER_TO_INT (b);
+
+  return a_char != b_char;
 }
 
 static void

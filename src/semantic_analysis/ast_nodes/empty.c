@@ -35,18 +35,15 @@ empty_build_acceptor (AstNode *self)
 
   g_autoptr (GPtrArray) all_states = g_ptr_array_new_with_free_func (g_object_unref);
   State *empty = state_new (PROP_STATE_TYPE_FLAGS, STATE_TYPE_START | STATE_TYPE_FINAL);
-  State *non_empty = create_dead_state ();
+  State *non_empty = fsm_get_or_create_dead_state (all_states);
   g_autoptr (GPtrArray) empty_transitions = g_ptr_array_new_with_free_func (g_object_unref);
   Transition *empty_on_any = create_deterministic_transition (ANY, non_empty);
 
+  g_ptr_array_add (all_states, empty);
   g_ptr_array_add (empty_transitions, empty_on_any);
   g_object_set (empty,
                 PROP_STATE_TRANSITIONS, empty_transitions,
                 NULL);
-
-  g_ptr_array_add_multiple (all_states,
-                            empty, non_empty,
-                            NULL);
 
   return epsilon_nfa_new (PROP_FSM_INITIALIZABLE_ALL_STATES, all_states);
 }

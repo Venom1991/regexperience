@@ -10,15 +10,6 @@
 
 typedef gpointer (*GRefFunc) (gpointer data);
 
-gboolean   g_char_any                        (gconstpointer   a,
-                                              gconstpointer   b);
-
-gboolean   g_char_equal                      (gconstpointer   a,
-                                              gconstpointer   b);
-
-gboolean   g_char_not_equal                  (gconstpointer   a,
-                                              gconstpointer   b);
-
 gboolean   g_ptr_array_equal                 (gconstpointer   a,
                                               gconstpointer   b);
 
