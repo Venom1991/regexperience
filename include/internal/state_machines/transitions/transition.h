@@ -33,6 +33,9 @@ void     transition_supplement_states_array_with_output (Transition *self,
 gboolean transition_is_possible                         (Transition *self,
                                                          gchar       input_character);
 
+gboolean transition_is_allowed                          (Transition *self,
+                                                         gchar       input_character);
+
 gboolean transition_is_epsilon                          (Transition *self);
 
 void     transition_convert_to_epsilon                  (Transition *self);

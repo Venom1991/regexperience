@@ -122,6 +122,46 @@ transition_is_possible (Transition *self,
 }
 
 gboolean
+transition_is_allowed (Transition *self,
+                       gchar       input_character)
+{
+  g_return_val_if_fail (TRANSITIONS_IS_TRANSITION (self), FALSE);
+
+  if (transition_is_possible (self, input_character))
+    {
+      TransitionPrivate *priv = transition_get_instance_private (self);
+      EqualityConditionType condition_type = priv->condition_type;
+
+      switch (condition_type)
+        {
+        case EQUALITY_CONDITION_TYPE_ANY:
+          {
+            /* The start and end of text special characters are not allowed
+             * as they shouldn't be covered by this type of equality.
+             */
+            gchar disallowed_chars[] = { START, END };
+            gsize disallowed_chars_count = G_N_ELEMENTS (disallowed_chars);
+
+            for (guint i = 0; i < disallowed_chars_count; ++i)
+              {
+                gchar disallowed_char = disallowed_chars[i];
+
+                if (input_character == disallowed_char)
+                  return FALSE;
+              }
+
+            return TRUE;
+          }
+
+        default:
+          return TRUE;
+        }
+    }
+
+  return FALSE;
+}
+
+gboolean
 transition_is_epsilon (Transition *self)
 {
   g_return_val_if_fail (TRANSITIONS_IS_TRANSITION (self), FALSE);
@@ -190,21 +230,6 @@ static gboolean
 transition_char_any (gconstpointer a,
                      gconstpointer b)
 {
-  /* Ignoring the start and end of text special characters
-   * as they shouldn't be covered by this type of equality.
-   */
-  gchar ignored_chars[] = { START, END };
-  gsize ignored_chars_count = G_N_ELEMENTS (ignored_chars);
-  const gchar b_char = (const gchar) GPOINTER_TO_INT (b);
-
-  for (guint i = 0; i < ignored_chars_count; ++i)
-    {
-      gchar ignored_char = ignored_chars[i];
-
-      if (b_char == ignored_char)
-        return FALSE;
-    }
-
   return TRUE;
 }
 

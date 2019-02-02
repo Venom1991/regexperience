@@ -358,7 +358,7 @@ dfa_transition_to_next_state (Dfa   *self,
 
           g_return_val_if_fail (TRANSITIONS_IS_DETERMINISTIC_TRANSITION (transition), FALSE);
 
-          if (transition_is_possible (transition, input_character))
+          if (transition_is_allowed (transition, input_character))
             {
               State *next_state = NULL;
 
