@@ -274,22 +274,6 @@ dfa_run (AcceptorRunnable *self,
       /* Adding a new match if possible. */
       if (match_value != NULL)
         {
-          gchar *value = match_value->str;
-
-          if (g_strrstr (value, start_of_text) != NULL)
-            {
-              match_range_begin++;
-
-              g_string_erase (match_value, 0, 1);
-            }
-
-          if (g_strrstr (value, end_of_text) != NULL)
-            {
-              match_range_end--;
-
-              g_string_erase (match_value, match_value->len - 1, 1);
-            }
-
           if (matches == NULL)
             matches = g_ptr_array_new_with_free_func (g_object_unref);
 

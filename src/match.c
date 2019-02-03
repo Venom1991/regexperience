@@ -1,4 +1,6 @@
 #include "core/match.h"
+#include "internal/state_machines/transitions/transition.h"
+#include "internal/common/helpers.h"
 
 struct _Match
 {
@@ -22,6 +24,8 @@ enum
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL };
 
+static void match_constructed  (GObject      *object);
+
 static void match_get_property (GObject      *object,
                                 guint         property_id,
                                 GValue       *value,
@@ -41,6 +45,7 @@ match_class_init (MatchClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+  object_class->constructed = match_constructed;
   object_class->get_property = match_get_property;
   object_class->set_property = match_set_property;
   object_class->finalize = match_finalize;
@@ -81,6 +86,31 @@ static void
 match_init (Match *self)
 {
   /* NOP */
+}
+
+static void
+match_constructed (GObject *object)
+{
+  MatchPrivate *priv = match_get_instance_private (CORE_MATCH (object));
+  GString *value = priv->value;
+  gchar start_of_text[] = { START, END_OF_STRING };
+  gchar end_of_text[] = { END, END_OF_STRING };
+
+  if (g_strrstr (value->str, start_of_text) != NULL)
+    {
+      priv->range_begin += 1;
+
+      g_string_erase (value, 0, 1);
+    }
+
+  if (g_strrstr (value->str, end_of_text) != NULL)
+    {
+      priv->range_end -= 1;
+
+      g_string_erase (value, value->len - 1, 1);
+    }
+
+  G_OBJECT_CLASS (match_parent_class)->constructed (object);
 }
 
 static void
