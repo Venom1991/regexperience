@@ -84,8 +84,6 @@ lexer_tokenize (Lexer        *self,
 
   LexerPrivate *priv = lexer_get_instance_private (self);
   TransducerRunnable *transducer = priv->transducer;
-  GPtrArray *tokens = NULL;
-  guint character_position = 1;
   GError *temporary_error = NULL;
 
   lexer_report_error (expression, &temporary_error);
@@ -97,50 +95,37 @@ lexer_tokenize (Lexer        *self,
       return NULL;
     }
 
-  tokens = g_ptr_array_new_with_free_func (g_object_unref);
+  transducer_runnable_reset (transducer);
 
-  if (*expression != END_OF_STRING)
+  g_autoptr (GString) normalized_expression_string = lexer_normalize_expression (expression);
+  gchar *normalized_expression = normalized_expression_string->str;
+  GPtrArray *tokens = g_ptr_array_new_with_free_func (g_object_unref);
+  guint character_position = 1;
+
+  while (TRUE)
     {
-      transducer_runnable_reset (transducer);
+      gchar current_character = *normalized_expression++;
 
-      g_autoptr (GString) normalized_expression_string = lexer_normalize_expression (expression);
-      gchar *normalized_expression = normalized_expression_string->str;
+      if (current_character == END_OF_STRING)
+        break;
 
-      while (TRUE)
+      TokenCategory category = (TokenCategory) GPOINTER_TO_INT (transducer_runnable_run (transducer,
+                                                                                         current_character));
+
+      if (category != TOKEN_CATEGORY_UNDEFINED)
         {
-          gchar current_character = *normalized_expression++;
+          g_autofree gchar *content = NULL;
 
-          if (current_character == END_OF_STRING)
-            break;
+          if (category == TOKEN_CATEGORY_EMPTY_EXPRESSION_MARKER)
+            content = g_strdup (EMPTY_STRING);
+          else
+            content = g_strdup_printf ("%c", current_character);
 
-          TokenCategory category = (TokenCategory) GPOINTER_TO_INT (transducer_runnable_run (transducer,
-                                                                                             current_character));
-
-          if (category != TOKEN_CATEGORY_UNDEFINED)
-            {
-              g_autofree gchar *content = NULL;
-
-              if (category == TOKEN_CATEGORY_EMPTY_EXPRESSION_MARKER)
-                content = g_strdup (EMPTY_STRING);
-              else
-                content = g_strdup_printf ("%c", current_character);
-
-              lexer_create_token (category,
-                                  content,
-                                  &character_position,
-                                  tokens);
-            }
+          lexer_create_token (category,
+                              content,
+                              &character_position,
+                              tokens);
         }
-    }
-  else
-    {
-      /* Nothing to iterate over in case of the empty string thus
-       * simply creating the special empty expression marker.
-       */
-      lexer_create_token (TOKEN_CATEGORY_EMPTY_EXPRESSION_MARKER,
-                          EMPTY_STRING,
-                          NULL,
-                          tokens);
     }
 
   /* Appending the end of input marker. */
@@ -317,16 +302,29 @@ lexer_report_error (const gchar  *expression,
 static GString *
 lexer_normalize_expression (const gchar *expression)
 {
-  if (g_strcmp0 (expression, "^") == 0)
+  g_autofree gchar *normalized_expression = NULL;
+  gchar **simple_normalizers[] =
     {
-      g_autofree gchar *normalized_expression = g_strdup_printf ("^%c", EMPTY);
+      (gchar*[]) { "",  "%c"  },
+      (gchar*[]) { "^", "^%c" },
+      (gchar*[]) { "$", "%c$" }
+    };
+  gsize simple_normalizers_count = G_N_ELEMENTS (simple_normalizers);
 
-      return g_string_new (normalized_expression);
+  for (guint i = 0; i < simple_normalizers_count; ++i)
+    {
+      gchar **simple_normalizer = simple_normalizers[i];
+
+      if (g_strcmp0 (expression, simple_normalizer[0]) == 0)
+        {
+          normalized_expression = g_strdup_printf (simple_normalizer[1], EMPTY);
+
+          break;
+        }
     }
-  else if (g_strcmp0 (expression, "$") == 0)
-    {
-      g_autofree gchar *normalized_expression = g_strdup_printf ("%c$", EMPTY);
 
+  if (normalized_expression != NULL)
+    {
       return g_string_new (normalized_expression);
     }
   else
