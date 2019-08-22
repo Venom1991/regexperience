@@ -151,7 +151,7 @@ nfa_define_transitions_for_dfa_state (GPtrArray *output_states,
                                       GPtrArray *dfa_states,
                                       GPtrArray *dfa_transitions)
 {
-  if (g_ptr_array_has_items (output_states))
+  if (g_collection_has_items (output_states))
     {
       const guint acceptable_scalar_output_states_count = 1;
       GEqualFunc state_equal_func = g_direct_equal;

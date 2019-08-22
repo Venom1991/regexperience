@@ -114,12 +114,7 @@ lexer_tokenize (Lexer        *self,
 
       if (category != TOKEN_CATEGORY_UNDEFINED)
         {
-          g_autofree gchar *content = NULL;
-
-          if (category == TOKEN_CATEGORY_EMPTY_EXPRESSION_MARKER)
-            content = g_strdup (EMPTY_STRING);
-          else
-            content = g_strdup_printf ("%c", current_character);
+          g_autofree gchar *content = g_strdup_printf ("%c", current_character);
 
           lexer_create_token (category,
                               content,

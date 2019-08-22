@@ -101,7 +101,7 @@ composite_state_constructed (GObject *object)
 
   StateTypeFlags composite_state_type_flags = STATE_TYPE_UNDEFINED;
 
-  g_return_if_fail (g_ptr_array_has_items (composed_from_states));
+  g_return_if_fail (g_collection_has_items (composed_from_states));
 
   if ((resolve_type_flags_mode & COMPOSITE_STATE_RESOLVE_TYPE_FLAGS_START) &&
       composite_state_can_be_marked_as (priv, STATE_TYPE_START))

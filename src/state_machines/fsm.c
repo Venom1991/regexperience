@@ -106,7 +106,7 @@ fsm_fetch_output_states_from_multiple (GPtrArray *input_states,
                     PROP_STATE_TRANSITIONS, &transitions,
                     NULL);
 
-      if (g_ptr_array_has_items (transitions))
+      if (g_collection_has_items (transitions))
         {
           for (guint j = 0; j < transitions->len; ++j)
             {
@@ -130,7 +130,7 @@ fsm_get_or_create_composite_state (GPtrArray                      *all_states,
 {
   State *composite_state = NULL;
 
-  if (g_ptr_array_has_items (all_states))
+  if (g_collection_has_items (all_states))
     {
       for (guint i = 0; i < all_states->len; ++i)
         {
@@ -167,7 +167,7 @@ fsm_get_or_create_dead_state (GPtrArray *all_states)
 {
   State *dead_state = NULL;
 
-  if (g_ptr_array_has_items (all_states))
+  if (g_collection_has_items (all_states))
     {
       for (guint i = 0; i < all_states->len; ++i)
         {
@@ -220,7 +220,7 @@ fsm_prepare_states (FsmPrivate *priv)
   GPtrArray *final_states = NULL;
   GPtrArray *non_final_states = NULL;
 
-  if (g_ptr_array_has_items (all_states))
+  if (g_collection_has_items (all_states))
     {
       final_states = g_ptr_array_new_with_free_func (g_object_unref);
       non_final_states = g_ptr_array_new_with_free_func (g_object_unref);
@@ -265,7 +265,7 @@ fsm_prepare_alphabet (FsmPrivate *priv)
   GSList *alphabet = NULL;
   GPtrArray *all_states = priv->all_states;
 
-  if (g_ptr_array_has_items (all_states))
+  if (g_collection_has_items (all_states))
     {
       for (guint i = 0; i < all_states->len; ++i)
         {
@@ -276,7 +276,7 @@ fsm_prepare_alphabet (FsmPrivate *priv)
                         PROP_STATE_TRANSITIONS, &transitions,
                         NULL);
 
-          if (g_ptr_array_has_items (transitions))
+          if (g_collection_has_items (transitions))
             {
               for (guint j = 0; j < transitions->len; ++j)
                 {

@@ -49,6 +49,8 @@ G_DECLARE_FINAL_TYPE (Grammar, grammar, SYNTACTIC_ANALYSIS, GRAMMAR, GObject)
 #define LOWER_CASE_LETTER                "lower-case-letter"
 #define DIGIT                            "digit"
 #define SPECIAL_CHARACTER                "special-character"
+#define SPACE                            "space"
+#define HORIZONTAL_TAB                   "horizontal-tab"
 #define REGULAR_METACHARACTER            "regular-metacharacter"
 #define BRACKET_EXPRESSION_METACHARACTER "bracket-expression-metacharacter"
 #define ANY_CHARACTER                    "any-character"

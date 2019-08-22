@@ -89,7 +89,7 @@ rule_discern_epsilon_derivability (Rule *self)
   RulePrivate *priv = rule_get_instance_private (self);
   GPtrArray *first_set = priv->first_set;
 
-  if (g_ptr_array_has_items (first_set))
+  if (g_collection_has_items (first_set))
     {
       for (guint i = 0; i < first_set->len; ++i)
         {

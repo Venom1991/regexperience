@@ -152,18 +152,20 @@ anchor_build_acceptor (AstNode        *self,
       for (guint i = 0; i < all_states->len; ++i)
         {
           State *state = g_ptr_array_index (all_states, i);
-          gboolean state_is_anchor = FALSE;
+          gboolean state_is_start_anchor = FALSE;
+          gboolean state_is_end_anchor = FALSE;
 
           if (start_type == ANCHOR_TYPE_ANCHORED)
             g_object_get (state,
-                          PROP_STATE_IS_START_ANCHOR, &state_is_anchor,
-                          NULL);
-          else if (end_type == ANCHOR_TYPE_ANCHORED)
-            g_object_get (state,
-                          PROP_STATE_IS_END_ANCHOR, &state_is_anchor,
+                          PROP_STATE_IS_START_ANCHOR, &state_is_start_anchor,
                           NULL);
 
-          if (state_is_anchor)
+          if (end_type == ANCHOR_TYPE_ANCHORED)
+            g_object_get (state,
+                          PROP_STATE_IS_END_ANCHOR, &state_is_end_anchor,
+                          NULL);
+
+          if (state_is_start_anchor || state_is_end_anchor)
             {
               g_autoptr (GPtrArray) transitions = NULL;
 
@@ -171,7 +173,7 @@ anchor_build_acceptor (AstNode        *self,
                             PROP_STATE_TRANSITIONS, &transitions,
                             NULL);
 
-              if (g_ptr_array_has_items (transitions))
+              if (g_collection_has_items (transitions))
                 {
                   for (guint j = 0; j < transitions->len; ++j)
                     {
@@ -186,7 +188,7 @@ anchor_build_acceptor (AstNode        *self,
 
   g_ptr_array_add (end_anchor_transitions, end_anchor_final_transition);
 
-  if (g_ptr_array_has_items (final_transitions))
+  if (g_collection_has_items (final_transitions))
     g_ptr_array_add_range (end_anchor_transitions,
                            final_transitions,
                            g_object_ref);

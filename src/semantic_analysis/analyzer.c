@@ -222,6 +222,8 @@ analyzer_is_constant (GNode  *cst_root,
                          BRACKET_EXPRESSION_METACHARACTER,
                          ANY_CHARACTER,
                          METACHARACTER_ESCAPE,
+                         SPACE,
+                         HORIZONTAL_TAB,
                          EMPTY_EXPRESSION,
                          NULL))
     {
@@ -229,9 +231,17 @@ analyzer_is_constant (GNode  *cst_root,
         analyzer_fetch_cst_children (cst_root,
                                      FETCH_CST_CHILDREN_TOKEN | FETCH_CST_CHILDREN_FIRST);
 
-      *first_cst_child = g_ptr_array_index (cst_children, 0);
+      if (g_collection_has_items (cst_children))
+        {
+          const guint constant_node_children_count = 1;
 
-      return TRUE;
+          if (cst_children->len == constant_node_children_count)
+            {
+              *first_cst_child = g_ptr_array_index (cst_children, 0);
+
+              return TRUE;
+            }
+        }
     }
 
   return FALSE;
@@ -249,7 +259,7 @@ analyzer_is_anchor (GNode  *cst_root,
           analyzer_fetch_cst_children (cst_root,
                                        FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_ALL);
 
-      if (g_ptr_array_has_items (cst_children))
+      if (g_collection_has_items (cst_children))
         {
           const guint anchor_node_children_count = 3;
 
@@ -278,7 +288,7 @@ analyzer_is_unary_operator (GNode  *cst_root,
           analyzer_fetch_cst_children (cst_root,
                                        FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_ALL);
 
-      if (g_ptr_array_has_items (cst_children))
+      if (g_collection_has_items (cst_children))
         {
           for (guint i = 0; i < cst_children->len; ++i)
             {
@@ -293,7 +303,7 @@ analyzer_is_unary_operator (GNode  *cst_root,
                     analyzer_fetch_cst_children (cst_child,
                                                  FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_FIRST);
 
-                  if (g_ptr_array_has_items (cst_grandchildren))
+                  if (g_collection_has_items (cst_grandchildren))
                     {
                       GNode *cst_grandchild = g_ptr_array_index (cst_grandchildren, 0);
 
@@ -336,7 +346,7 @@ analyzer_is_binary_operator (GNode  *cst_root,
         analyzer_fetch_cst_children (cst_root,
                                      FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_ALL);
 
-      if (g_ptr_array_has_items (cst_children))
+      if (g_collection_has_items (cst_children))
         {
           for (guint i = 0; i < cst_children->len; ++i)
             {
@@ -358,7 +368,7 @@ analyzer_is_binary_operator (GNode  *cst_root,
                     analyzer_fetch_cst_children (cst_child,
                                                  FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_ALL);
 
-                  if (g_ptr_array_has_items (cst_grandchildren))
+                  if (g_collection_has_items (cst_grandchildren))
                     {
                       *first_cst_child = g_ptr_array_index (cst_children, 0);
                       *second_cst_child = g_ptr_array_index (cst_grandchildren, cst_grandchildren->len - 1);
@@ -381,7 +391,7 @@ analyzer_is_empty (GNode *cst_root)
     analyzer_fetch_cst_children (cst_root,
                                  FETCH_CST_CHILDREN_TERMINAL | FETCH_CST_CHILDREN_FIRST);
 
-  if (g_ptr_array_has_items (cst_children))
+  if (g_collection_has_items (cst_children))
     {
       const guint empty_node_children_count = 1;
 
@@ -444,7 +454,7 @@ analyzer_continue (GNode      *cst_root,
     analyzer_fetch_cst_children (cst_root,
                                  FETCH_CST_CHILDREN_NON_TERMINAL | FETCH_CST_CHILDREN_FIRST);
 
-  g_assert (g_ptr_array_has_items (cst_children));
+  g_assert (g_collection_has_items (cst_children));
 
   GNode *first_cst_child = g_ptr_array_index (cst_children, 0);
 

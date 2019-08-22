@@ -50,8 +50,8 @@ gint     transition_compare_equality_condition_type     (Transition *a,
 #define EPSILON                                 0x00 /* ASCII "NUL" */
 #define START                                   0x02 /* ASCII "STX" */
 #define END                                     0x03 /* ASCII "ETX" */
+#define EMPTY                                   0x04 /* ASCII "EOT" */
 #define ANY                                     0x1A /* ASCII "SUB" */
-#define EMPTY                                   0x1B /* ASCII "ESC" */
 
 G_END_DECLS
 

@@ -159,13 +159,39 @@ grammar_define_productions (GPtrArray **productions,
       (gchar**[])
         {
           (gchar*[]) { START },
-          (gchar*[]) { ANCHORED_EXPRESSION, END_OF_INPUT, NULL },
+          (gchar*[]) { EXPRESSION, END_OF_INPUT, NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { EXPRESSION },
+          (gchar*[]) { ANCHORED_EXPRESSION, EXPRESSION_PRIME, NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { EXPRESSION_PRIME },
+          (gchar*[]) { ALTERNATION, NULL },
+          (gchar*[]) { EPSILON, NULL     },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { ALTERNATION },
+          (gchar*[]) { "|", ANCHORED_EXPRESSION, ALTERNATION_PRIME, NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { ALTERNATION_PRIME },
+          (gchar*[]) { ALTERNATION, NULL },
+          (gchar*[]) { EPSILON, NULL     },
           NULL
         },
       (gchar**[])
         {
           (gchar*[]) { ANCHORED_EXPRESSION },
-          (gchar*[]) { START_ANCHOR, EXPRESSION, END_ANCHOR, NULL },
+          (gchar*[]) { START_ANCHOR, SIMPLE_EXPRESSION, END_ANCHOR, NULL },
           NULL
         },
       (gchar**[])
@@ -180,32 +206,6 @@ grammar_define_productions (GPtrArray **productions,
           (gchar*[]) { END_ANCHOR },
           (gchar*[]) { "$", NULL     },
           (gchar*[]) { EPSILON, NULL },
-          NULL
-        },
-      (gchar**[])
-        {
-          (gchar*[]) { EXPRESSION },
-          (gchar*[]) { SIMPLE_EXPRESSION, EXPRESSION_PRIME, NULL },
-          NULL
-        },
-      (gchar**[])
-        {
-          (gchar*[]) { EXPRESSION_PRIME },
-          (gchar*[]) { ALTERNATION, NULL },
-          (gchar*[]) { EPSILON, NULL     },
-          NULL
-        },
-      (gchar**[])
-        {
-          (gchar*[]) { ALTERNATION },
-          (gchar*[]) { "|", SIMPLE_EXPRESSION, ALTERNATION_PRIME, NULL },
-          NULL
-        },
-      (gchar**[])
-        {
-          (gchar*[]) { ALTERNATION_PRIME },
-          (gchar*[]) { ALTERNATION, NULL },
-          (gchar*[]) { EPSILON, NULL     },
           NULL
         },
       (gchar**[])
@@ -292,7 +292,7 @@ grammar_define_productions (GPtrArray **productions,
       (gchar**[])
         {
           (gchar*[]) { GROUP },
-          (gchar*[]) {"(", ANCHORED_EXPRESSION, ")", NULL },
+          (gchar*[]) {"(", EXPRESSION, ")", NULL },
           NULL
         },
       (gchar**[])
@@ -383,10 +383,11 @@ grammar_define_productions (GPtrArray **productions,
       (gchar**[])
         {
           (gchar*[]) { SPECIAL_CHARACTER },
+          (gchar*[]) { SPACE, NULL          },
+          (gchar*[]) { HORIZONTAL_TAB, NULL },
           (gchar*[]) { "!" DELIMITER "#" DELIMITER "%" DELIMITER "&" DELIMITER "," DELIMITER "/" DELIMITER
                        ":" DELIMITER ";" DELIMITER ">" DELIMITER "=" DELIMITER "<" DELIMITER "@" DELIMITER
-                       "_" DELIMITER "`" DELIMITER "{" DELIMITER "}" DELIMITER " " DELIMITER "\n" DELIMITER
-                       "\t", NULL },
+                       "_" DELIMITER "`" DELIMITER "{" DELIMITER "}" DELIMITER, NULL },
           NULL
         },
       (gchar**[])
@@ -410,14 +411,26 @@ grammar_define_productions (GPtrArray **productions,
         },
       (gchar**[])
         {
-          (gchar *[]) { METACHARACTER_ESCAPE },
-          (gchar *[]) { "\\", NULL },
+          (gchar*[]) { METACHARACTER_ESCAPE },
+          (gchar*[]) { "\\", NULL },
           NULL
         },
       (gchar**[])
         {
-          (gchar *[]) { EMPTY_EXPRESSION },
-          (gchar *[]) { EMPTY_STRING, NULL },
+          (gchar*[]) { SPACE },
+          (gchar*[]) { "\x20", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { HORIZONTAL_TAB },
+          (gchar*[]) { "\x09", NULL },
+          NULL
+        },
+      (gchar**[])
+        {
+          (gchar*[]) { EMPTY_EXPRESSION },
+          (gchar*[]) { "\x04", NULL },
           NULL
         }
     };
@@ -536,7 +549,7 @@ static Symbol *
 grammar_get_or_create_symbol (Symbol    *symbol,
                               GPtrArray *symbols_array)
 {
-  if (g_ptr_array_has_items (symbols_array))
+  if (g_collection_has_items (symbols_array))
     for (guint i = 0; i < symbols_array->len; ++i)
       {
         Symbol *current = g_ptr_array_index (symbols_array, i);
@@ -654,7 +667,7 @@ grammar_insert_parsing_table_entries (GHashTable *parsing_table,
                                       GPtrArray  *terminals,
                                       Rule       *rule)
 {
-  if (g_ptr_array_has_items (terminals))
+  if (g_collection_has_items (terminals))
     for (guint i = 0; i < terminals->len; ++i)
       {
         Symbol *terminal = g_ptr_array_index (terminals, i);

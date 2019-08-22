@@ -83,7 +83,7 @@ mealy_run (TransducerRunnable *self,
                 PROP_STATE_TRANSITIONS, &transitions,
                 NULL);
 
-  g_return_val_if_fail (g_ptr_array_has_items (transitions), NULL);
+  g_return_val_if_fail (g_collection_has_items (transitions), NULL);
 
   for (guint i = 0; i < transitions->len; ++i)
     {

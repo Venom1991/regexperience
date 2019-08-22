@@ -108,7 +108,7 @@ epsilon_nfa_get_property (GObject    *object,
                       PROP_FSM_INITIALIZABLE_FINAL_STATES, &final_states,
                       NULL);
 
-        g_return_if_fail (g_ptr_array_has_items (final_states));
+        g_return_if_fail (g_collection_has_items (final_states));
         g_return_if_fail (final_states->len == acceptable_epsilon_nfa_final_states_count);
 
         g_value_set_object (value, g_ptr_array_index (final_states, 0));
@@ -195,7 +195,7 @@ epsilon_nfa_has_epsilon_transitions (GPtrArray *all_states)
                     PROP_STATE_TRANSITIONS, &transitions,
                     NULL);
 
-      if (g_ptr_array_has_items (transitions))
+      if (g_collection_has_items (transitions))
         {
           for (guint j = 0; j < transitions->len; ++j)
             {
@@ -228,7 +228,7 @@ epsilon_nfa_build_epsilon_closed_transition (State      *state,
                                                        input_output_combinations,
                                                        INITIALIZE_OUTPUT_STATES_MODE_EPSILON_INITIAL);
 
-  if (g_ptr_array_has_items (epsilon_closed_transition_output_states))
+  if (g_collection_has_items (epsilon_closed_transition_output_states))
     {
       const guint acceptable_deterministic_output_states_count = 1;
 
@@ -285,7 +285,7 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
       g_return_if_reached ();
     }
 
-  if (g_ptr_array_has_items (input_states))
+  if (g_collection_has_items (input_states))
     {
       gchar input_character = 0;
 
@@ -335,7 +335,7 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                                 PROP_STATE_TRANSITIONS, &transitions,
                                 NULL);
 
-                  if (g_ptr_array_has_items (transitions))
+                  if (g_collection_has_items (transitions))
                     {
                       for (guint j = 0; j < transitions->len; ++j)
                         {
@@ -345,7 +345,7 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                           transition_supplement_states_array_with_output (transition,
                                                                           transition_output_states);
 
-                          if (g_ptr_array_has_items (transition_output_states))
+                          if (g_collection_has_items (transition_output_states))
                             {
                               if (is_epsilon_step && transition_is_epsilon (transition))
                                 {
@@ -366,7 +366,7 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                                                                                        input_output_combinations,
                                                                                        INITIALIZE_OUTPUT_STATES_MODE_EPSILON_SUBSEQUENT);
 
-                                  if (g_ptr_array_has_items (transitive_epsilon_closed_output_states))
+                                  if (g_collection_has_items (transitive_epsilon_closed_output_states))
                                     {
                                       g_ptr_array_add_range_distinct (current_iteration_output_states,
                                                                       transitive_epsilon_closed_output_states,
@@ -398,7 +398,7 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
                 }
             }
 
-          if (g_ptr_array_has_items (current_iteration_output_states))
+          if (g_collection_has_items (current_iteration_output_states))
             g_ptr_array_add_range_distinct (current_closure_step_output_states,
                                             current_iteration_output_states,
                                             state_equal_func,
@@ -412,7 +412,7 @@ epsilon_nfa_initialize_epsilon_closed_output_states (GPtrArray                  
   /* Initializing the resultant array and moving the final closure output states into it (last recursive call). */
   if (is_final_step)
     {
-      if (g_ptr_array_has_items (current_closure_step_output_states))
+      if (g_collection_has_items (current_closure_step_output_states))
         {
           *epsilon_closed_transition_output_states = g_ptr_array_new ();
 

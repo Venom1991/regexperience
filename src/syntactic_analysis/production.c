@@ -120,7 +120,7 @@ production_compute_first_set (Production *self)
     {
       GPtrArray *rules = priv->rules;
 
-      if (g_ptr_array_has_items (rules))
+      if (g_collection_has_items (rules))
         {
           GEqualFunc symbol_equal_func = (GEqualFunc) symbol_is_equal;
 
@@ -137,7 +137,7 @@ production_compute_first_set (Production *self)
                             PROP_RULE_SYMBOLS, &symbols,
                             NULL);
 
-              g_assert (g_ptr_array_has_items (symbols));
+              g_assert (g_collection_has_items (symbols));
 
               for (guint j = 0; j < symbols->len; ++j)
                 {
@@ -215,7 +215,7 @@ production_compute_follow_set (Production *self)
     {
       GPtrArray *occurrences = priv->occurrences;
 
-      if (g_ptr_array_has_items (occurrences))
+      if (g_collection_has_items (occurrences))
         {
           GEqualFunc symbol_equal_func = (GEqualFunc) symbol_is_equal;
 

@@ -50,7 +50,7 @@ gboolean symbol_is_production_match (Symbol     *self,
   _Generic(((void) 0, Y),                    \
          gchar *: symbol_is_string_match,    \
     Production *: symbol_is_production_match \
-          ) (X, Y)
+  ) (X, Y)
 
 #define PROP_SYMBOL_VALUE "value"
 

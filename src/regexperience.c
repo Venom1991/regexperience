@@ -153,7 +153,7 @@ regexperience_match (Regexperience  *self,
 
   *matches = acceptor_runnable_run (acceptor, input);
 
-  return g_ptr_array_has_items (*matches)
+  return g_collection_has_items (*matches)
       && acceptor_runnable_can_accept (acceptor);
 }
 

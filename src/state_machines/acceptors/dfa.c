@@ -120,7 +120,7 @@ dfa_complement (FsmModifiable *self)
                 PROP_FSM_INITIALIZABLE_ALL_STATES, &all_states,
                 NULL);
 
-  if (g_ptr_array_has_items (all_states))
+  if (g_collection_has_items (all_states))
     {
       for (guint i = 0; i < all_states->len; ++i)
         {
@@ -329,7 +329,7 @@ dfa_transition_to_next_state (Dfa   *self,
                 PROP_STATE_TRANSITIONS, &transitions,
                 NULL);
 
-  g_return_val_if_fail (g_ptr_array_has_items (transitions), FALSE);
+  g_return_val_if_fail (g_collection_has_items (transitions), FALSE);
   g_object_unref (current_state);
 
   /* Ignoring the null terminator. */
@@ -384,7 +384,7 @@ dfa_remove_unreachable_states_if_needed (Dfa *self)
 
   g_autoptr (GArray) unreachable_states = dfa_fetch_unreachable_states_from (all_states);
 
-  if (g_array_has_items (unreachable_states))
+  if (g_collection_has_items (unreachable_states))
     {
       for (guint i = 0; i < unreachable_states->len; ++i)
         {
@@ -405,7 +405,7 @@ dfa_fetch_unreachable_states_from (GPtrArray *all_states)
 {
   GArray *unreachable_states = NULL;
 
-  if (g_ptr_array_has_items (all_states))
+  if (g_collection_has_items (all_states))
     {
       g_autoptr (GPtrArray) transition_output_states = g_ptr_array_new ();
       GEqualFunc state_equal_func = g_direct_equal;
@@ -496,7 +496,7 @@ dfa_compose_equivalent_states_if_needed (Dfa *self)
     {
       GPtrArray *equivalence_class = g_ptr_array_index (final_equivalence_classes, i);
 
-      if (g_ptr_array_has_items (equivalence_class) &&
+      if (g_collection_has_items (equivalence_class) &&
           equivalence_class->len > acceptable_scalar_equivalence_class_size)
         {
           should_compose_equivalence_classes = TRUE;
@@ -517,7 +517,7 @@ dfa_compose_equivalent_states_if_needed (Dfa *self)
         {
           GPtrArray *equivalence_class = g_ptr_array_index (final_equivalence_classes, i);
 
-          if (g_ptr_array_has_items (equivalence_class))
+          if (g_collection_has_items (equivalence_class))
             {
               State *input_state = NULL;
               g_autoptr (GPtrArray) transitions = g_ptr_array_new_with_free_func (g_object_unref);
@@ -590,7 +590,7 @@ dfa_fetch_equivalence_classes_from (GPtrArray *input_equivalence_classes,
     {
       GPtrArray *input_equivalence_class = g_ptr_array_index (input_equivalence_classes, i);
 
-      if (g_ptr_array_has_items (input_equivalence_class))
+      if (g_collection_has_items (input_equivalence_class))
         {
           const guint candidate_class_states_count = 1;
 
@@ -645,14 +645,14 @@ dfa_fetch_equivalence_classes_from (GPtrArray *input_equivalence_classes,
         }
     }
 
-  if (g_hash_table_has_items (states_for_removal))
+  if (g_collection_has_items (states_for_removal))
     for (guint i = 0; i < input_equivalence_classes->len; ++i)
       {
         GPtrArray *input_equivalence_class = g_ptr_array_index (input_equivalence_classes, i);
         GArray *current_states_for_removal = g_hash_table_lookup (states_for_removal,
                                                                   input_equivalence_class);
 
-        if (g_array_has_items (current_states_for_removal))
+        if (g_collection_has_items (current_states_for_removal))
           for (guint j = 0; j < current_states_for_removal->len; ++j)
             {
               gpointer state_for_removal = g_array_index (current_states_for_removal, gpointer, j);

@@ -95,7 +95,7 @@ parser_build_concrete_syntax_tree (Parser     *self,
                                    GError    **error)
 {
   g_return_val_if_fail (SYNTACTIC_ANALYSIS_IS_PARSER (self), NULL);
-  g_return_val_if_fail (g_ptr_array_has_items (tokens), NULL);
+  g_return_val_if_fail (g_collection_has_items (tokens), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
   /* Preparing the prediction and analysis queues using
@@ -516,7 +516,7 @@ parser_report_error (guint       token_position,
 
       if (invalid_token == NULL)
         {
-          if (g_array_has_items (additional_categories))
+          if (g_collection_has_items (additional_categories))
             {
               Token *found_token = NULL;
 

@@ -184,7 +184,7 @@ GPtrArray *
 g_hash_table_values_to_ptr_array (GHashTable     *hash_table,
                                   GDestroyNotify  free_func)
 {
-  g_return_val_if_fail (g_hash_table_has_items (hash_table), NULL);
+  g_return_val_if_fail (g_collection_has_items (hash_table), NULL);
 
   GPtrArray *ptr_array = NULL;
   GHashTableIter iter;
@@ -210,7 +210,7 @@ g_queue_unref_g_objects (GQueue *queue)
 {
   g_return_if_fail (queue != NULL);
 
-  if (g_queue_has_items (queue))
+  if (g_collection_has_items (queue))
     {
       g_queue_free_full (queue, g_object_unref);
 

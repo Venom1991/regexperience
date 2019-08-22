@@ -102,19 +102,14 @@ terminal_is_match (Symbol          *self,
       const gchar *value_as_string = (const gchar *) value;
       GPtrArray *self_split_values = priv->split_values;
 
-      if (g_ptr_array_has_items (self_split_values))
-        {
-          GCompareFunc terminal_compare_func = g_compare_strings;
-          gpointer split_value = g_ptr_array_bsearch (self_split_values,
-                                                      terminal_compare_func,
-                                                      &value_as_string);
+      g_assert (g_collection_has_items (self_split_values));
 
-          return split_value != NULL;
-        }
-      else
-        {
-          return g_strcmp0 (value_as_string, EMPTY_STRING) == 0;
-        }
+      GCompareFunc terminal_compare_func = g_compare_strings;
+      gpointer split_value = g_ptr_array_bsearch (self_split_values,
+                                                  terminal_compare_func,
+                                                  &value_as_string);
+
+      return split_value != NULL;
     }
 
   return FALSE;

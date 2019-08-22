@@ -158,7 +158,7 @@ static void
 nondeterministic_transition_output_states_from_g_ptr_array (NondeterministicTransitionPrivate *priv,
                                                             GPtrArray                         *ptr_array)
 {
-  g_return_if_fail (g_ptr_array_has_items (ptr_array));
+  g_return_if_fail (g_collection_has_items (ptr_array));
 
   guint count = ptr_array->len;
 

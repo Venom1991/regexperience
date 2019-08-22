@@ -60,4 +60,12 @@ gboolean   g_node_unref_g_object             (GNode          *node,
 
 void       g_node_unref_g_objects            (GNode          *node);
 
+#define g_collection_has_items(X)        \
+  _Generic((X),                          \
+     GPtrArray *: g_ptr_array_has_items, \
+        GArray *: g_array_has_items,     \
+        GQueue *: g_queue_has_items,     \
+    GHashTable *: g_hash_table_has_items \
+  ) (X)
+
 #endif /* REGEXPERIENCE_HELPERS_H */
