@@ -357,10 +357,7 @@ static GNode *
 parser_transform_analysis (GQueue *analysis_queue)
 {
   GNode *concrete_syntax_tree = NULL;
-
-  g_queue_reverse (analysis_queue);
-
-  DerivationItem *start_derivation_item = g_queue_peek_tail (analysis_queue);
+  DerivationItem *start_derivation_item = g_queue_peek_head (analysis_queue);
   g_autoptr (Production) start_left_hand_side = NULL;
 
   g_object_get (start_derivation_item,
@@ -382,7 +379,7 @@ parser_insert_children (GNode  *root,
 {
   g_assert (!g_queue_is_empty (analysis_queue));
 
-  g_autoptr (DerivationItem) derivation_item = g_queue_pop_tail (analysis_queue);
+  g_autoptr (DerivationItem) derivation_item = g_queue_pop_head (analysis_queue);
   g_autoptr (Rule) right_hand_side = NULL;
   g_autoptr (GPtrArray) symbols = NULL;
 
@@ -407,7 +404,7 @@ parser_insert_children (GNode  *root,
         {
           if (!symbol_is_epsilon (symbol))
             {
-              Token *token = g_queue_pop_tail (analysis_queue);
+              Token *token = g_queue_pop_head (analysis_queue);
 
               child = g_node_new (token);
             }
