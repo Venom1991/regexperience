@@ -176,7 +176,7 @@ production_compute_first_set (Production *self)
                   epsilon_derivable_symbols_count++;
                 }
 
-              /* Adding epsilon to the current rule's first if all of its non-terminal
+              /* Adding epsilon to the current rule's first set if all of its non-terminal
                * members can derive epsilon. This means that the rule itself is
                * completely transparent.
                */
