@@ -694,14 +694,25 @@ grammar_constructor (GType                  type,
                      guint                  n_construct_properties,
                      GObjectConstructParam *construct_properties)
 {
-  if (singleton != NULL)
-    return G_OBJECT (g_object_ref (singleton));
+  GObject *instance = NULL;
 
-  GObjectClass *object_class = G_OBJECT_CLASS (grammar_parent_class);
+  if (!G_IS_OBJECT (singleton))
+    {
+      GObjectClass *object_class = G_OBJECT_CLASS (grammar_parent_class);
 
-  return object_class->constructor (type,
-                                    n_construct_properties,
-                                    construct_properties);
+      instance = object_class->constructor (type,
+                                            n_construct_properties,
+                                            construct_properties);
+      singleton = SYNTACTIC_ANALYSIS_GRAMMAR (instance);
+
+      g_object_add_weak_pointer (instance, (gpointer) &singleton);
+    }
+  else
+    {
+      instance = g_object_ref (G_OBJECT (singleton));
+    }
+
+  return instance;
 }
 
 static void
