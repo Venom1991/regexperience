@@ -1,6 +1,5 @@
 #include "internal/state_machines/state.h"
 #include "internal/state_machines/transitions/transition.h"
-#include "internal/state_machines/transitions/deterministic_transition.h"
 #include "internal/common/helpers.h"
 
 typedef struct

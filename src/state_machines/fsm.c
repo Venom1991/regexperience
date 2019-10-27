@@ -1,7 +1,6 @@
 #include "internal/state_machines/fsm.h"
 #include "internal/state_machines/fsm_initializable.h"
-#include "internal/state_machines/transitions/deterministic_transition.h"
-#include "internal/state_machines/transitions/nondeterministic_transition.h"
+#include "internal/state_machines/transitions/transition.h"
 #include "internal/state_machines/state_factory.h"
 #include "internal/common/helpers.h"
 

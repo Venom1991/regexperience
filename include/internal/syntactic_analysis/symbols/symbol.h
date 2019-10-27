@@ -29,7 +29,7 @@ struct _SymbolClass
   gboolean (*is_equal)      (Symbol          *self,
                              Symbol          *other);
 
-  gpointer padding[8];
+  gpointer     padding[8];
 };
 
 void     symbol_extract_value       (Symbol     *self,

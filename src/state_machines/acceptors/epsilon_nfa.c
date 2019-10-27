@@ -2,8 +2,6 @@
 #include "internal/state_machines/acceptors/nfa.h"
 #include "internal/state_machines/fsm_initializable.h"
 #include "internal/state_machines/fsm_convertible.h"
-#include "internal/state_machines/transitions/deterministic_transition.h"
-#include "internal/state_machines/transitions/nondeterministic_transition.h"
 #include "internal/state_machines/transitions/transition_factory.h"
 #include "internal/common/helpers.h"
 

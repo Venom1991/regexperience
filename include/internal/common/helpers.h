@@ -8,7 +8,7 @@
 #define EMPTY_STRING  ""
 #define END_OF_STRING '\0'
 
-typedef gpointer (*GRefFunc) (gpointer data);
+typedef gpointer (*GRefFunc) (gpointer);
 
 gboolean   g_ptr_array_equal                 (gconstpointer   a,
                                               gconstpointer   b);

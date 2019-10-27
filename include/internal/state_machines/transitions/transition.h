@@ -24,7 +24,7 @@ struct _TransitionClass
   void (*supplement_states_array_with_output) (Transition *self,
                                                GPtrArray  *states_array);
 
-  gpointer padding[8];
+  gpointer     padding[8];
 };
 
 void     transition_supplement_states_array_with_output (Transition *self,

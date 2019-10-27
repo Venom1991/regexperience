@@ -1,7 +1,6 @@
 #include "internal/syntactic_analysis/parsing_table_key.h"
 #include "internal/syntactic_analysis/production.h"
 #include "internal/syntactic_analysis/symbols/symbol.h"
-#include "internal/syntactic_analysis/symbols/terminal.h"
 
 struct _ParsingTableKey
 {

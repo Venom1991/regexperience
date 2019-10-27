@@ -1,4 +1,3 @@
-
 #include "internal/state_machines/transducers/mealy.h"
 #include "internal/state_machines/transducers/transducer_runnable.h"
 #include "internal/state_machines/fsm_initializable.h"

@@ -25,7 +25,7 @@ struct _StateClass
   gboolean (*is_composed_from) (State           *self,
                                 const GPtrArray *states);
 
-  gpointer padding[8];
+  gpointer     padding[8];
 };
 
 gboolean state_is_composed_from (State           *self,

@@ -17,7 +17,7 @@ struct _FsmModifiableInterface
   void (*complement) (FsmModifiable *self);
 };
 
-void fsm_modifiable_minimize (FsmModifiable *self);
+void fsm_modifiable_minimize   (FsmModifiable *self);
 
 void fsm_modifiable_complement (FsmModifiable *self);
 

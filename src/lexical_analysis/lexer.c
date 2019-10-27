@@ -286,12 +286,10 @@ lexer_report_error (const gchar  *expression,
     }
 
   if (error_message != NULL)
-    {
-      g_set_error (error,
-                   LEXICAL_ANALYSIS_LEXER_ERROR,
-                   error_code,
-                   error_message);
-    }
+    g_set_error (error,
+                 LEXICAL_ANALYSIS_LEXER_ERROR,
+                 error_code,
+                 error_message);
 }
 
 static GString *
